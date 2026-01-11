@@ -1,29 +1,6 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
-
 # LuminaBooks - Personal Book Tracker
 
 Приложение для отслеживания вашей библиотеки книг, созданное с React, Vite и Electron.
-
-View your app in AI Studio: https://ai.studio/apps/drive/1WodKcppTzMOa_S2eYb56W1sCg7LG8q8W
-
-## Запуск в браузере
-
-**Требования:** Node.js 18+
-
-1. Установите зависимости:
-   ```bash
-   npm install
-   ```
-2. Установите `GEMINI_API_KEY` в файле `.env.local`:
-   ```
-   GEMINI_API_KEY=your_api_key_here
-   ```
-3. Запустите приложение:
-   ```bash
-   npm run dev
-   ```
 
 ## Запуск как Desktop приложение (Electron)
 
