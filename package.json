@@ -1,0 +1,75 @@
+{
+  "name": "luminabooks---personal-book-tracker",
+  "private": true,
+  "version": "1.2.0",
+  "type": "module",
+  "main": "dist-electron/main.js",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:3000 && cross-env ELECTRON=true electron .\"",
+    "electron:build": "npm run build:electron && npm run build:app && electron-builder",
+    "electron:pack": "npm run build:electron && npm run build:app && electron-builder --dir",
+    "build:electron": "tsc -p electron/tsconfig.json",
+    "build:app": "tsc && vite build --mode production"
+  },
+  "dependencies": {
+    "@google/genai": "^1.35.0",
+    "lucide-react": "^0.562.0",
+    "react": "^19.2.3",
+    "react-dom": "^19.2.3"
+  },
+  "devDependencies": {
+    "@types/node": "^22.14.0",
+    "@vitejs/plugin-react": "^5.0.0",
+    "concurrently": "^9.2.1",
+    "cross-env": "^7.0.3",
+    "electron": "^33.0.0",
+    "electron-builder": "^25.1.8",
+    "typescript": "~5.8.2",
+    "vite": "^6.2.0",
+    "wait-on": "^8.0.1"
+  },
+  "build": {
+    "appId": "com.onegamerstory.luminabooks",
+    "productName": "LuminaBooks",
+    "artifactName": "${productName} Setup v${version}.${ext}",
+    "icon": "resources/icon.png",
+    "directories": {
+      "output": "release",
+      "buildResources": "resources"
+    },
+    "files": [
+      "dist/**/*",
+      "dist-electron/**/*",
+      "package.json",
+      "resources/**/*"
+    ],
+    "win": {
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "resources/icon.ico"
+    },
+    "mac": {
+      "target": "dmg",
+      "icon": "resources/icon.icns",
+      "category": "public.app-category.lifestyle",
+      "darkModeSupport": true
+    },
+    "linux": {
+      "target": "AppImage",
+      "icon": "resources/icon.png"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true
+    }
+  }
+}
