@@ -3,6 +3,7 @@ import React from 'react';
 import { Book, BookStatus } from '../types';
 import { translations } from '../App';
 import { calculateDaysDifference } from '../utils/dateUtils';
+import GitHubCalendar from './GitHubCalendar';
 import { 
   BookOpen, 
   TrendingUp, 
@@ -115,6 +116,9 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
           <p className="text-3xl font-bold text-amber-600">{toReadCount}</p>
         </div>
       </div>
+
+      {/* Календарь активности */}
+      <GitHubCalendar books={books} lang={lang} />
 
       {/* Средняя скорость прочтения */}
       <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">

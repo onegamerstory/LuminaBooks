@@ -1,5 +1,5 @@
 {
-  "name": "luminabooks---personal-book-tracker",
+  "name": "luminabooks-personal-book-tracker",
   "private": true,
   "version": "1.3.0",
   "type": "module",
@@ -31,6 +31,10 @@
     "vite": "^6.2.0",
     "wait-on": "^8.0.1"
   },
+  
+  "author": "История Одного Геймера <gamecuts0412@gmail.com>",
+  "description": "Personal Book Tracker Application",
+
   "build": {
     "appId": "com.onegamerstory.luminabooks",
     "productName": "LuminaBooks",
