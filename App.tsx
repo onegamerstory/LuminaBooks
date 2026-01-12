@@ -3,8 +3,9 @@ import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, ViewType } from './types';
 import CatalogView from './components/CatalogView';
 import CalendarView from './components/CalendarView';
+import StatisticsView from './components/StatisticsView';
 import BookModal from './components/BookModal';
-import { BookOpen, Calendar, Plus, Library, Languages } from 'lucide-react';
+import { BookOpen, Calendar, Plus, Library, Languages, BarChart3 } from 'lucide-react';
 
 const STORAGE_KEY = 'lumina_books_v1';
 
@@ -41,7 +42,19 @@ export const translations = {
     imageUrl: 'Image URL...',
     selectBookToStart: 'Select book to start reading',
     noBooksToStart: 'No books to start reading',
-    startReading: 'Start reading'
+    startReading: 'Start reading',
+    days: 'days',
+    day: 'day',
+    statistics: 'Statistics',
+    totalBooks: 'Total Books',
+    highestRatedBooks: 'Highest Rated Books',
+    lowestRatedBooks: 'Lowest Rated Books',
+    averageReadingSpeed: 'Average Reading Speed',
+    averageReadingSpeedDesc: 'Average days per book',
+    noBooksWithDates: 'No books with reading dates',
+    book: 'book',
+    books: 'books',
+    booksPlural: 'books'
   },
   ru: {
     catalog: 'Каталог',
@@ -75,7 +88,19 @@ export const translations = {
     imageUrl: 'Ссылка на обложку...',
     selectBookToStart: 'Выберите книгу для начала чтения',
     noBooksToStart: 'Нет книг для начала чтения',
-    startReading: 'Начать читать'
+    startReading: 'Начать читать',
+    days: 'дней',
+    day: 'день',
+    statistics: 'Статистика',
+    totalBooks: 'Всего книг',
+    highestRatedBooks: 'Книги с максимальной оценкой',
+    lowestRatedBooks: 'Книги с минимальной оценкой',
+    averageReadingSpeed: 'Средняя скорость прочтения',
+    averageReadingSpeedDesc: 'Среднее количество дней на книгу',
+    noBooksWithDates: 'Нет книг с датами чтения',
+    book: 'книга',
+    books: 'книг',
+    booksPlural: 'книги'
   }
 };
 
@@ -286,6 +311,17 @@ const App: React.FC = () => {
                 <Calendar size={18} />
                 <span className="hidden sm:inline">{t.calendar}</span>
               </button>
+              <button
+                onClick={() => setActiveView('statistics')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeView === 'statistics' 
+                  ? 'bg-white text-indigo-600 shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <BarChart3 size={18} />
+                <span className="hidden sm:inline">{t.statistics}</span>
+              </button>
             </nav>
 
             <button
@@ -319,11 +355,16 @@ const App: React.FC = () => {
             onDelete={handleDelete}
             lang={lang}
           />
-        ) : (
+        ) : activeView === 'calendar' ? (
           <CalendarView 
             books={books} 
             lang={lang}
             onStartReading={handleStartReading}
+          />
+        ) : (
+          <StatisticsView 
+            books={books} 
+            lang={lang}
           />
         )}
       </main>

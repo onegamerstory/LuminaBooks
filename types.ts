@@ -18,4 +18,4 @@ export interface Book {
   description?: string;
 }
 
-export type ViewType = 'catalog' | 'calendar';
+export type ViewType = 'catalog' | 'calendar' | 'statistics';

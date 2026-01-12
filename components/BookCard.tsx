@@ -3,6 +3,7 @@ import React from 'react';
 import { Book, BookStatus } from '../types';
 import { Star, Edit2, Trash2, Calendar, User } from 'lucide-react';
 import { translations } from '../App';
+import { calculateDaysDifference } from '../utils/dateUtils';
 
 interface BookCardProps {
   book: Book;
@@ -24,6 +25,26 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
     if (status === BookStatus.READING) return t.reading;
     if (status === BookStatus.READ) return t.read;
     return t.toRead;
+  };
+
+  const formatDaysText = (days: number, lang: 'en' | 'ru'): string => {
+    if (lang === 'ru') {
+      const lastDigit = days % 10;
+      const lastTwoDigits = days % 100;
+      
+      if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
+        return `${days} ${t.days}`;
+      }
+      if (lastDigit === 1) {
+        return `${days} день`;
+      }
+      if (lastDigit >= 2 && lastDigit <= 4) {
+        return `${days} дня`;
+      }
+      return `${days} ${t.days}`;
+    } else {
+      return days === 1 ? `${days} ${t.day}` : `${days} ${t.days}`;
+    }
   };
 
   return (
@@ -77,6 +98,10 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
             <span>
               {book.startDate} 
               {book.endDate ? ` — ${book.endDate}` : ` ${t.inProgress}`}
+              {(() => {
+                const days = calculateDaysDifference(book.startDate, book.endDate);
+                return days !== null ? ` • ${formatDaysText(days, lang)}` : '';
+              })()}
             </span>
           </div>
         )}
