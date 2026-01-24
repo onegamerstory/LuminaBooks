@@ -97,28 +97,52 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
   return (
     <div className="bg-white rounded-2xl shadow-sm border border-slate-100 overflow-hidden">
-      <div className="p-6 border-b flex flex-col sm:flex-row items-center justify-between gap-4">
-        <div className="flex items-center gap-4">
-          <h2 className="text-2xl font-bold font-serif text-slate-800">{t.readingCalendar}</h2>
-          <div className="group relative">
-             <HelpCircle size={16} className="text-slate-300 cursor-help" />
-             <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
-               {lang === 'ru' 
-                 ? 'Показывает книги, которые вы читали в конкретные дни.' 
-                 : 'Displays books you were reading on specific days based on start and end dates.'}
-             </div>
+      <div className="p-6 border-b flex flex-col gap-4">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          <div className="flex items-center gap-4">
+            <h2 className="text-2xl font-bold font-serif text-slate-800">{t.readingCalendar}</h2>
+            <div className="group relative">
+               <HelpCircle size={16} className="text-slate-300 cursor-help" />
+               <div className="absolute left-1/2 -translate-x-1/2 bottom-full mb-2 w-48 p-2 bg-slate-800 text-white text-[10px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50">
+                 {lang === 'ru' 
+                   ? 'Показывает книги, которые вы читали в конкретные дни.' 
+                   : 'Displays books you were reading on specific days based on start and end dates.'}
+               </div>
+            </div>
+          </div>
+
+          <div className="flex items-center gap-4 bg-slate-100 p-1 rounded-xl">
+            <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white rounded-lg transition-colors">
+              <ChevronLeft size={20} />
+            </button>
+            <span className="font-bold text-slate-700 min-w-[140px] text-center capitalize">
+              {monthName} {year}
+            </span>
+            <button onClick={() => changeMonth(1)} className="p-2 hover:bg-white rounded-lg transition-colors">
+              <ChevronRight size={20} />
+            </button>
           </div>
         </div>
 
-        <div className="flex items-center gap-4 bg-slate-100 p-1 rounded-xl">
-          <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-white rounded-lg transition-colors">
-            <ChevronLeft size={20} />
-          </button>
-          <span className="font-bold text-slate-700 min-w-[140px] text-center capitalize">
-            {monthName} {year}
-          </span>
-          <button onClick={() => changeMonth(1)} className="p-2 hover:bg-white rounded-lg transition-colors">
-            <ChevronRight size={20} />
+        {/* Date Picker */}
+        <div className="flex items-center gap-3">
+          <label className="text-sm font-medium text-slate-600">{lang === 'ru' ? 'Перейти к дате:' : 'Go to date:'}</label>
+          <input
+            type="date"
+            value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`}
+            onChange={(e) => {
+              if (e.target.value) {
+                const [year, month, day] = e.target.value.split('-').map(Number);
+                setCurrentDate(new Date(year, month - 1, day));
+              }
+            }}
+            className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+          />
+          <button
+            onClick={() => setCurrentDate(new Date())}
+            className="px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors text-sm font-medium"
+          >
+            {lang === 'ru' ? 'Сегодня' : 'Today'}
           </button>
         </div>
       </div>
