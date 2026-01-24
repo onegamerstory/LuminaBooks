@@ -140,6 +140,19 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                 />
               </div>
 
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{lang === 'ru' ? 'Всего часов' : 'Total Hours'}</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  step="0.5"
+                  value={formData.totalHours || ''}
+                  onChange={e => setFormData({...formData, totalHours: e.target.value ? parseFloat(e.target.value) : undefined})}
+                  placeholder={lang === 'ru' ? 'Количество часов чтения' : 'Hours spent reading'}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
+
               <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.status}</label>

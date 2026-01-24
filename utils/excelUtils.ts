@@ -79,13 +79,13 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             totalPages = isNaN(parsed) || parsed <= 0 ? undefined : parsed;
           }
 
-          // Валидация количества часов (импортированные часы)
-          let importedTotalHours: number | undefined = undefined;
+          // Валидация количества часов (базовое значение часов)
+          let totalHours: number | undefined = undefined;
           if (typeof row['Всего часов'] === 'number' && row['Всего часов'] > 0) {
-            importedTotalHours = Math.round(row['Всего часов'] * 10) / 10;
+            totalHours = Math.round(row['Всего часов'] * 10) / 10;
           } else if (typeof row['Всего часов'] === 'string' && row['Всего часов'].trim()) {
             const parsed = parseFloat(row['Всего часов']);
-            importedTotalHours = isNaN(parsed) || parsed <= 0 ? undefined : Math.round(parsed * 10) / 10;
+            totalHours = isNaN(parsed) || parsed <= 0 ? undefined : Math.round(parsed * 10) / 10;
           }
 
           const book: Book = {
@@ -100,7 +100,7 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             endDate: row['Дата окончания'] || '',
             description: row['Описание'] || '',
             totalPages: totalPages,
-            importedTotalHours: importedTotalHours
+            totalHours: totalHours
           };
 
           return book;
