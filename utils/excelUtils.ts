@@ -7,6 +7,7 @@ export const exportBooksToExcel = (books: Book[]) => {
     'Название': book.title,
     'Автор': book.author,
     'Год': book.year,
+    'Всего страниц': book.totalPages || '',
     'Статус': book.status,
     'Оценка': book.rating,
     'Дата начала': book.startDate,
@@ -25,6 +26,7 @@ export const exportBooksToExcel = (books: Book[]) => {
     { wch: 25 },  // Название
     { wch: 20 },  // Автор
     { wch: 8 },   // Год
+    { wch: 12 },  // Всего страниц
     { wch: 12 },  // Статус
     { wch: 8 },   // Оценка
     { wch: 12 },  // Дата начала
@@ -65,6 +67,15 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             rating = isNaN(parsed) ? 0 : Math.min(10, Math.max(0, parsed));
           }
 
+          // Валидация количества страниц
+          let totalPages: number | undefined = undefined;
+          if (typeof row['Всего страниц'] === 'number' && row['Всего страниц'] > 0) {
+            totalPages = Math.floor(row['Всего страниц']);
+          } else if (typeof row['Всего страниц'] === 'string' && row['Всего страниц'].trim()) {
+            const parsed = parseInt(row['Всего страниц']);
+            totalPages = isNaN(parsed) || parsed <= 0 ? undefined : parsed;
+          }
+
           return {
             id: `imported_${Date.now()}_${index}`,
             title: row['Название'] || 'Unknown',
@@ -75,7 +86,8 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             rating: rating,
             startDate: row['Дата начала'] || '',
             endDate: row['Дата окончания'] || '',
-            description: row['Описание'] || ''
+            description: row['Описание'] || '',
+            totalPages: totalPages
           };
         });
 
