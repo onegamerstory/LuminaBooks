@@ -30,13 +30,14 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const readCount = books.filter(b => b.status === BookStatus.READ).length;
   const toReadCount = books.filter(b => b.status === BookStatus.WANT_TO_READ).length;
 
-  // Книги с максимальной оценкой
-  const maxRating = books.length > 0 ? Math.max(...books.map(b => b.rating)) : 0;
-  const maxRatingBooks = books.filter(b => b.rating === maxRating);
+  // Книги с максимальной оценкой (только прочитанные)
+  const readBooks = books.filter(b => b.status === BookStatus.READ);
+  const maxRating = readBooks.length > 0 ? Math.max(...readBooks.map(b => b.rating)) : 0;
+  const maxRatingBooks = readBooks.filter(b => b.rating === maxRating);
 
-  // Книги с минимальной оценкой
-  const minRating = books.length > 0 ? Math.min(...books.map(b => b.rating)) : 0;
-  const minRatingBooks = books.filter(b => b.rating === minRating);
+  // Книги с минимальной оценкой (только прочитанные)
+  const minRating = readBooks.length > 0 ? Math.min(...readBooks.map(b => b.rating)) : 0;
+  const minRatingBooks = readBooks.filter(b => b.rating === minRating);
 
   // Средняя скорость прочтения (на основе часов из истории сессий или сохраненного значения)
   const booksWithHours = books.filter(b => calculateBookTotalHours(b) > 0);
@@ -172,10 +173,18 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-amber-500" size={24} fill="currentColor" />
-                <h3 className="text-lg font-semibold text-slate-800">{t.highestRatedBooks}</h3>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-800">{t.highestRatedBooks}</h3>
+                  <p className="text-sm text-slate-500">
+                    {maxRatingBooks.length > 5 
+                      ? `${lang === 'ru' ? 'Показаны первые 5 из' : 'Showing first 5 of'} ${maxRatingBooks.length}`
+                      : `${maxRatingBooks.length} ${lang === 'ru' ? 'книг' : 'books'}`
+                    }
+                  </p>
+                </div>
               </div>
               <div className="space-y-2">
-                {maxRatingBooks.map(book => (
+                {maxRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-slate-800">{book.title}</p>
@@ -196,10 +205,18 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-slate-400" size={24} />
-                <h3 className="text-lg font-semibold text-slate-800">{t.lowestRatedBooks}</h3>
+                <div className="flex-1">
+                  <h3 className="text-lg font-semibold text-slate-800">{t.lowestRatedBooks}</h3>
+                  <p className="text-sm text-slate-500">
+                    {minRatingBooks.length > 5 
+                      ? `${lang === 'ru' ? 'Показаны первые 5 из' : 'Showing first 5 of'} ${minRatingBooks.length}`
+                      : `${minRatingBooks.length} ${lang === 'ru' ? 'книг' : 'books'}`
+                    }
+                  </p>
+                </div>
               </div>
               <div className="space-y-2">
-                {minRatingBooks.map(book => (
+                {minRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div className="flex-1">
                       <p className="font-medium text-slate-800">{book.title}</p>
