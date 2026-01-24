@@ -2,9 +2,13 @@
 import React, { useState } from 'react';
 import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
+
+type ViewMode = 'large' | 'medium' | 'table';
+
+const VIEWMODE_STORAGE_KEY = 'lumina_catalog_viewmode';
 
 interface CatalogViewProps {
   books: Book[];
@@ -14,11 +18,100 @@ interface CatalogViewProps {
   lang: 'en' | 'ru';
 }
 
+const getStatusColor = (status: BookStatus): string => {
+  switch (status) {
+    case BookStatus.READING:
+      return 'text-blue-600 bg-blue-50';
+    case BookStatus.READ:
+      return 'text-emerald-600 bg-emerald-50';
+    case BookStatus.WANT_TO_READ:
+      return 'text-amber-600 bg-amber-50';
+    default:
+      return 'text-slate-600 bg-slate-50';
+  }
+};
+
+const BookTableRow: React.FC<{
+  book: Book;
+  onEdit: () => void;
+  onDelete: () => void;
+  lang: 'en' | 'ru';
+}> = ({ book, onEdit, onDelete, lang }) => {
+  const t = translations[lang];
+
+  return (
+    <tr className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+      <td className="p-4">
+        {book.coverUrl && (
+          <img 
+            src={book.coverUrl} 
+            alt={book.title}
+            className="w-12 h-16 object-cover rounded"
+            onError={(e) => {
+              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64"%3E%3Crect fill="%23e2e8f0" width="48" height="64"/%3E%3Ctext x="50%25" y="50%25" font-size="12" fill="%23cbd5e1" text-anchor="middle" dy=".3em"%3E%3C/text%3E%3C/svg%3E';
+            }}
+          />
+        )}
+      </td>
+      <td className="p-4 font-medium text-slate-800">{book.title}</td>
+      <td className="p-4 text-slate-600">{book.author}</td>
+      <td className="p-4 text-slate-600">{book.year}</td>
+      <td className="p-4">
+        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(book.status)}`}>
+          {(() => {
+            switch (book.status) {
+              case BookStatus.READING:
+                return lang === 'ru' ? 'Читаю' : 'Reading';
+              case BookStatus.READ:
+                return lang === 'ru' ? 'Прочитано' : 'Read';
+              case BookStatus.WANT_TO_READ:
+                return lang === 'ru' ? 'Буду читать' : 'To Read';
+              default:
+                return book.status;
+            }
+          })()}
+        </span>
+      </td>
+      <td className="p-4 text-center">
+        <span className="font-semibold text-amber-600">★ {book.rating}</span>
+      </td>
+      <td className="p-4 text-slate-600 text-sm">{book.startDate || '-'}</td>
+      <td className="p-4 text-slate-600 text-sm">{book.endDate || '-'}</td>
+      <td className="p-4">
+        <div className="flex gap-2">
+          <button
+            onClick={onEdit}
+            className="px-2 py-1 text-xs bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition-colors"
+          >
+            {lang === 'ru' ? 'Ред.' : 'Edit'}
+          </button>
+          <button
+            onClick={onDelete}
+            className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
+          >
+            {lang === 'ru' ? 'Удал.' : 'Del'}
+          </button>
+        </div>
+      </td>
+    </tr>
+  );
+};
+
 const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<BookStatus | 'All'>('All');
   const [isImporting, setIsImporting] = useState(false);
+  const [viewMode, setViewModeState] = useState<ViewMode>(() => {
+    const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
+    return (saved && ['large', 'medium', 'table'].includes(saved)) ? saved : 'large';
+  });
   const t = translations[lang];
+
+  // Сохранение режима отображения при изменении
+  const handleViewModeChange = (newMode: ViewMode) => {
+    setViewModeState(newMode);
+    localStorage.setItem(VIEWMODE_STORAGE_KEY, newMode);
+  };
 
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
@@ -49,6 +142,24 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
       event.target.value = '';
     }
   };
+
+  const ViewModeButton: React.FC<{
+    mode: ViewMode;
+    icon: React.ReactNode;
+    title: string;
+  }> = ({ mode, icon, title }) => (
+    <button
+      onClick={() => handleViewModeChange(mode)}
+      className={`p-2 rounded-lg transition-colors ${
+        viewMode === mode
+          ? 'bg-indigo-600 text-white'
+          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+      }`}
+      title={title}
+    >
+      {icon}
+    </button>
+  );
 
   return (
     <div className="space-y-6">
@@ -105,21 +216,88 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
               <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
             </select>
           </div>
+
+          <div className="flex gap-1 bg-slate-200 p-1 rounded-lg">
+            <ViewModeButton
+              mode="large"
+              icon={<Grid3x3 size={18} />}
+              title={lang === 'ru' ? 'Крупная сетка' : 'Large grid'}
+            />
+            <ViewModeButton
+              mode="medium"
+              icon={<Grid2x2 size={18} />}
+              title={lang === 'ru' ? 'Средняя сетка' : 'Medium grid'}
+            />
+            <ViewModeButton
+              mode="table"
+              icon={<List size={18} />}
+              title={lang === 'ru' ? 'Таблица' : 'Table'}
+            />
+          </div>
         </div>
       </div>
 
       {filteredBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-          {filteredBooks.map(book => (
-            <BookCard 
-              key={book.id} 
-              book={book} 
-              onEdit={() => onEdit(book)} 
-              onDelete={() => onDelete(book.id)}
-              lang={lang}
-            />
-          ))}
-        </div>
+        <>
+          {viewMode === 'large' && (
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+              {filteredBooks.map(book => (
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onEdit={() => onEdit(book)} 
+                  onDelete={() => onDelete(book.id)}
+                  lang={lang}
+                />
+              ))}
+            </div>
+          )}
+
+          {viewMode === 'medium' && (
+            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+              {filteredBooks.map(book => (
+                <BookCard 
+                  key={book.id} 
+                  book={book} 
+                  onEdit={() => onEdit(book)} 
+                  onDelete={() => onDelete(book.id)}
+                  lang={lang}
+                />
+              ))}
+            </div>
+          )}
+
+          {viewMode === 'table' && (
+            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+              <table className="w-full">
+                <thead>
+                  <tr className="bg-slate-50 border-b border-slate-200">
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Обложка' : 'Cover'}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.title}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.author}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.year}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.status}</th>
+                    <th className="p-4 text-center text-sm font-semibold text-slate-600">{t.rating}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.startDate}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.endDate}</th>
+                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Действия' : 'Actions'}</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {filteredBooks.map(book => (
+                    <BookTableRow
+                      key={book.id}
+                      book={book}
+                      onEdit={() => onEdit(book)}
+                      onDelete={() => onDelete(book.id)}
+                      lang={lang}
+                    />
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </>
       ) : (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border-2 border-dashed border-slate-100">
           <Library size={48} className="mb-4 opacity-20" />
