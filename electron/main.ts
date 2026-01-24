@@ -33,6 +33,7 @@ function createWindow() {
   // Показываем окно только после загрузки
   mainWindow.once('ready-to-show', () => {
     mainWindow.show();
+    mainWindow.webContents.focus(); // Убеждаемся что фокус на окне
     
     // Открываем DevTools в режиме разработки
     if (isDev) {
@@ -51,6 +52,8 @@ function createWindow() {
   // Логирование событий загрузки
   mainWindow.webContents.on('did-finish-load', () => {
     console.log('Page loaded successfully');
+    // Убеждаемся что фокус на окне после загрузки
+    mainWindow.webContents.focus();
   });
 
   // Загружаем приложение

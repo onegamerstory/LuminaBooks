@@ -5,6 +5,7 @@ import BookCard from './BookCard';
 import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
+import Toast, { ToastMessage } from './Toast';
 
 type ViewMode = 'large' | 'medium' | 'table';
 
@@ -101,11 +102,21 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<BookStatus | 'All'>('All');
   const [isImporting, setIsImporting] = useState(false);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
     return (saved && ['large', 'medium', 'table'].includes(saved)) ? saved : 'large';
   });
   const t = translations[lang];
+
+  const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
+    const id = `toast_${Date.now()}`;
+    setToasts(prev => [...prev, { id, message, type }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
 
   // Сохранение режима отображения при изменении
   const handleViewModeChange = (newMode: ViewMode) => {
@@ -132,9 +143,9 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
     try {
       const importedBooks = await importBooksFromExcel(file);
       onImport(importedBooks);
-      alert(lang === 'ru' ? `Успешно импортировано ${importedBooks.length} книг(и)` : `Successfully imported ${importedBooks.length} book(s)`);
+      addToast(lang === 'ru' ? `Успешно импортировано ${importedBooks.length} книг(и)` : `Successfully imported ${importedBooks.length} book(s)`, 'success');
     } catch (error) {
-      alert(lang === 'ru' ? 'Ошибка при импорте файла' : 'Error importing file');
+      addToast(lang === 'ru' ? 'Ошибка при импорте файла' : 'Error importing file', 'error');
       console.error(error);
     } finally {
       setIsImporting(false);
@@ -163,6 +174,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
 
   return (
     <div className="space-y-6">
+      <Toast messages={toasts} onRemove={removeToast} />
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-slate-800">{t.library}</h2>

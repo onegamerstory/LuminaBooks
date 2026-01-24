@@ -4,8 +4,9 @@ import { Book, BookStatus, ViewType } from './types';
 import CatalogView from './components/CatalogView';
 import CalendarView from './components/CalendarView';
 import StatisticsView from './components/StatisticsView';
+import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
-import { BookOpen, Calendar, Plus, Library, Languages, BarChart3 } from 'lucide-react';
+import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap } from 'lucide-react';
 
 const STORAGE_KEY = 'lumina_books_v1';
 
@@ -217,6 +218,23 @@ const App: React.FC = () => {
     localStorage.setItem('lumina_lang', lang);
   }, [lang]);
 
+  // Обработчик для восстановления фокуса на события клавиатуры в Electron
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Если событие не обрабатывается по умолчанию, это может быть сигналом потери фокуса
+      // Пробуем вернуть фокус активному элементу
+      if (document.activeElement && document.activeElement !== document.body) {
+        (document.activeElement as HTMLElement).focus();
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    
+    return () => {
+      window.removeEventListener('keydown', handleKeyDown, true);
+    };
+  }, []);
+
   const handleAddBook = (book: Book) => {
     setBooks(prev => {
       // Нормализуем даты: пустые строки, null, undefined → пустая строка
@@ -290,6 +308,10 @@ const App: React.FC = () => {
     });
   };
 
+  const handleUpdateBook = (updatedBook: Book) => {
+    setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
+  };
+
   const handleStartReading = (bookId: string, startDate: string) => {
     setBooks(prev => {
       const updatedBooks = prev.map(book => {
@@ -360,6 +382,17 @@ const App: React.FC = () => {
                 <BarChart3 size={18} />
                 <span className="hidden sm:inline">{t.statistics}</span>
               </button>
+              <button
+                onClick={() => setActiveView('reading')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeView === 'reading' 
+                  ? 'bg-white text-indigo-600 shadow-sm' 
+                  : 'text-slate-600 hover:text-slate-900'
+                }`}
+              >
+                <Zap size={18} />
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Чтение' : 'Reading'}</span>
+              </button>
             </nav>
 
             <button
@@ -399,6 +432,12 @@ const App: React.FC = () => {
             books={books} 
             lang={lang}
             onStartReading={handleStartReading}
+          />
+        ) : activeView === 'reading' ? (
+          <ReadingView 
+            books={books} 
+            onUpdateBook={handleUpdateBook}
+            lang={lang}
           />
         ) : (
           <StatisticsView 

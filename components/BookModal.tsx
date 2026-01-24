@@ -127,61 +127,73 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   />
                 </div>
               </div>
-            </div>
-          </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.status}</label>
-              <select
-                value={formData.status}
-                onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
-              >
-                <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
-                <option value={BookStatus.READING}>{t.reading}</option>
-                <option value={BookStatus.READ}>{t.read}</option>
-              </select>
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.rating}</label>
-              <input 
-                type="number" 
-                min="0" max="10" step="0.5"
-                value={formData.rating}
-                onChange={e => setFormData({...formData, rating: Number(e.target.value)})}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.description}</label>
-              <textarea 
-                value={formData.description}
-                onChange={e => setFormData({...formData, description: e.target.value})}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-[42px]"
-                rows={1}
-              />
-            </div>
-          </div>
+              <div>
+                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{lang === 'ru' ? 'Всего страниц' : 'Total Pages'}</label>
+                <input 
+                  type="number" 
+                  min="0"
+                  value={formData.totalPages || ''}
+                  onChange={e => setFormData({...formData, totalPages: e.target.value ? parseInt(e.target.value) : undefined})}
+                  placeholder={lang === 'ru' ? 'Количество страниц в книге' : 'Total number of pages'}
+                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                />
+              </div>
 
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.startDate}</label>
-              <input 
-                type="date" 
-                value={formData.startDate}
-                onChange={e => setFormData({...formData, startDate: e.target.value})}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
-            </div>
-            <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.endDate}</label>
-              <input 
-                type="date" 
-                value={formData.endDate}
-                onChange={e => setFormData({...formData, endDate: e.target.value})}
-                className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
-              />
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.status}</label>
+                  <select
+                    value={formData.status}
+                    onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
+                  >
+                    <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
+                    <option value={BookStatus.READING}>{t.reading}</option>
+                    <option value={BookStatus.READ}>{t.read}</option>
+                  </select>
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.rating}</label>
+                  <input 
+                    type="number" 
+                    min="0" max="10" step="0.5"
+                    value={formData.rating}
+                    onChange={e => setFormData({...formData, rating: Number(e.target.value)})}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.description}</label>
+                  <textarea 
+                    value={formData.description}
+                    onChange={e => setFormData({...formData, description: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-[42px]"
+                    rows={1}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.startDate}</label>
+                  <input 
+                    type="date" 
+                    value={formData.startDate}
+                    onChange={e => setFormData({...formData, startDate: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+                <div>
+                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.endDate}</label>
+                  <input 
+                    type="date" 
+                    value={formData.endDate}
+                    onChange={e => setFormData({...formData, endDate: e.target.value})}
+                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  />
+                </div>
+              </div>
             </div>
           </div>
 
