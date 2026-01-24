@@ -1,5 +1,6 @@
 import * as XLSX from 'xlsx';
 import { Book, BookStatus } from '../types';
+import { calculateBookTotalHours } from './dateUtils';
 
 export const exportBooksToExcel = (books: Book[]) => {
   // Подготовка данных для экспорта
@@ -13,7 +14,8 @@ export const exportBooksToExcel = (books: Book[]) => {
     'Дата начала': book.startDate,
     'Дата окончания': book.endDate,
     'Ссылка на обложку': book.coverUrl,
-    'Описание': book.description || ''
+    'Описание': book.description || '',
+    'Всего часов': calculateBookTotalHours(book)
   }));
 
   // Создание workbook и worksheet
@@ -32,7 +34,8 @@ export const exportBooksToExcel = (books: Book[]) => {
     { wch: 12 },  // Дата начала
     { wch: 12 },  // Дата окончания
     { wch: 40 },  // Ссылка на обложку
-    { wch: 30 }   // Описание
+    { wch: 30 },  // Описание
+    { wch: 10 }   // Всего часов
   ];
 
   // Сохранение файла
@@ -76,7 +79,16 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             totalPages = isNaN(parsed) || parsed <= 0 ? undefined : parsed;
           }
 
-          return {
+          // Валидация количества часов (импортированные часы)
+          let importedTotalHours: number | undefined = undefined;
+          if (typeof row['Всего часов'] === 'number' && row['Всего часов'] > 0) {
+            importedTotalHours = Math.round(row['Всего часов'] * 10) / 10;
+          } else if (typeof row['Всего часов'] === 'string' && row['Всего часов'].trim()) {
+            const parsed = parseFloat(row['Всего часов']);
+            importedTotalHours = isNaN(parsed) || parsed <= 0 ? undefined : Math.round(parsed * 10) / 10;
+          }
+
+          const book: Book = {
             id: `imported_${Date.now()}_${index}`,
             title: row['Название'] || 'Unknown',
             author: row['Автор'] || 'Unknown',
@@ -87,8 +99,11 @@ export const importBooksFromExcel = (file: File): Promise<Book[]> => {
             startDate: row['Дата начала'] || '',
             endDate: row['Дата окончания'] || '',
             description: row['Описание'] || '',
-            totalPages: totalPages
+            totalPages: totalPages,
+            importedTotalHours: importedTotalHours
           };
+
+          return book;
         });
 
         resolve(importedBooks);

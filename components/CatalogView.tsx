@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronUp, ChevronDown } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
 import Toast, { ToastMessage } from './Toast';
@@ -57,6 +57,9 @@ const BookTableRow: React.FC<{
       <td className="p-4 font-medium text-slate-800">{book.title}</td>
       <td className="p-4 text-slate-600">{book.author}</td>
       <td className="p-4 text-slate-600">{book.year}</td>
+      <td className="p-4 text-center font-medium text-slate-700">
+        {book.totalPages ? `${book.totalPages}` : '-'}
+      </td>
       <td className="p-4">
         <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(book.status)}`}>
           {(() => {
@@ -103,6 +106,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   const [filterStatus, setFilterStatus] = useState<BookStatus | 'All'>('All');
   const [isImporting, setIsImporting] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [sortColumn, setSortColumn] = useState<string | null>(null);
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
     return (saved && ['large', 'medium', 'table'].includes(saved)) ? saved : 'large';
@@ -130,6 +135,40 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
     const matchesStatus = filterStatus === 'All' || book.status === filterStatus;
     return matchesSearch && matchesStatus;
   });
+
+  const sortedBooks = [...filteredBooks].sort((a, b) => {
+    if (!sortColumn) return 0;
+
+    let aValue: any = a[sortColumn as keyof Book];
+    let bValue: any = b[sortColumn as keyof Book];
+
+    // Handle undefined values
+    if (aValue === undefined || aValue === null) aValue = '';
+    if (bValue === undefined || bValue === null) bValue = '';
+
+    // Convert to string for comparison if necessary
+    if (typeof aValue === 'string') aValue = aValue.toLowerCase();
+    if (typeof bValue === 'string') bValue = bValue.toLowerCase();
+
+    if (aValue < bValue) {
+      return sortDirection === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return sortDirection === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const handleColumnSort = (column: string) => {
+    if (sortColumn === column) {
+      // Toggle sort direction if clicking the same column
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      // Set new column and reset to ascending
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
 
   const handleExport = () => {
     exportBooksToExcel(books);
@@ -285,18 +324,83 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                 <thead>
                   <tr className="bg-slate-50 border-b border-slate-200">
                     <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Обложка' : 'Cover'}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.title}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.author}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.year}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.status}</th>
-                    <th className="p-4 text-center text-sm font-semibold text-slate-600">{t.rating}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.startDate}</th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{t.endDate}</th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('title')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.title}
+                        {sortColumn === 'title' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('author')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.author}
+                        {sortColumn === 'author' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('year')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.year}
+                        {sortColumn === 'year' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('totalPages')}
+                    >
+                      <div className="flex items-center gap-2 justify-center">
+                        {lang === 'ru' ? 'Страниц' : 'Pages'}
+                        {sortColumn === 'totalPages' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('status')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.status}
+                        {sortColumn === 'status' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('rating')}
+                    >
+                      <div className="flex items-center gap-2 justify-center">
+                        {t.rating}
+                        {sortColumn === 'rating' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('startDate')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.startDate}
+                        {sortColumn === 'startDate' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
+                    <th 
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      onClick={() => handleColumnSort('endDate')}
+                    >
+                      <div className="flex items-center gap-2">
+                        {t.endDate}
+                        {sortColumn === 'endDate' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
+                      </div>
+                    </th>
                     <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Действия' : 'Actions'}</th>
                   </tr>
                 </thead>
                 <tbody>
-                  {filteredBooks.map(book => (
+                  {sortedBooks.map(book => (
                     <BookTableRow
                       key={book.id}
                       book={book}

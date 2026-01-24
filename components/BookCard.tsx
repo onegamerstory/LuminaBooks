@@ -3,7 +3,7 @@ import React from 'react';
 import { Book, BookStatus } from '../types';
 import { Star, Edit2, Trash2, Calendar, User } from 'lucide-react';
 import { translations } from '../App';
-import { calculateDaysDifference } from '../utils/dateUtils';
+import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 
 interface BookCardProps {
   book: Book;
@@ -100,13 +100,8 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
               {book.startDate} 
               {book.endDate ? ` — ${book.endDate}` : ` ${t.inProgress}`}
               {(() => {
-                // Вычисляем общее количество часов из сессий
-                if (book.sessions && book.sessions.length > 0) {
-                  const totalSeconds = book.sessions.reduce((sum, session) => sum + session.duration, 0);
-                  const hours = totalSeconds / 3600;
-                  return hours > 0 ? ` • ${formatHoursText(hours, lang)}` : '';
-                }
-                return '';
+                const hours = calculateBookTotalHours(book);
+                return hours > 0 ? ` • ${formatHoursText(hours, lang)}` : '';
               })()}
             </span>
           </div>

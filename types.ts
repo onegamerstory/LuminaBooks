@@ -32,6 +32,7 @@ export interface Book {
   totalPages?: number; // Всего страниц в книге
   currentPage?: number; // Текущая страница прочитанной книги
   currentPercentage?: number; // Текущий процент прочитанной книги
+  importedTotalHours?: number; // Часы, импортированные из файла (base value)
   sessions?: ReadingSession[];
 }
 

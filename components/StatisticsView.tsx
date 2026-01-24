@@ -2,7 +2,7 @@
 import React from 'react';
 import { Book, BookStatus } from '../types';
 import { translations } from '../App';
-import { calculateDaysDifference } from '../utils/dateUtils';
+import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 import GitHubCalendar from './GitHubCalendar';
 import { 
   BookOpen, 
@@ -38,16 +38,13 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const minRating = books.length > 0 ? Math.min(...books.map(b => b.rating)) : 0;
   const minRatingBooks = books.filter(b => b.rating === minRating);
 
-  // Средняя скорость прочтения (на основе часов из истории сессий)
-  const booksWithSessions = books.filter(b => b.sessions && b.sessions.length > 0);
-  const totalHours = booksWithSessions.reduce((sum, book) => {
-    const bookHours = (book.sessions || []).reduce((bookSum, session) => {
-      return bookSum + (session.duration / 3600); // Преобразуем секунды в часы
-    }, 0);
-    return sum + bookHours;
+  // Средняя скорость прочтения (на основе часов из истории сессий или сохраненного значения)
+  const booksWithHours = books.filter(b => calculateBookTotalHours(b) > 0);
+  const totalHours = booksWithHours.reduce((sum, book) => {
+    return sum + calculateBookTotalHours(book);
   }, 0);
-  const averageHours = booksWithSessions.length > 0 
-    ? Math.round((totalHours / booksWithSessions.length) * 10) / 10 
+  const averageHours = booksWithHours.length > 0 
+    ? Math.round((totalHours / booksWithHours.length) * 10) / 10 
     : 0;
 
   const formatHoursText = (hours: number, lang: 'en' | 'ru'): string => {
@@ -131,15 +128,15 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             <Clock className="text-indigo-600" size={24} />
             <h3 className="text-lg font-semibold text-slate-800">{t.averageReadingSpeed}</h3>
           </div>
-          {booksWithSessions.length > 0 ? (
+          {booksWithHours.length > 0 ? (
             <div>
               <p className="text-3xl font-bold text-indigo-600 mb-2">
                 {formatHoursText(averageHours, lang)}
               </p>
               <p className="text-sm text-slate-500">
-                {t.averageReadingSpeedDesc} ({booksWithSessions.length} {(() => {
+                {t.averageReadingSpeedDesc} ({booksWithHours.length} {(() => {
                   if (lang === 'ru') {
-                    const count = booksWithSessions.length;
+                    const count = booksWithHours.length;
                     const lastDigit = count % 10;
                     const lastTwoDigits = count % 100;
                     if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
@@ -153,7 +150,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                     }
                     return t.books;
                   } else {
-                    return booksWithSessions.length === 1 ? t.book : t.books;
+                    return booksWithHours.length === 1 ? t.book : t.books;
                   }
                 })()})
               </p>
