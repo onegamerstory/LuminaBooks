@@ -1,7 +1,7 @@
 {
   "name": "luminabooks---personal-book-tracker",
   "private": true,
-  "version": "1.3.0",
+  "version": "1.4.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -18,10 +18,12 @@
     "@google/genai": "^1.35.0",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3"
+    "react-dom": "^19.2.3",
+    "xlsx": "^0.18.5"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
+    "@types/xlsx": "^0.0.35",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",
@@ -31,10 +33,8 @@
     "vite": "^6.2.0",
     "wait-on": "^8.0.1"
   },
-  
   "author": "История Одного Геймера <gamecuts0412@gmail.com>",
   "description": "Personal Book Tracker Application",
-
   "build": {
     "appId": "com.onegamerstory.luminabooks",
     "productName": "LuminaBooks",

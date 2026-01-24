@@ -252,6 +252,44 @@ const App: React.FC = () => {
     }
   };
 
+  const handleImport = (importedBooks: Book[]) => {
+    setBooks(prev => {
+      const updatedBooks = prev.map(existingBook => {
+        // Проверяем, есть ли в импортированных книгах такая же комбинация название + автор
+        const duplicateImportedBook = importedBooks.find(
+          importedBook => 
+            importedBook.title.toLowerCase().trim() === existingBook.title.toLowerCase().trim() &&
+            importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
+        );
+
+        // Если найдена дубликат - заменяем информацию
+        if (duplicateImportedBook) {
+          return {
+            ...duplicateImportedBook,
+            id: existingBook.id // Сохраняем оригинальный ID
+          };
+        }
+
+        return existingBook;
+      });
+
+      // Добавляем новые книги, которые не являются дубликатами
+      const existingTitlesAuthors = new Set(
+        updatedBooks.map(b => `${b.title.toLowerCase().trim()}_${b.author.toLowerCase().trim()}`)
+      );
+
+      const newBooks = importedBooks.filter(
+        importedBook => 
+          !existingTitlesAuthors.has(
+            `${importedBook.title.toLowerCase().trim()}_${importedBook.author.toLowerCase().trim()}`
+          )
+      );
+
+      const finalBooks = [...updatedBooks, ...newBooks];
+      return updateBookStatusBasedOnDates(finalBooks);
+    });
+  };
+
   const handleStartReading = (bookId: string, startDate: string) => {
     setBooks(prev => {
       const updatedBooks = prev.map(book => {
@@ -353,6 +391,7 @@ const App: React.FC = () => {
             books={books} 
             onEdit={handleEdit} 
             onDelete={handleDelete}
+            onImport={handleImport}
             lang={lang}
           />
         ) : activeView === 'calendar' ? (

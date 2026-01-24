@@ -2,19 +2,22 @@
 import React, { useState } from 'react';
 import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload } from 'lucide-react';
 import { translations } from '../App';
+import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
 
 interface CatalogViewProps {
   books: Book[];
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
+  onImport: (books: Book[]) => void;
   lang: 'en' | 'ru';
 }
 
-const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, lang }) => {
+const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const [filterStatus, setFilterStatus] = useState<BookStatus | 'All'>('All');
+  const [isImporting, setIsImporting] = useState(false);
   const t = translations[lang];
 
   const filteredBooks = books.filter(book => {
@@ -24,10 +27,58 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, lang
     return matchesSearch && matchesStatus;
   });
 
+  const handleExport = () => {
+    exportBooksToExcel(books);
+  };
+
+  const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
+    const file = event.target.files?.[0];
+    if (!file) return;
+
+    setIsImporting(true);
+    try {
+      const importedBooks = await importBooksFromExcel(file);
+      onImport(importedBooks);
+      alert(lang === 'ru' ? `Успешно импортировано ${importedBooks.length} книг(и)` : `Successfully imported ${importedBooks.length} book(s)`);
+    } catch (error) {
+      alert(lang === 'ru' ? 'Ошибка при импорте файла' : 'Error importing file');
+      console.error(error);
+    } finally {
+      setIsImporting(false);
+      // Очистка input
+      event.target.value = '';
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <h2 className="text-2xl font-bold text-slate-800 self-start">{t.library}</h2>
+        <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold text-slate-800">{t.library}</h2>
+          <div className="flex gap-2">
+            <button
+              onClick={handleExport}
+              disabled={books.length === 0}
+              className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+              title={lang === 'ru' ? 'Экспортировать в Excel' : 'Export to Excel'}
+            >
+              <Upload size={18} />
+              <span className="text-sm">{lang === 'ru' ? 'Экспорт' : 'Export'}</span>
+            </button>
+            
+            <label className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer">
+              <Download size={18} />
+              <span className="text-sm">{lang === 'ru' ? 'Импорт' : 'Import'}</span>
+              <input
+                type="file"
+                accept=".xlsx,.xls"
+                onChange={handleImport}
+                disabled={isImporting}
+                className="hidden"
+              />
+            </label>
+          </div>
+        </div>
         
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           <div className="relative">
