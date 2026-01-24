@@ -280,11 +280,29 @@ const App: React.FC = () => {
             importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
         );
 
-        // Если найдена дубликат - заменяем информацию
+        // Если найдена дубликат - обновляем все параметры, но сохраняем историю сессий
         if (duplicateImportedBook) {
+          // Вычисляем часы из существующих сессий
+          let existingSessionHours = 0;
+          if (existingBook.sessions && existingBook.sessions.length > 0) {
+            const totalSeconds = existingBook.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
+            existingSessionHours = Math.round((totalSeconds / 3600) * 10) / 10;
+          }
+
+          // Вычитаем часы из существующих сессий из импортированного значения
+          // Это предотвращает двойной учет часов при переимпорте
+          let adjustedTotalHours = duplicateImportedBook.totalHours || 0;
+          if (existingSessionHours > 0 && adjustedTotalHours > existingSessionHours) {
+            adjustedTotalHours = Math.round((adjustedTotalHours - existingSessionHours) * 10) / 10;
+          }
+
           return {
             ...duplicateImportedBook,
-            id: existingBook.id // Сохраняем оригинальный ID
+            id: existingBook.id, // Сохраняем оригинальный ID
+            totalHours: adjustedTotalHours, // Используем скорректированное значение часов
+            currentPage: existingBook.currentPage, // Сохраняем текущую страницу
+            currentPercentage: existingBook.currentPercentage, // Сохраняем текущий процент
+            sessions: existingBook.sessions // Сохраняем историю сессий
           };
         }
 
