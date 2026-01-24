@@ -26,6 +26,15 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
     endPage?: string;
     percentageRead?: string;
   }>({});
+  const [manualSessionModalOpen, setManualSessionModalOpen] = useState(false);
+  const [manualSessionBookId, setManualSessionBookId] = useState<string | null>(null);
+  const [manualSessionData, setManualSessionData] = useState<{
+    date?: string;
+    startTime?: string;
+    endTime?: string;
+    endPage?: string;
+    endPercentage?: string;
+  }>({});
   const [expandedBookId, setExpandedBookId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const pagesInputRef = useRef<HTMLInputElement>(null);
@@ -227,6 +236,119 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
     setSessionModalOpen(false);
   };
 
+  const saveManualSession = () => {
+    if (!manualSessionBookId || !manualSessionData.date) {
+      addToast(lang === 'ru' ? 'Заполните дату' : 'Fill in the date', 'error');
+      return;
+    }
+
+    const book = books.find(b => b.id === manualSessionBookId);
+    if (!book) return;
+
+    // Валидация времени
+    if (!manualSessionData.startTime || !manualSessionData.endTime) {
+      addToast(lang === 'ru' ? 'Заполните время начала и конца' : 'Fill in start and end times', 'error');
+      return;
+    }
+
+    const [startHour, startMin] = manualSessionData.startTime.split(':').map(Number);
+    const [endHour, endMin] = manualSessionData.endTime.split(':').map(Number);
+    
+    if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
+      addToast(lang === 'ru' ? 'Неверный формат времени' : 'Invalid time format', 'error');
+      return;
+    }
+
+    // Создаем даты начала и конца
+    const [year, month, day] = manualSessionData.date.split('-').map(Number);
+    const startDateTime = new Date(year, month - 1, day, startHour, startMin);
+    const endDateTime = new Date(year, month - 1, day, endHour, endMin);
+
+    if (endDateTime <= startDateTime) {
+      addToast(lang === 'ru' ? 'Время конца должно быть позже времени начала' : 'End time must be after start time', 'error');
+      return;
+    }
+
+    // Валидация конечных страниц/процентов - требуется минимум одно значение
+    if (!manualSessionData.endPage && !manualSessionData.endPercentage) {
+      addToast(lang === 'ru' ? 'Заполните конечную страницу или процент' : 'Fill in end page or percentage', 'error');
+      return;
+    }
+
+    // Вычисляем продолжительность в секундах
+    const duration = Math.floor((endDateTime.getTime() - startDateTime.getTime()) / 1000);
+
+    // Начальные значения берутся из текущего прогресса книги
+    const startPage = book.currentPage || 0;
+    const startPercentage = book.currentPercentage || 0;
+
+    // Вычисляем конечные значения с преобразованием
+    let finalEndPage: number | undefined = undefined;
+    let finalEndPercentage: number | undefined = undefined;
+    let pagesRead: number | undefined = undefined;
+    let percentageReadValue: number | undefined = undefined;
+
+    if (manualSessionData.endPage && book.totalPages) {
+      // Если указаны конечные страницы - вычисляем конечный процент
+      finalEndPage = parseInt(manualSessionData.endPage);
+      finalEndPercentage = Math.round((finalEndPage / book.totalPages) * 100);
+      pagesRead = Math.max(0, finalEndPage - startPage);
+      percentageReadValue = Math.max(0, finalEndPercentage - startPercentage);
+    } else if (manualSessionData.endPercentage && book.totalPages) {
+      // Если указаны конечные проценты - вычисляем конечные страницы
+      finalEndPercentage = parseInt(manualSessionData.endPercentage);
+      finalEndPage = Math.round((finalEndPercentage / 100) * book.totalPages);
+      percentageReadValue = Math.max(0, finalEndPercentage - startPercentage);
+      pagesRead = Math.max(0, finalEndPage - startPage);
+    } else if (manualSessionData.endPage) {
+      // Если не указано всего страниц, но указаны конечные страницы
+      finalEndPage = parseInt(manualSessionData.endPage);
+      pagesRead = Math.max(0, finalEndPage - startPage);
+    } else if (manualSessionData.endPercentage) {
+      // Если не указано всего страниц, но указаны конечные проценты
+      finalEndPercentage = parseInt(manualSessionData.endPercentage);
+      percentageReadValue = Math.max(0, finalEndPercentage - startPercentage);
+    }
+
+    const newSession: ReadingSession = {
+      id: `session_${Date.now()}`,
+      startTime: startDateTime.toISOString(),
+      endTime: endDateTime.toISOString(),
+      duration: duration,
+      startPage: startPage,
+      endPage: finalEndPage,
+      pagesRead: pagesRead,
+      startPercentage: startPercentage,
+      endPercentage: finalEndPercentage,
+      percentageRead: percentageReadValue
+    };
+
+    // Вычисляем финальный текущий процент
+    let finalCurrentPercentage: number | undefined = undefined;
+    if (finalEndPercentage !== undefined) {
+      finalCurrentPercentage = finalEndPercentage;
+    } else if (finalEndPage !== undefined && book.totalPages) {
+      finalCurrentPercentage = Math.round((finalEndPage / book.totalPages) * 100);
+    } else if (book.currentPercentage !== undefined) {
+      finalCurrentPercentage = book.currentPercentage;
+    }
+
+    const updatedBook: Book = {
+      ...book,
+      currentPage: finalEndPage || book.currentPage,
+      currentPercentage: finalCurrentPercentage,
+      sessions: [...(book.sessions || []), newSession]
+    };
+
+    onUpdateBook(updatedBook);
+
+    addToast(lang === 'ru' ? 'Сессия добавлена' : 'Session added', 'success');
+    
+    // Очищение состояния
+    setManualSessionModalOpen(false);
+    setManualSessionBookId(null);
+    setManualSessionData({});
+  };
   return (
     <div className="space-y-6">
       <Toast messages={toasts} onRemove={removeToast} />
@@ -318,13 +440,26 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     </div>
                   </div>
                 ) : (
-                  <button
-                    onClick={() => startSession(book.id)}
-                    className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
-                  >
-                    <Play size={18} />
-                    <span className="text-sm">{lang === 'ru' ? 'Начать сессию' : 'Start Session'}</span>
-                  </button>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => startSession(book.id)}
+                      className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                    >
+                      <Play size={18} />
+                      <span className="text-sm">{lang === 'ru' ? 'Начать сессию' : 'Start Session'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setManualSessionBookId(book.id);
+                        setManualSessionData({ date: new Date().toISOString().split('T')[0] });
+                        setManualSessionModalOpen(true);
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors"
+                    >
+                      <Clock size={18} />
+                      <span className="text-sm">{lang === 'ru' ? 'Добавить вручную' : 'Add Manual'}</span>
+                    </button>
+                  </div>
                 )}
               </div>
 
@@ -495,6 +630,125 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               </button>
               <button
                 onClick={endSession}
+                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+              >
+                {lang === 'ru' ? 'Сохранить' : 'Save'}
+              </button>
+            </div>
+          </div>
+        </div>,
+        document.body
+      )}
+
+      {/* Модальное окно ручного добавления сессии */}
+      {manualSessionModalOpen && manualSessionBookId && createPortal(
+        <div 
+          className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50"
+          onClick={(e) => {
+            if (e.target === e.currentTarget) {
+              setManualSessionModalOpen(false);
+            }
+          }}
+        >
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-slate-800 mb-4">
+              {lang === 'ru' ? 'Добавить сессию вручную' : 'Add Manual Session'}
+            </h3>
+
+            <div className="space-y-4 mb-6">
+              {/* Дата */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {lang === 'ru' ? 'Дата' : 'Date'} *
+                </label>
+                <input
+                  type="date"
+                  value={manualSessionData.date || ''}
+                  onChange={(e) => setManualSessionData({ ...manualSessionData, date: e.target.value })}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+              </div>
+
+              {/* Время начала и конца */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {lang === 'ru' ? 'Время начала' : 'Start Time'} *
+                  </label>
+                  <input
+                    type="time"
+                    value={manualSessionData.startTime || ''}
+                    onChange={(e) => setManualSessionData({ ...manualSessionData, startTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {lang === 'ru' ? 'Время конца' : 'End Time'} *
+                  </label>
+                  <input
+                    type="time"
+                    value={manualSessionData.endTime || ''}
+                    onChange={(e) => setManualSessionData({ ...manualSessionData, endTime: e.target.value })}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              {/* Информация о текущем прогрессе */}
+              <div className="bg-slate-50 p-3 rounded-lg text-sm text-slate-600 border border-slate-200">
+                <p className="font-medium">{lang === 'ru' ? 'Начальные значения:' : 'Start values:'}</p>
+                <p>{lang === 'ru' ? 'Страница: ' : 'Page: '}
+                  <span className="font-semibold">{books.find(b => b.id === manualSessionBookId)?.currentPage || 0}</span>
+                </p>
+                <p>{lang === 'ru' ? 'Процент: ' : 'Percentage: '}
+                  <span className="font-semibold">{books.find(b => b.id === manualSessionBookId)?.currentPercentage || 0}%</span>
+                </p>
+              </div>
+
+              {/* Конечная страница / процент - обязательно минимум одно */}
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {lang === 'ru' ? 'Конечная страница' : 'End Page'} {lang === 'ru' ? '(опционально)' : '(optional)'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    value={manualSessionData.endPage || ''}
+                    onChange={(e) => setManualSessionData({ ...manualSessionData, endPage: e.target.value })}
+                    placeholder={lang === 'ru' ? 'Номер страницы' : 'Page number'}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-slate-700 mb-2">
+                    {lang === 'ru' ? 'Конечный процент' : 'End Percentage'} {lang === 'ru' ? '(опционально)' : '(optional)'}
+                  </label>
+                  <input
+                    type="number"
+                    min="0"
+                    max="100"
+                    value={manualSessionData.endPercentage || ''}
+                    onChange={(e) => setManualSessionData({ ...manualSessionData, endPercentage: e.target.value })}
+                    placeholder={lang === 'ru' ? 'От 0 до 100' : '0-100'}
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  />
+                </div>
+              </div>
+
+              <p className="text-xs text-slate-500">{lang === 'ru' ? '* Заполните хотя бы одно из полей выше' : '* Fill in at least one field above'}</p>
+            </div>
+
+            <div className="flex gap-3">
+              <button
+                onClick={() => setManualSessionModalOpen(false)}
+                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+              >
+                {lang === 'ru' ? 'Отмена' : 'Cancel'}
+              </button>
+              <button
+                onClick={saveManualSession}
                 className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Сохранить' : 'Save'}

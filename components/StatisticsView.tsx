@@ -38,33 +38,36 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const minRating = books.length > 0 ? Math.min(...books.map(b => b.rating)) : 0;
   const minRatingBooks = books.filter(b => b.rating === minRating);
 
-  // Средняя скорость прочтения (только для книг с датами начала)
-  const booksWithDates = books.filter(b => b.startDate && b.startDate.trim() !== '');
-  const totalDays = booksWithDates.reduce((sum, book) => {
-    const days = calculateDaysDifference(book.startDate, book.endDate);
-    return sum + (days || 0);
+  // Средняя скорость прочтения (на основе часов из истории сессий)
+  const booksWithSessions = books.filter(b => b.sessions && b.sessions.length > 0);
+  const totalHours = booksWithSessions.reduce((sum, book) => {
+    const bookHours = (book.sessions || []).reduce((bookSum, session) => {
+      return bookSum + (session.duration / 3600); // Преобразуем секунды в часы
+    }, 0);
+    return sum + bookHours;
   }, 0);
-  const averageDays = booksWithDates.length > 0 
-    ? Math.round((totalDays / booksWithDates.length) * 10) / 10 
+  const averageHours = booksWithSessions.length > 0 
+    ? Math.round((totalHours / booksWithSessions.length) * 10) / 10 
     : 0;
 
-  const formatDaysText = (days: number, lang: 'en' | 'ru'): string => {
+  const formatHoursText = (hours: number, lang: 'en' | 'ru'): string => {
+    const roundedHours = Math.round(hours * 10) / 10;
     if (lang === 'ru') {
-      const lastDigit = Math.floor(days) % 10;
-      const lastTwoDigits = Math.floor(days) % 100;
+      const lastDigit = Math.floor(roundedHours) % 10;
+      const lastTwoDigits = Math.floor(roundedHours) % 100;
       
       if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-        return `${days} ${t.days}`;
+        return `${roundedHours} часов`;
       }
       if (lastDigit === 1) {
-        return `${days} день`;
+        return `${roundedHours} час`;
       }
       if (lastDigit >= 2 && lastDigit <= 4) {
-        return `${days} дня`;
+        return `${roundedHours} часа`;
       }
-      return `${days} ${t.days}`;
+      return `${roundedHours} часов`;
     } else {
-      return days === 1 ? `${days} ${t.day}` : `${days} ${t.days}`;
+      return roundedHours === 1 ? `${roundedHours} hour` : `${roundedHours} hours`;
     }
   };
 
@@ -128,15 +131,15 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             <Clock className="text-indigo-600" size={24} />
             <h3 className="text-lg font-semibold text-slate-800">{t.averageReadingSpeed}</h3>
           </div>
-          {booksWithDates.length > 0 ? (
+          {booksWithSessions.length > 0 ? (
             <div>
               <p className="text-3xl font-bold text-indigo-600 mb-2">
-                {formatDaysText(averageDays, lang)}
+                {formatHoursText(averageHours, lang)}
               </p>
               <p className="text-sm text-slate-500">
-                {t.averageReadingSpeedDesc} ({booksWithDates.length} {(() => {
+                {t.averageReadingSpeedDesc} ({booksWithSessions.length} {(() => {
                   if (lang === 'ru') {
-                    const count = booksWithDates.length;
+                    const count = booksWithSessions.length;
                     const lastDigit = count % 10;
                     const lastTwoDigits = count % 100;
                     if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
@@ -150,7 +153,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                     }
                     return t.books;
                   } else {
-                    return booksWithDates.length === 1 ? t.book : t.books;
+                    return booksWithSessions.length === 1 ? t.book : t.books;
                   }
                 })()})
               </p>

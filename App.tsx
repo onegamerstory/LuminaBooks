@@ -51,8 +51,8 @@ export const translations = {
     highestRatedBooks: 'Highest Rated Books',
     lowestRatedBooks: 'Lowest Rated Books',
     averageReadingSpeed: 'Average Reading Speed',
-    averageReadingSpeedDesc: 'Average days per book',
-    noBooksWithDates: 'No books with reading dates',
+    averageReadingSpeedDesc: 'Average hours per book',
+    noBooksWithDates: 'No books with reading sessions',
     book: 'book',
     books: 'books',
     booksPlural: 'books'
@@ -97,8 +97,8 @@ export const translations = {
     highestRatedBooks: 'Книги с максимальной оценкой',
     lowestRatedBooks: 'Книги с минимальной оценкой',
     averageReadingSpeed: 'Средняя скорость прочтения',
-    averageReadingSpeedDesc: 'Среднее количество дней на книгу',
-    noBooksWithDates: 'Нет книг с датами чтения',
+    averageReadingSpeedDesc: 'Среднее количество часов на книгу',
+    noBooksWithDates: 'Нет книг с историей чтения',
     book: 'книга',
     books: 'книг',
     booksPlural: 'книги'

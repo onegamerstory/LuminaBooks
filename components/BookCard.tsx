@@ -27,23 +27,24 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
     return t.toRead;
   };
 
-  const formatDaysText = (days: number, lang: 'en' | 'ru'): string => {
+  const formatHoursText = (hours: number, lang: 'en' | 'ru'): string => {
+    const roundedHours = Math.round(hours * 10) / 10;
     if (lang === 'ru') {
-      const lastDigit = days % 10;
-      const lastTwoDigits = days % 100;
+      const lastDigit = Math.floor(roundedHours) % 10;
+      const lastTwoDigits = Math.floor(roundedHours) % 100;
       
       if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-        return `${days} ${t.days}`;
+        return `${roundedHours} часов`;
       }
       if (lastDigit === 1) {
-        return `${days} день`;
+        return `${roundedHours} час`;
       }
       if (lastDigit >= 2 && lastDigit <= 4) {
-        return `${days} дня`;
+        return `${roundedHours} часа`;
       }
-      return `${days} ${t.days}`;
+      return `${roundedHours} часов`;
     } else {
-      return days === 1 ? `${days} ${t.day}` : `${days} ${t.days}`;
+      return roundedHours === 1 ? `${roundedHours} hour` : `${roundedHours} hours`;
     }
   };
 
@@ -99,8 +100,13 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
               {book.startDate} 
               {book.endDate ? ` — ${book.endDate}` : ` ${t.inProgress}`}
               {(() => {
-                const days = calculateDaysDifference(book.startDate, book.endDate);
-                return days !== null ? ` • ${formatDaysText(days, lang)}` : '';
+                // Вычисляем общее количество часов из сессий
+                if (book.sessions && book.sessions.length > 0) {
+                  const totalSeconds = book.sessions.reduce((sum, session) => sum + session.duration, 0);
+                  const hours = totalSeconds / 3600;
+                  return hours > 0 ? ` • ${formatHoursText(hours, lang)}` : '';
+                }
+                return '';
               })()}
             </span>
           </div>
