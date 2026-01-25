@@ -10,9 +10,10 @@ interface BookModalProps {
   onSubmit: (book: Book) => void;
   initialData?: Book;
   lang: 'en' | 'ru';
+  defaultCoverUrl?: string;
 }
 
-const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initialData, lang }) => {
+const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initialData, lang, defaultCoverUrl = '' }) => {
   const t = translations[lang];
   const [formData, setFormData] = useState<Partial<Book>>({
     title: '',
@@ -46,13 +47,23 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Determine cover URL: use provided one, then default, then fallback
+    let finalCoverUrl = formData.coverUrl;
+    if (!finalCoverUrl && defaultCoverUrl) {
+      finalCoverUrl = defaultCoverUrl;
+    }
+    if (!finalCoverUrl) {
+      finalCoverUrl = `https://picsum.photos/seed/${formData.title}/400/600`;
+    }
+    
     const newBook: Book = {
       ...formData as Book,
       id: initialData?.id || crypto.randomUUID(),
       title: formData.title || 'Untitled',
       author: formData.author || 'Unknown',
       year: formData.year || 'N/A',
-      coverUrl: formData.coverUrl || `https://picsum.photos/seed/${formData.title}/400/600`,
+      coverUrl: finalCoverUrl,
       status: formData.status as BookStatus,
       rating: Number(formData.rating) || 0,
     };

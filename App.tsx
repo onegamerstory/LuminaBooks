@@ -6,7 +6,7 @@ import CalendarView from './components/CalendarView';
 import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
-import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap } from 'lucide-react';
+import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, X } from 'lucide-react';
 
 const STORAGE_KEY = 'lumina_books_v1';
 
@@ -55,7 +55,13 @@ export const translations = {
     noBooksWithDates: 'No books with reading sessions',
     book: 'book',
     books: 'books',
-    booksPlural: 'books'
+    booksPlural: 'books',
+    defaultCoverSettings: 'Default Cover Settings',
+    defaultCoverUrl: 'Default Cover URL',
+    enterCoverUrl: 'Enter default cover URL...',
+    save: 'Save',
+    coverUrlSaved: 'Default cover URL saved',
+    coverUrlCleared: 'Default cover URL cleared'
   },
   ru: {
     catalog: 'Каталог',
@@ -101,7 +107,13 @@ export const translations = {
     noBooksWithDates: 'Нет книг с историей чтения',
     book: 'книга',
     books: 'книг',
-    booksPlural: 'книги'
+    booksPlural: 'книги',
+    defaultCoverSettings: 'Настройки обложки по умолчанию',
+    defaultCoverUrl: 'URL обложки по умолчанию',
+    enterCoverUrl: 'Введите URL обложки по умолчанию...',
+    save: 'Сохранить',
+    coverUrlSaved: 'URL обложки сохранён',
+    coverUrlCleared: 'URL обложки очищен'
   }
 };
 
@@ -111,6 +123,8 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | undefined>(undefined);
   const [lang, setLang] = useState<'en' | 'ru'>('ru');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
 
   const t = translations[lang];
 
@@ -170,6 +184,12 @@ const App: React.FC = () => {
     const savedLang = localStorage.getItem('lumina_lang');
     if (savedLang === 'en' || savedLang === 'ru') {
       setLang(savedLang);
+    }
+    
+    // Load default cover URL
+    const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+    if (savedDefaultCoverUrl) {
+      setDefaultCoverUrl(savedDefaultCoverUrl);
     }
   }, []);
 
@@ -423,16 +443,26 @@ const App: React.FC = () => {
             </button>
           </div>
 
-          <button
-            onClick={() => {
-              setEditingBook(undefined);
-              setIsModalOpen(true);
-            }}
-            className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-100"
-          >
-            <Plus size={18} />
-            <span className="hidden sm:inline">{t.addBook}</span>
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={() => setIsSettingsOpen(true)}
+              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-xl text-sm font-semibold transition-colors"
+              title={lang === 'ru' ? 'Настройки обложки' : 'Cover settings'}
+            >
+              <Settings size={18} />
+            </button>
+
+            <button
+              onClick={() => {
+                setEditingBook(undefined);
+                setIsModalOpen(true);
+              }}
+              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-100"
+            >
+              <Plus size={18} />
+              <span className="hidden sm:inline">{t.addBook}</span>
+            </button>
+          </div>
         </div>
       </header>
 
@@ -472,7 +502,72 @@ const App: React.FC = () => {
           onSubmit={handleAddBook}
           initialData={editingBook}
           lang={lang}
+          defaultCoverUrl={defaultCoverUrl}
         />
+      )}
+
+      {isSettingsOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
+            <div className="border-b px-6 py-4 flex items-center justify-between">
+              <h2 className="text-xl font-bold font-serif text-slate-800">
+                {t.defaultCoverSettings}
+              </h2>
+              <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+                <X size={20} />
+              </button>
+            </div>
+
+            <div className="p-6 space-y-4">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-2">{t.defaultCoverUrl}</label>
+                <input 
+                  type="text" 
+                  placeholder={t.enterCoverUrl}
+                  value={defaultCoverUrl}
+                  onChange={(e) => setDefaultCoverUrl(e.target.value)}
+                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                />
+                {defaultCoverUrl && (
+                  <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
+                    <p className="text-xs text-slate-600 mb-2">{lang === 'ru' ? 'Предпросмотр:' : 'Preview:'}</p>
+                    <img 
+                      src={defaultCoverUrl} 
+                      alt="Cover preview"
+                      className="w-20 h-28 object-cover rounded"
+                      onError={(e) => {
+                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"%3E%3Crect fill="%23e2e8f0" width="60" height="80"/%3E%3Ctext x="50%25" y="50%25" font-size="12" fill="%23cbd5e1" text-anchor="middle" dy=".3em"%3EError%3C/text%3E%3C/svg%3E';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+
+              <div className="flex gap-3 pt-4">
+                <button
+                  onClick={() => {
+                    if (defaultCoverUrl.trim()) {
+                      localStorage.setItem('lumina_default_cover_url', defaultCoverUrl);
+                    }
+                    setIsSettingsOpen(false);
+                  }}
+                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition-colors"
+                >
+                  {t.save}
+                </button>
+                <button
+                  onClick={() => {
+                    setDefaultCoverUrl('');
+                    localStorage.removeItem('lumina_default_cover_url');
+                  }}
+                  className="flex-1 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-semibold transition-colors"
+                >
+                  {lang === 'ru' ? 'Очистить' : 'Clear'}
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
       )}
       
       <footer className="py-8 border-t bg-white text-center text-slate-400 text-sm">
