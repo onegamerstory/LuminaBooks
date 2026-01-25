@@ -103,7 +103,8 @@ const BookTableRow: React.FC<{
 
 const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [filterStatus, setFilterStatus] = useState<BookStatus | 'All'>('All');
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<BookStatus | 'All'>>(new Set(['All']));
+  const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
@@ -132,9 +133,45 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           book.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = filterStatus === 'All' || book.status === filterStatus;
+    const matchesStatus = selectedStatuses.has('All') || selectedStatuses.has(book.status);
     return matchesSearch && matchesStatus;
   });
+
+  const handleStatusToggle = (status: BookStatus | 'All') => {
+    const newStatuses = new Set(selectedStatuses);
+    
+    if (status === 'All') {
+      if (newStatuses.has('All')) {
+        newStatuses.clear();
+        newStatuses.add('All');
+      } else {
+        newStatuses.clear();
+        newStatuses.add('All');
+      }
+    } else {
+      // Удаляем 'All' если выбираем конкретный статус
+      newStatuses.delete('All');
+      
+      if (newStatuses.has(status)) {
+        newStatuses.delete(status);
+      } else {
+        newStatuses.add(status);
+      }
+      
+      // Если все статусы выбраны, переключаемся на 'All'
+      if (newStatuses.size === 3) {
+        newStatuses.clear();
+        newStatuses.add('All');
+      }
+      
+      // Если ничего не выбрано, выбираем 'All'
+      if (newStatuses.size === 0) {
+        newStatuses.add('All');
+      }
+    }
+    
+    setSelectedStatuses(newStatuses);
+  };
 
   const sortedBooks = [...filteredBooks].sort((a, b) => {
     if (!sortColumn) return 0;
@@ -255,17 +292,65 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
           </div>
           
           <div className="relative">
-            <Filter className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
-            <select
-              value={filterStatus}
-              onChange={(e) => setFilterStatus(e.target.value as any)}
-              className="pl-10 pr-8 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 appearance-none w-full"
+            <button
+              onClick={() => setIsFilterOpen(!isFilterOpen)}
+              className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2 hover:border-slate-300 transition-colors"
             >
-              <option value="All">{t.allStatuses}</option>
-              <option value={BookStatus.READING}>{t.reading}</option>
-              <option value={BookStatus.READ}>{t.read}</option>
-              <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
-            </select>
+              <Filter size={18} className="text-slate-400" />
+              <span className="text-sm text-slate-700">
+                {selectedStatuses.has('All') 
+                  ? t.allStatuses 
+                  : `${selectedStatuses.size} ${lang === 'ru' ? 'выбрано' : 'selected'}`
+                }
+              </span>
+            </button>
+            
+            {isFilterOpen && (
+              <>
+                <div 
+                  className="fixed inset-0 z-10" 
+                  onClick={() => setIsFilterOpen(false)}
+                />
+                <div className="absolute top-full mt-2 left-0 bg-white border border-slate-200 rounded-xl shadow-lg z-20 min-w-max">
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle('All')}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700 font-medium">{t.allStatuses}</span>
+                  </label>
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has(BookStatus.READING) && !selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle(BookStatus.READING)}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700">{t.reading}</span>
+                  </label>
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has(BookStatus.READ) && !selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle(BookStatus.READ)}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700">{t.read}</span>
+                  </label>
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has(BookStatus.WANT_TO_READ) && !selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle(BookStatus.WANT_TO_READ)}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700">{t.toRead}</span>
+                  </label>
+                </div>
+              </>
+            )}
           </div>
 
           <div className="flex gap-1 bg-slate-200 p-1 rounded-lg">
