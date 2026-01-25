@@ -3,6 +3,8 @@ import React, { useState, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
 import { X } from 'lucide-react';
 import { translations } from '../App';
+import { DateInput } from '@mantine/dates';
+import dayjs from 'dayjs';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -201,20 +203,26 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.startDate}</label>
-                  <input 
-                    type="date" 
-                    value={formData.startDate}
-                    onChange={e => setFormData({...formData, startDate: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  <DateInput
+                    value={formData.startDate ? dayjs(formData.startDate).toDate() : null}
+                    onChange={(date) => setFormData({...formData, startDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
+                    placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
+                    format="DD.MM.YYYY"
+                    valueFormat="YYYY-MM-DD"
+                    clearable
+                    className="w-full"
                   />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.endDate}</label>
-                  <input 
-                    type="date" 
-                    value={formData.endDate}
-                    onChange={e => setFormData({...formData, endDate: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  <DateInput
+                    value={formData.endDate ? dayjs(formData.endDate).toDate() : null}
+                    onChange={(date) => setFormData({...formData, endDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
+                    placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
+                    format="DD.MM.YYYY"
+                    valueFormat="YYYY-MM-DD"
+                    clearable
+                    className="w-full"
                   />
                 </div>
               </div>

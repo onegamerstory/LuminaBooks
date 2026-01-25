@@ -3,6 +3,8 @@ import React, { useState, useMemo } from 'react';
 import { Book, BookStatus } from '../types';
 import { ChevronLeft, ChevronRight, HelpCircle, X } from 'lucide-react';
 import { translations } from '../App';
+import { DateInput } from '@mantine/dates';
+import dayjs from 'dayjs';
 
 interface CalendarViewProps {
   books: Book[];
@@ -127,16 +129,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         {/* Date Picker */}
         <div className="flex items-center gap-3">
           <label className="text-sm font-medium text-slate-600">{lang === 'ru' ? 'Перейти к дате:' : 'Go to date:'}</label>
-          <input
-            type="date"
-            value={`${currentDate.getFullYear()}-${String(currentDate.getMonth() + 1).padStart(2, '0')}-${String(currentDate.getDate()).padStart(2, '0')}`}
-            onChange={(e) => {
-              if (e.target.value) {
-                const [year, month, day] = e.target.value.split('-').map(Number);
-                setCurrentDate(new Date(year, month - 1, day));
+          <DateInput
+            value={new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())}
+            onChange={(date) => {
+              if (date) {
+                setCurrentDate(new Date(dayjs(date).format('YYYY-MM-DD')));
               }
             }}
-            className="px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+            placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
+            format="DD.MM.YYYY"
+            valueFormat="YYYY-MM-DD"
+            clearable={false}
+            className="w-40"
           />
           <button
             onClick={() => setCurrentDate(new Date())}

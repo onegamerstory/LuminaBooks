@@ -7,6 +7,9 @@ import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, X } from 'lucide-react';
+import { MantineProvider } from '@mantine/core';
+import '@mantine/core/styles.css';
+import '@mantine/dates/styles.css';
 
 const STORAGE_KEY = 'lumina_books_v1';
 
@@ -375,7 +378,8 @@ const App: React.FC = () => {
   const isMac = typeof window !== 'undefined' && window.electronAPI?.isMac === true;
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <MantineProvider>
+      <div className="min-h-screen flex flex-col">
       <header className={`bg-white border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -574,6 +578,7 @@ const App: React.FC = () => {
         &copy; {new Date().getFullYear()} LuminaBooks. {lang === 'ru' ? 'Следите за своим прогрессом чтения.' : 'Track your reading journey.'}
       </footer>
     </div>
+    </MantineProvider>
   );
 };
 

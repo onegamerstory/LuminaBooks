@@ -1,7 +1,7 @@
 {
   "name": "luminabooks---personal-book-tracker",
   "private": true,
-  "version": "1.4.2",
+  "version": "1.4.3",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -16,6 +16,10 @@
   },
   "dependencies": {
     "@google/genai": "^1.35.0",
+    "@mantine/core": "^7.5.0",
+    "@mantine/dates": "^7.5.0",
+    "@mantine/hooks": "^7.5.0",
+    "dayjs": "^1.11.10",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3",

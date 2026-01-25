@@ -4,6 +4,9 @@ import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../App';
 import Toast, { ToastMessage } from './Toast';
+import { DateInput } from '@mantine/dates';
+import { NumberInput } from '@mantine/core';
+import dayjs from 'dayjs';
 
 interface ReadingViewProps {
   books: Book[];
@@ -661,11 +664,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                 <label className="block text-sm font-medium text-slate-700 mb-2">
                   {lang === 'ru' ? 'Дата' : 'Date'} *
                 </label>
-                <input
-                  type="date"
-                  value={manualSessionData.date || ''}
-                  onChange={(e) => setManualSessionData({ ...manualSessionData, date: e.target.value })}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                <DateInput
+                  value={manualSessionData.date ? dayjs(manualSessionData.date).toDate() : null}
+                  onChange={(date) => setManualSessionData({ ...manualSessionData, date: date ? dayjs(date).format('YYYY-MM-DD') : '' })}
+                  placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
+                  format="DD.MM.YYYY"
+                  valueFormat="YYYY-MM-DD"
+                  clearable
+                  className="w-full"
                 />
               </div>
 
@@ -675,23 +681,81 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     {lang === 'ru' ? 'Время начала' : 'Start Time'} *
                   </label>
-                  <input
-                    type="time"
-                    value={manualSessionData.startTime || ''}
-                    onChange={(e) => setManualSessionData({ ...manualSessionData, startTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <NumberInput
+                        label={lang === 'ru' ? 'Часы' : 'Hours'}
+                        value={manualSessionData.startTime ? parseInt(manualSessionData.startTime.split(':')[0]) : undefined}
+                        onChange={(val) => {
+                          const minutes = manualSessionData.startTime ? manualSessionData.startTime.split(':')[1] : '00';
+                          setManualSessionData({
+                            ...manualSessionData,
+                            startTime: `${String(val || 0).padStart(2, '0')}:${minutes}`
+                          });
+                        }}
+                        min={0}
+                        max={23}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="text-lg font-semibold mt-5 text-slate-700">:</div>
+                    <div className="flex-1">
+                      <NumberInput
+                        label={lang === 'ru' ? 'Минуты' : 'Minutes'}
+                        value={manualSessionData.startTime ? parseInt(manualSessionData.startTime.split(':')[1]) : undefined}
+                        onChange={(val) => {
+                          const hours = manualSessionData.startTime ? manualSessionData.startTime.split(':')[0] : '00';
+                          setManualSessionData({
+                            ...manualSessionData,
+                            startTime: `${hours}:${String(val || 0).padStart(2, '0')}`
+                          });
+                        }}
+                        min={0}
+                        max={59}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
                 </div>
                 <div>
                   <label className="block text-sm font-medium text-slate-700 mb-2">
                     {lang === 'ru' ? 'Время конца' : 'End Time'} *
                   </label>
-                  <input
-                    type="time"
-                    value={manualSessionData.endTime || ''}
-                    onChange={(e) => setManualSessionData({ ...manualSessionData, endTime: e.target.value })}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                  />
+                  <div className="flex items-center gap-2">
+                    <div className="flex-1">
+                      <NumberInput
+                        label={lang === 'ru' ? 'Часы' : 'Hours'}
+                        value={manualSessionData.endTime ? parseInt(manualSessionData.endTime.split(':')[0]) : undefined}
+                        onChange={(val) => {
+                          const minutes = manualSessionData.endTime ? manualSessionData.endTime.split(':')[1] : '00';
+                          setManualSessionData({
+                            ...manualSessionData,
+                            endTime: `${String(val || 0).padStart(2, '0')}:${minutes}`
+                          });
+                        }}
+                        min={0}
+                        max={23}
+                        placeholder="0"
+                      />
+                    </div>
+                    <div className="text-lg font-semibold mt-5 text-slate-700">:</div>
+                    <div className="flex-1">
+                      <NumberInput
+                        label={lang === 'ru' ? 'Минуты' : 'Minutes'}
+                        value={manualSessionData.endTime ? parseInt(manualSessionData.endTime.split(':')[1]) : undefined}
+                        onChange={(val) => {
+                          const hours = manualSessionData.endTime ? manualSessionData.endTime.split(':')[0] : '00';
+                          setManualSessionData({
+                            ...manualSessionData,
+                            endTime: `${hours}:${String(val || 0).padStart(2, '0')}`
+                          });
+                        }}
+                        min={0}
+                        max={59}
+                        placeholder="0"
+                      />
+                    </div>
+                  </div>
                 </div>
               </div>
 
