@@ -173,23 +173,52 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 {day.getDate()}
               </span>
               
-              <div className="mt-7 flex flex-wrap gap-1 overflow-hidden h-full content-start justify-center">
-                {booksToday.slice(0, 4).map(book => (
-                  <div key={book.id} className="relative group/cover w-[calc(50%-4px)] aspect-[2/3] max-w-[60px]">
-                    <img 
-                      src={book.coverUrl} 
-                      className="w-full h-full object-cover rounded shadow-md border border-slate-200"
-                      alt={book.title}
-                    />
-                    <div className="absolute inset-0 bg-black/80 text-[8px] text-white p-1 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center text-center font-bold">
-                      {book.title}
-                    </div>
+              {/* Стопка обложек со смещением */}
+              <div className="mt-7 relative h-full flex flex-col items-start justify-center w-full">
+                {booksToday.slice(0, 4).length > 2 ? (
+                  // Для более чем 2 обложек - стопка со смещением, поднята вверх
+                  <div className="relative w-full flex items-start justify-center" style={{ height: '115px', marginTop: '-30px' }}>
+                    {booksToday.slice(0, 4).map((book, idx) => (
+                      <div 
+                        key={book.id} 
+                        className="absolute group/cover aspect-[2/3] w-[60px] shadow-md border border-slate-200 rounded"
+                        style={{
+                          zIndex: idx,
+                          transform: `translateY(${idx * 10}px) translateX(${(idx - (Math.min(booksToday.length, 4) - 1) / 2) * 10}px)`,
+                        }}
+                      >
+                        <img 
+                          src={book.coverUrl} 
+                          className="w-full h-full object-cover rounded"
+                          alt={book.title}
+                        />
+                        <div className="absolute inset-0 bg-black/80 text-[8px] text-white p-1 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center text-center font-bold rounded">
+                          {book.title}
+                        </div>
+                      </div>
+                    ))}
                   </div>
-                ))}
+                ) : (
+                  // Для 2 и менее обложек - обычное отображение в ряд
+                  <div className="flex flex-wrap gap-1 justify-center w-full">
+                    {booksToday.slice(0, 4).map(book => (
+                      <div key={book.id} className="relative group/cover w-[calc(50%-4px)] aspect-[2/3] max-w-[60px]">
+                        <img 
+                          src={book.coverUrl} 
+                          className="w-full h-full object-cover rounded shadow-md border border-slate-200"
+                          alt={book.title}
+                        />
+                        <div className="absolute inset-0 bg-black/80 text-[8px] text-white p-1 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center text-center font-bold">
+                          {book.title}
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
                 {booksToday.length > 4 && (
-                   <div className="w-full text-center text-[10px] font-bold text-[#6B9071]">
-                     +{booksToday.length - 4} {lang === 'ru' ? 'еще' : 'more'}
-                   </div>
+                  <div className="w-full text-center text-[10px] font-bold text-[#6B9071] mt-1">
+                    +{booksToday.length - 4} {lang === 'ru' ? 'еще' : 'more'}
+                  </div>
                 )}
               </div>
             </div>
