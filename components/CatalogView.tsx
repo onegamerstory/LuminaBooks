@@ -41,7 +41,7 @@ const BookTableRow: React.FC<{
   const t = translations[lang];
 
   return (
-    <tr className="border-b border-slate-200 hover:bg-slate-50 transition-colors">
+    <tr className="border-b border-slate-200 hover:bg-[#D6E1D8] transition-colors">
       <td className="p-4">
         {book.coverUrl && (
           <img 
@@ -54,7 +54,7 @@ const BookTableRow: React.FC<{
           />
         )}
       </td>
-      <td className="p-4 font-medium text-slate-800">{book.title}</td>
+      <td className="p-4 font-medium text-[#1E2920]">{book.title}</td>
       <td className="p-4 text-slate-600">{book.author}</td>
       <td className="p-4 text-slate-600">{book.year}</td>
       <td className="p-4 text-center font-medium text-slate-700">
@@ -85,7 +85,7 @@ const BookTableRow: React.FC<{
         <div className="flex gap-2">
           <button
             onClick={onEdit}
-            className="px-2 py-1 text-xs bg-indigo-100 text-indigo-600 rounded hover:bg-indigo-200 transition-colors"
+            className="px-2 py-1 text-xs bg-[#A1BAA5] text-[#1E2920] rounded hover:bg-[#87A68C] transition-colors"
           >
             {lang === 'ru' ? 'Ред.' : 'Edit'}
           </button>
@@ -239,8 +239,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
       onClick={() => handleViewModeChange(mode)}
       className={`p-2 rounded-lg transition-colors ${
         viewMode === mode
-          ? 'bg-indigo-600 text-white'
-          : 'bg-slate-100 text-slate-600 hover:bg-slate-200'
+          ? 'bg-[#6b9071] text-white'
+          : 'bg-[#F0F4F1] text-slate-600 hover:bg-[#D6E1D8]'
       }`}
       title={title}
     >
@@ -253,19 +253,19 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
       <Toast messages={toasts} onRemove={removeToast} />
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
         <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-slate-800">{t.library}</h2>
+          <h2 className="text-2xl font-bold text-[#1E2920]">{t.library}</h2>
           <div className="flex gap-2">
             <button
               onClick={handleExport}
               disabled={books.length === 0}
-              className="flex items-center gap-2 px-3 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-3 py-2 bg-[#9E8F8F] text-white rounded-lg hover:bg-[#887777] disabled:bg-[#D6E1D8] disabled:cursor-not-allowed transition-colors"
               title={lang === 'ru' ? 'Экспортировать в Excel' : 'Export to Excel'}
             >
               <Upload size={18} />
               <span className="text-sm">{lang === 'ru' ? 'Экспорт' : 'Export'}</span>
             </button>
             
-            <label className="flex items-center gap-2 px-3 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors cursor-pointer">
+            <label className="flex items-center gap-2 px-3 py-2 bg-[#846B90]/60 text-white rounded-lg hover:bg-[#846B90] transition-colors cursor-pointer">
               <Download size={18} />
               <span className="text-sm">{lang === 'ru' ? 'Импорт' : 'Import'}</span>
               <input
@@ -287,17 +287,17 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
               placeholder={t.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500 w-full"
+              className="pl-10 pr-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-[#6b9071] w-full"
             />
           </div>
           
           <div className="relative">
             <button
               onClick={() => setIsFilterOpen(!isFilterOpen)}
-              className="flex items-center gap-2 bg-white border border-slate-200 rounded-xl px-4 py-2 hover:border-slate-300 transition-colors"
+              className="flex items-center gap-2 bg-[#F0F4F1] border border-slate-200 rounded-xl px-4 py-2.5 hover:border-slate-300 transition-colors"
             >
-              <Filter size={18} className="text-slate-400" />
-              <span className="text-sm text-slate-700">
+              <Filter size={18} className="text-[#D6E1D8]" />
+              <span className="text-sm text-[#1E2920]">
                 {selectedStatuses.has('All') 
                   ? t.allStatuses 
                   : `${selectedStatuses.size} ${lang === 'ru' ? 'выбрано' : 'selected'}`
@@ -311,8 +311,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                   className="fixed inset-0 z-10" 
                   onClick={() => setIsFilterOpen(false)}
                 />
-                <div className="absolute top-full mt-2 left-0 bg-white border border-slate-200 rounded-xl shadow-lg z-20 min-w-max">
-                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                <div className="absolute top-full mt-2 left-0 bg-[#F0F4F1] border border-slate-200 rounded-xl shadow-lg z-20 min-w-max">
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
                     <input
                       type="checkbox"
                       checked={selectedStatuses.has('All')}
@@ -321,7 +321,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                     />
                     <span className="text-slate-700 font-medium">{t.allStatuses}</span>
                   </label>
-                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
                     <input
                       type="checkbox"
                       checked={selectedStatuses.has(BookStatus.READING) && !selectedStatuses.has('All')}
@@ -330,7 +330,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                     />
                     <span className="text-slate-700">{t.reading}</span>
                   </label>
-                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
                     <input
                       type="checkbox"
                       checked={selectedStatuses.has(BookStatus.READ) && !selectedStatuses.has('All')}
@@ -339,7 +339,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                     />
                     <span className="text-slate-700">{t.read}</span>
                   </label>
-                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-slate-50 cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
                     <input
                       type="checkbox"
                       checked={selectedStatuses.has(BookStatus.WANT_TO_READ) && !selectedStatuses.has('All')}
@@ -353,7 +353,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
             )}
           </div>
 
-          <div className="flex gap-1 bg-slate-200 p-1 rounded-lg">
+          <div className="flex gap-1 bg-[#F0F4F1] p-1 rounded-lg border border-slate-200">
             <ViewModeButton
               mode="large"
               icon={<Grid3x3 size={18} />}
@@ -404,13 +404,13 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
           )}
 
           {viewMode === 'table' && (
-            <div className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-x-auto">
+            <div className="bg-[#F0F4F1] rounded-xl shadow-md border border-slate-200 overflow-x-auto">
               <table className="w-full">
                 <thead>
-                  <tr className="bg-slate-50 border-b border-slate-200">
+                  <tr className="bg-[#BCCDBE] border-b border-slate-200">
                     <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Обложка' : 'Cover'}</th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('title')}
                     >
                       <div className="flex items-center gap-2">
@@ -419,7 +419,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('author')}
                     >
                       <div className="flex items-center gap-2">
@@ -428,7 +428,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('year')}
                     >
                       <div className="flex items-center gap-2">
@@ -437,7 +437,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('totalPages')}
                     >
                       <div className="flex items-center gap-2 justify-center">
@@ -446,7 +446,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('status')}
                     >
                       <div className="flex items-center gap-2">
@@ -455,7 +455,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('rating')}
                     >
                       <div className="flex items-center gap-2 justify-center">
@@ -464,7 +464,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('startDate')}
                     >
                       <div className="flex items-center gap-2">
@@ -473,7 +473,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       </div>
                     </th>
                     <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-slate-100 transition-colors"
+                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
                       onClick={() => handleColumnSort('endDate')}
                     >
                       <div className="flex items-center gap-2">
@@ -500,10 +500,10 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
           )}
         </>
       ) : (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border-2 border-dashed border-slate-100">
-          <Library size={48} className="mb-4 opacity-20" />
-          <p className="text-lg">{t.noBooks}</p>
-          <p className="text-sm">{t.tryAdding}</p>
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-[#6b9071]">
+          <Library size={48} className="text-[#6b9071] mb-4 opacity-20" />
+          <p className="text-lg text-[#6b9071]">{t.noBooks}</p>
+          <p className="text-sm text-[#6b9071]">{t.tryAdding}</p>
         </div>
       )}
     </div>

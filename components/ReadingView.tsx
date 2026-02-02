@@ -355,10 +355,10 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   return (
     <div className="space-y-6">
       <Toast messages={toasts} onRemove={removeToast} />
-      <h2 className="text-2xl font-bold text-slate-800">{lang === 'ru' ? 'Чтение' : 'Reading'}</h2>
+      <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Чтение' : 'Reading'}</h2>
 
       {readingBooks.length === 0 ? (
-        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border-2 border-dashed border-slate-100">
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
           <Clock size={48} className="mb-4 opacity-20" />
           <p className="text-lg">{lang === 'ru' ? 'Нет книг со статусом "Читаю"' : 'No books with "Reading" status'}</p>
           <p className="text-sm">{lang === 'ru' ? 'Добавьте книгу или измените её статус' : 'Add a book or change its status'}</p>
@@ -366,7 +366,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       ) : (
         <div className="space-y-4">
           {readingBooks.map(book => (
-            <div key={book.id} className="bg-white rounded-xl shadow-sm border border-slate-200 p-6">
+            <div key={book.id} className="bg-[#F0F4F1] rounded-xl shadow-md border border-slate-200 p-6">
               <div className="flex justify-between items-start mb-4 gap-4">
                 {book.coverUrl && (
                   <div className="flex-shrink-0 relative">
@@ -395,19 +395,19 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   </div>
                 )}
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-800">{book.title}</h3>
+                  <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
                   <p className="text-sm text-slate-600">{book.author}</p>
                 </div>
                 {sessionState?.bookId === book.id ? (
                   <div className="text-right">
-                    <div className="text-3xl font-bold text-indigo-600 font-mono mb-3">
+                    <div className="text-3xl font-bold text-[#6B9071] font-mono mb-3">
                       {formatTime(elapsedSeconds)}
                     </div>
                     <div className="flex gap-2">
                       {sessionState.isRunning ? (
                         <button
                           onClick={pauseSession}
-                          className="flex items-center gap-2 px-4 py-2 bg-yellow-500 text-white rounded-lg hover:bg-yellow-600 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 bg-[#B09F31] text-white rounded-lg hover:bg-[#7F7324] transition-colors"
                         >
                           <Pause size={18} />
                           <span className="text-sm">{lang === 'ru' ? 'Пауза' : 'Pause'}</span>
@@ -415,7 +415,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       ) : (
                         <button
                           onClick={resumeSession}
-                          className="flex items-center gap-2 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
+                          className="flex items-center gap-2 px-4 py-2 bg-[#846B90]/60 text-white rounded-lg hover:bg-[#846B90] transition-colors"
                         >
                           <Play size={18} />
                           <span className="text-sm">{lang === 'ru' ? 'Продолжить' : 'Resume'}</span>
@@ -435,7 +435,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                           }
                           setSessionModalOpen(true);
                         }}
-                        className="flex items-center gap-2 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors"
+                        className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
                       >
                         <CheckCircle size={18} />
                         <span className="text-sm">{lang === 'ru' ? 'Завершить' : 'End'}</span>
@@ -446,7 +446,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   <div className="flex gap-2">
                     <button
                       onClick={() => startSession(book.id)}
-                      className="flex items-center gap-2 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 transition-colors"
+                      className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
                     >
                       <Play size={18} />
                       <span className="text-sm">{lang === 'ru' ? 'Начать сессию' : 'Start Session'}</span>
@@ -476,7 +476,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
                       <thead>
-                        <tr className="bg-slate-50 border-b border-slate-200">
+                        <tr className="bg-[#A1BAA5] border-b border-slate-200">
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Дата' : 'Date'}</th>
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Начало' : 'Start'}</th>
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Конец' : 'End'}</th>
@@ -507,7 +507,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                             : `${minutes}${lang === 'ru' ? 'м' : 'm'}`;
 
                           return (
-                            <tr key={session.id} className="border-b border-slate-100 hover:bg-slate-50">
+                            <tr key={session.id} className="border-b border-slate-100 hover:bg-[#D6E1D8]">
                               <td className="p-2 text-slate-700">{dateStr}</td>
                               <td className="p-2 text-slate-700">{startTimeStr}</td>
                               <td className="p-2 text-slate-700">{endTimeStr}</td>
@@ -537,7 +537,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   {book.sessions.length > 3 && expandedBookId !== book.id && (
                     <button
                       onClick={() => setExpandedBookId(book.id)}
-                      className="mt-3 px-3 py-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:bg-indigo-50 rounded transition-colors"
+                      className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
                     >
                       {lang === 'ru' ? '+ Показать все' : '+ Show All'} ({book.sessions.length - 3} {lang === 'ru' ? 'ещё' : 'more'})
                     </button>
@@ -545,7 +545,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   {expandedBookId === book.id && book.sessions.length > 3 && (
                     <button
                       onClick={() => setExpandedBookId(null)}
-                      className="mt-3 px-3 py-1 text-sm text-indigo-600 hover:text-indigo-700 font-medium hover:bg-indigo-50 rounded transition-colors"
+                      className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
                     >
                       {lang === 'ru' ? '− Скрыть' : '− Hide'}
                     </button>
@@ -567,13 +567,13 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">
+          <div className="bg-[#F0F4F1] rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-xl font-semibold text-[#1E2920] mb-4">
               {lang === 'ru' ? 'Завершить сессию' : 'End Session'}
             </h3>
             <p className="text-sm text-slate-600 mb-4">
               {lang === 'ru' ? 'Время сессии: ' : 'Session time: '}
-              <span className="font-bold text-indigo-600">{formatTime(elapsedSeconds)}</span>
+              <span className="font-bold text-[#6B9071]">{formatTime(elapsedSeconds)}</span>
             </p>
 
             <div className="space-y-4 mb-6">
@@ -595,7 +595,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={sessionData.endPage || ''}
                     onChange={(e) => setSessionData({ ...sessionData, endPage: e.target.value })}
                     placeholder={lang === 'ru' ? 'Номер страницы' : 'Page number'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -618,7 +618,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={sessionData.percentageRead || ''}
                     onChange={(e) => setSessionData({ ...sessionData, percentageRead: e.target.value })}
                     placeholder={lang === 'ru' ? 'Процент от 0 до 100' : 'Percentage 0-100'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -653,8 +653,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
-            <h3 className="text-xl font-semibold text-slate-800 mb-4">
+          <div className="bg-[#F0F4F1] rounded-xl shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 className="text-xl font-semibold text-[#1E2920] mb-4">
               {lang === 'ru' ? 'Добавить сессию вручную' : 'Add Manual Session'}
             </h3>
 
@@ -782,7 +782,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={manualSessionData.endPage || ''}
                     onChange={(e) => setManualSessionData({ ...manualSessionData, endPage: e.target.value })}
                     placeholder={lang === 'ru' ? 'Номер страницы' : 'Page number'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
                 <div>
@@ -796,7 +796,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={manualSessionData.endPercentage || ''}
                     onChange={(e) => setManualSessionData({ ...manualSessionData, endPercentage: e.target.value })}
                     placeholder={lang === 'ru' ? 'От 0 до 100' : '0-100'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -813,7 +813,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               </button>
               <button
                 onClick={saveManualSession}
-                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Сохранить' : 'Save'}
               </button>

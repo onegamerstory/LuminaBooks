@@ -379,24 +379,24 @@ const App: React.FC = () => {
 
   return (
     <MantineProvider>
-      <div className="min-h-screen flex flex-col">
-      <header className={`bg-white border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
+      <div className="min-h-screen bg-[#F0F4F1] flex flex-col">
+      <header className={`bg-[#F0F4F1] border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-indigo-600 rounded-lg flex items-center justify-center text-white">
+            <div className="w-10 h-10 bg-[#6B9071] rounded-lg flex items-center justify-center text-white">
               <BookOpen size={24} />
             </div>
-            <h1 className="text-xl font-bold font-serif tracking-tight text-slate-800">LuminaBooks</h1>
+            <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
           </div>
 
           <div className="flex items-center gap-2">
-            <nav className="flex items-center gap-1 bg-slate-100 p-1 rounded-xl">
+            <nav className="flex items-center gap-1 bg-[#F0F4F1] p-1 rounded-xl">
               <button
                 onClick={() => setActiveView('catalog')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'catalog' 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
+                  : 'text-slate-600 hover:text-[#1E2920]'
                 }`}
               >
                 <Library size={18} />
@@ -406,8 +406,8 @@ const App: React.FC = () => {
                 onClick={() => setActiveView('calendar')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'calendar' 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
+                  : 'text-slate-600 hover:text-[#1E2920]'
                 }`}
               >
                 <Calendar size={18} />
@@ -417,8 +417,8 @@ const App: React.FC = () => {
                 onClick={() => setActiveView('statistics')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'statistics' 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
+                  : 'text-slate-600 hover:text-[#1E2920]'
                 }`}
               >
                 <BarChart3 size={18} />
@@ -428,8 +428,8 @@ const App: React.FC = () => {
                 onClick={() => setActiveView('reading')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'reading' 
-                  ? 'bg-white text-indigo-600 shadow-sm' 
-                  : 'text-slate-600 hover:text-slate-900'
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
+                  : 'text-slate-600 hover:text-[#1E2920]'
                 }`}
               >
                 <Zap size={18} />
@@ -439,7 +439,7 @@ const App: React.FC = () => {
 
             <button
               onClick={toggleLang}
-              className="p-2 hover:bg-slate-100 rounded-xl text-slate-600 flex items-center gap-2 transition-colors border border-transparent hover:border-slate-200"
+              className="p-2 hover:bg-[#D6E1D8] rounded-xl text-slate-600 flex items-center gap-2 transition-colors hover:border-slate-200"
               title="Switch Language"
             >
               <Languages size={18} />
@@ -450,7 +450,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={() => setIsSettingsOpen(true)}
-              className="flex items-center gap-2 bg-slate-100 hover:bg-slate-200 text-slate-600 px-3 py-2 rounded-xl text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-xl text-sm font-semibold transition-colors"
               title={lang === 'ru' ? 'Настройки обложки' : 'Cover settings'}
             >
               <Settings size={18} />
@@ -461,7 +461,7 @@ const App: React.FC = () => {
                 setEditingBook(undefined);
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-2 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-indigo-100"
+              className="flex items-center gap-2 bg-[#6B9071] hover:bg-[#59785E] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-[#59785E]/50"
             >
               <Plus size={18} />
               <span className="hidden sm:inline">{t.addBook}</span>
@@ -512,9 +512,9 @@ const App: React.FC = () => {
 
       {isSettingsOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
+          <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
             <div className="border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold font-serif text-slate-800">
+              <h2 className="text-xl font-bold font-serif text-[#1E2920]">
                 {t.defaultCoverSettings}
               </h2>
               <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -530,7 +530,7 @@ const App: React.FC = () => {
                   placeholder={t.enterCoverUrl}
                   value={defaultCoverUrl}
                   onChange={(e) => setDefaultCoverUrl(e.target.value)}
-                  className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                  className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                 />
                 {defaultCoverUrl && (
                   <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
@@ -555,7 +555,7 @@ const App: React.FC = () => {
                     }
                     setIsSettingsOpen(false);
                   }}
-                  className="flex-1 px-4 py-2 bg-indigo-600 text-white rounded-lg hover:bg-indigo-700 font-semibold transition-colors"
+                  className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
                 >
                   {t.save}
                 </button>
@@ -574,7 +574,7 @@ const App: React.FC = () => {
         </div>
       )}
       
-      <footer className="py-8 border-t bg-white text-center text-slate-400 text-sm">
+      <footer className="py-8 border-t bg-[#F0F4F1] text-center text-slate-400 text-sm">
         &copy; {new Date().getFullYear()} LuminaBooks. {lang === 'ru' ? 'Следите за своим прогрессом чтения.' : 'Track your reading journey.'}
       </footer>
     </div>

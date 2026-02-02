@@ -76,9 +76,9 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-bold font-serif text-slate-800">
+      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
+        <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-xl font-bold font-serif text-[#1E2920]">
             {initialData ? t.editBook : t.addNewBook}
           </h2>
           <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
@@ -89,7 +89,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="w-full sm:w-1/3 flex flex-col gap-2">
-               <div className="aspect-[2/3] rounded-xl overflow-hidden bg-slate-100 border-2 border-dashed border-slate-200 relative group">
+               <div className="aspect-[2/3] rounded-xl overflow-hidden bg-[#F0F4F1] border-2 border-dashed border-slate-200 relative group">
                   {formData.coverUrl ? (
                     <img src={formData.coverUrl} className="w-full h-full object-cover" alt="Preview" />
                   ) : (
@@ -103,7 +103,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                  placeholder={t.imageUrl}
                  value={formData.coverUrl}
                  onChange={e => setFormData({...formData, coverUrl: e.target.value})}
-                 className="text-xs px-2 py-1 border rounded"
+                 className="text-xs px-2 py-1 bg-[#F0F4F1] border rounded "
                />
             </div>
 
@@ -115,7 +115,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   type="text" 
                   value={formData.title}
                   onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                   placeholder="e.g. The Great Gatsby"
                 />
               </div>
@@ -127,7 +127,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     type="text" 
                     value={formData.author}
                     onChange={e => setFormData({...formData, author: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                   />
                 </div>
                 <div>
@@ -136,7 +136,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     type="text" 
                     value={formData.year}
                     onChange={e => setFormData({...formData, year: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                   />
                 </div>
               </div>
@@ -149,7 +149,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   value={formData.totalPages || ''}
                   onChange={e => setFormData({...formData, totalPages: e.target.value ? parseInt(e.target.value) : undefined})}
                   placeholder={lang === 'ru' ? 'Количество страниц в книге' : 'Total number of pages'}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                 />
               </div>
 
@@ -162,7 +162,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   value={formData.totalHours || ''}
                   onChange={e => setFormData({...formData, totalHours: e.target.value ? parseFloat(e.target.value) : undefined})}
                   placeholder={lang === 'ru' ? 'Количество часов чтения' : 'Hours spent reading'}
-                  className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                  className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                 />
               </div>
 
@@ -172,7 +172,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   <select
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none appearance-none"
+                    className="w-full px-4 bg-[#F0F4F1] py-2 border border-slate-200 text-slate-500 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none appearance-none"
                   >
                     <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
                     <option value={BookStatus.READING}>{t.reading}</option>
@@ -186,7 +186,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     min="0" max="10" step="0.5"
                     value={formData.rating}
                     onChange={e => setFormData({...formData, rating: Number(e.target.value)})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none"
+                    className="w-full px-4 bg-[#F0F4F1] py-2 text-slate-500 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                   />
                 </div>
                 <div>
@@ -194,7 +194,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                   <textarea 
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-indigo-500 outline-none resize-none h-[42px]"
+                    className="w-full px-4 bg-[#F0F4F1] py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-[42px]"
                     rows={1}
                   />
                 </div>
@@ -233,13 +233,13 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
             <button 
               type="button" 
               onClick={onClose}
-              className="px-6 py-2 border border-slate-200 text-slate-600 rounded-xl hover:bg-slate-50 transition-colors"
+              className="px-6 py-2 bg-[#BCCDBE] border border-slate-200 text-slate-600 rounded-xl hover:bg-[#87A68C] transition-colors"
             >
               {t.cancel}
             </button>
             <button 
               type="submit"
-              className="px-8 py-2 bg-indigo-600 text-white font-semibold rounded-xl hover:bg-indigo-700 shadow-lg shadow-indigo-100 transition-all active:scale-95"
+              className="px-8 py-2 bg-[#6B9071] text-white font-semibold rounded-xl hover:bg-[#5A7A60] shadow-lg shadow-[#6B9071]/20 transition-all active:scale-95"
             >
               {initialData ? t.updateBook : t.addToLibrary}
             </button>

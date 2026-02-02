@@ -49,7 +49,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
   };
 
   return (
-    <div className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full">
+    <div className="group bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full">
       <div className="relative aspect-[2/3] overflow-hidden bg-slate-100">
         <img 
           src={book.coverUrl || `https://picsum.photos/seed/${book.title}/400/600`} 
@@ -60,7 +60,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
           <div className="flex gap-2">
             <button 
               onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="p-2 bg-white/20 hover:bg-white/40 backdrop-blur-md rounded-lg text-white transition-colors"
+              className="p-2 bg-[#F0F4F1]/20 hover:bg-[#F0F4F1]/40 backdrop-blur-md rounded-lg text-white transition-colors"
             >
               <Edit2 size={16} />
             </button>
@@ -79,7 +79,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
 
       <div className="p-4 flex flex-col flex-grow space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-slate-800 line-clamp-1 text-lg leading-tight" title={book.title}>
+          <h3 className="font-bold text-[#1E2920] line-clamp-1 text-lg leading-tight" title={book.title}>
             {book.title}
           </h3>
           <div className="flex items-center gap-1 text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded text-sm font-bold">

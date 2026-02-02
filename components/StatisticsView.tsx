@@ -71,7 +71,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
   if (totalBooks === 0) {
     return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-white rounded-2xl border-2 border-dashed border-slate-100">
+      <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
         <Library size={48} className="mb-4 opacity-20" />
         <p className="text-lg">{t.noBooks}</p>
         <p className="text-sm">{t.tryAdding}</p>
@@ -81,40 +81,40 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-slate-800">{t.statistics}</h2>
+      <h2 className="text-2xl font-bold text-[#1E2920]">{t.statistics}</h2>
 
       {/* Основные метрики */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">{t.totalBooks}</h3>
-            <BookOpen className="text-indigo-600" size={20} />
+            <BookOpen className="text-[#6B9071]" size={20} />
           </div>
-          <p className="text-3xl font-bold text-slate-800">{totalBooks}</p>
+          <p className="text-3xl font-bold text-[#6B9071]">{totalBooks}</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">{t.reading}</h3>
-            <TrendingUp className="text-blue-600" size={20} />
+            <TrendingUp className="text-[#6B8A90]" size={20} />
           </div>
-          <p className="text-3xl font-bold text-blue-600">{readingCount}</p>
+          <p className="text-3xl font-bold text-[#6B8A90]">{readingCount}</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">{t.read}</h3>
-            <Award className="text-emerald-600" size={20} />
+            <Award className="text-[#906B8A]" size={20} />
           </div>
-          <p className="text-3xl font-bold text-emerald-600">{readCount}</p>
+          <p className="text-3xl font-bold text-[#906B8A]">{readCount}</p>
         </div>
 
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
           <div className="flex items-center justify-between mb-2">
             <h3 className="text-sm font-medium text-slate-600">{t.toRead}</h3>
-            <BookOpen className="text-amber-600" size={20} />
+            <BookOpen className="text-[#B09F31]" size={20} />
           </div>
-          <p className="text-3xl font-bold text-amber-600">{toReadCount}</p>
+          <p className="text-3xl font-bold text-[#B09F31]">{toReadCount}</p>
         </div>
       </div>
 
@@ -124,14 +124,14 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         <GitHubCalendar books={books} lang={lang} />
 
         {/* Средняя скорость прочтения */}
-        <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
           <div className="flex items-center gap-3 mb-4">
-            <Clock className="text-indigo-600" size={24} />
-            <h3 className="text-lg font-semibold text-slate-800">{t.averageReadingSpeed}</h3>
+            <Clock className="text-[#6B9071]" size={24} />
+            <h3 className="text-lg font-semibold text-[#1E2920]">{t.averageReadingSpeed}</h3>
           </div>
           {booksWithHours.length > 0 ? (
             <div>
-              <p className="text-3xl font-bold text-indigo-600 mb-2">
+              <p className="text-3xl font-bold text-[#6B9071] mb-2">
                 {formatHoursText(averageHours, lang)}
               </p>
               <p className="text-sm text-slate-500">
@@ -170,11 +170,11 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Книги с максимальной оценкой */}
           {maxRatingBooks.length > 0 && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-amber-500" size={24} fill="currentColor" />
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-800">{t.highestRatedBooks}</h3>
+                  <h3 className="text-lg font-semibold text-[#1E2920]">{t.highestRatedBooks}</h3>
                   <p className="text-sm text-slate-500">
                     {maxRatingBooks.length > 5 
                       ? `${lang === 'ru' ? 'Показаны первые 5 из' : 'Showing first 5 of'} ${maxRatingBooks.length}`
@@ -187,7 +187,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                 {maxRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-slate-800">{book.title}</p>
+                      <p className="font-medium text-[#1E2920]">{book.title}</p>
                       <p className="text-sm text-slate-500">{book.author}</p>
                     </div>
                     <div className="flex items-center gap-1 text-amber-500 font-bold">
@@ -202,11 +202,11 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
           {/* Книги с минимальной оценкой */}
           {minRatingBooks.length > 0 && maxRating !== minRating && (
-            <div className="bg-white rounded-xl p-6 shadow-sm border border-slate-100">
+            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-slate-400" size={24} />
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-slate-800">{t.lowestRatedBooks}</h3>
+                  <h3 className="text-lg font-semibold text-[#1E2920]">{t.lowestRatedBooks}</h3>
                   <p className="text-sm text-slate-500">
                     {minRatingBooks.length > 5 
                       ? `${lang === 'ru' ? 'Показаны первые 5 из' : 'Showing first 5 of'} ${minRatingBooks.length}`
@@ -219,7 +219,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                 {minRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-slate-800">{book.title}</p>
+                      <p className="font-medium text-[#1E2920]">{book.title}</p>
                       <p className="text-sm text-slate-500">{book.author}</p>
                     </div>
                     <div className="flex items-center gap-1 text-slate-400 font-bold">
