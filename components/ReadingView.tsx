@@ -223,7 +223,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       currentPage: finalEndPage || book.currentPage,
       // Обновляем текущий процент (всегда вычисляем если возможно)
       currentPercentage: finalCurrentPercentage,
-      sessions: [...(book.sessions || []), newSession]
+      sessions: [...(book.sessions || []), newSession],
+      // Если достигнута 100% прочитанность, автоматически устанавливаем статус "Прочитано"
+      status: finalCurrentPercentage === 100 ? BookStatus.READ : book.status,
+      // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
+      endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
 
     onUpdateBook(updatedBook);
@@ -340,7 +344,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       ...book,
       currentPage: finalEndPage || book.currentPage,
       currentPercentage: finalCurrentPercentage,
-      sessions: [...(book.sessions || []), newSession]
+      sessions: [...(book.sessions || []), newSession],
+      // Если достигнута 100% прочитанность, автоматически устанавливаем статус "Прочитано"
+      status: finalCurrentPercentage === 100 ? BookStatus.READ : book.status,
+      // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
+      endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
 
     onUpdateBook(updatedBook);
