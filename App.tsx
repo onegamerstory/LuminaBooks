@@ -24,6 +24,8 @@ export const translations = {
     reading: 'Reading',
     read: 'Read',
     toRead: 'To Read',
+    abandoned: 'Abandoned',
+    postponed: 'Postponed',
     editBook: 'Edit Book',
     addNewBook: 'Add New Book',
     title: 'Title',
@@ -76,6 +78,8 @@ export const translations = {
     reading: 'Читаю',
     read: 'Прочитано',
     toRead: 'Буду читать',
+    abandoned: 'Брошено',
+    postponed: 'Отложено',
     editBook: 'Редактировать',
     addNewBook: 'Новая книга',
     title: 'Название',
@@ -137,9 +141,15 @@ const App: React.FC = () => {
   // 2. Если есть только дата начала (без даты окончания) → статус "Читаю"
   // 3. Если нет никаких дат → статус "Буду читать"
   // Эти правила применяются ВСЕГДА, независимо от текущего статуса книги
+  // ИСКЛЮЧЕНИЕ: если статус "Брошено" или "Отложено", они не изменяются
   const updateBookStatusBasedOnDates = (books: Book[]): Book[] => {
     return books.map(book => {
       let updatedBook = { ...book };
+      
+      // Не изменяем статусы "Брошено" и "Отложено"
+      if (book.status === BookStatus.ABANDONED || book.status === BookStatus.POSTPONED) {
+        return updatedBook;
+      }
       
       // Проверяем наличие дат (исключаем пустые строки и null/undefined)
       const hasStartDate = book.startDate && 

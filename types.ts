@@ -2,7 +2,9 @@
 export enum BookStatus {
   READING = 'Reading',
   READ = 'Read',
-  WANT_TO_READ = 'To Read'
+  WANT_TO_READ = 'To Read',
+  ABANDONED = 'Abandoned',
+  POSTPONED = 'Postponed'
 }
 
 export interface ReadingSession {

@@ -19,11 +19,15 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
     [BookStatus.READING]: 'bg-blue-100 text-blue-700',
     [BookStatus.READ]: 'bg-emerald-100 text-emerald-700',
     [BookStatus.WANT_TO_READ]: 'bg-amber-100 text-amber-700',
+    [BookStatus.ABANDONED]: 'bg-red-100 text-red-700',
+    [BookStatus.POSTPONED]: 'bg-orange-100 text-orange-700',
   };
 
   const getStatusLabel = (status: BookStatus) => {
     if (status === BookStatus.READING) return t.reading;
     if (status === BookStatus.READ) return t.read;
+    if (status === BookStatus.ABANDONED) return t.abandoned;
+    if (status === BookStatus.POSTPONED) return t.postponed;
     return t.toRead;
   };
 

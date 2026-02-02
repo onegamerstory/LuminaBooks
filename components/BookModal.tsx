@@ -177,6 +177,8 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
                     <option value={BookStatus.READING}>{t.reading}</option>
                     <option value={BookStatus.READ}>{t.read}</option>
+                    <option value={BookStatus.POSTPONED}>{t.postponed}</option>
+                    <option value={BookStatus.ABANDONED}>{t.abandoned}</option>
                   </select>
                 </div>
                 <div>

@@ -27,6 +27,10 @@ const getStatusColor = (status: BookStatus): string => {
       return 'text-emerald-600 bg-emerald-50';
     case BookStatus.WANT_TO_READ:
       return 'text-amber-600 bg-amber-50';
+    case BookStatus.ABANDONED:
+      return 'text-red-600 bg-red-50';
+    case BookStatus.POSTPONED:
+      return 'text-orange-600 bg-orange-50';
     default:
       return 'text-slate-600 bg-slate-50';
   }
@@ -70,6 +74,10 @@ const BookTableRow: React.FC<{
                 return lang === 'ru' ? 'Прочитано' : 'Read';
               case BookStatus.WANT_TO_READ:
                 return lang === 'ru' ? 'Буду читать' : 'To Read';
+              case BookStatus.ABANDONED:
+                return lang === 'ru' ? 'Брошено' : 'Abandoned';
+              case BookStatus.POSTPONED:
+                return lang === 'ru' ? 'Отложено' : 'Postponed';
               default:
                 return book.status;
             }
@@ -347,6 +355,24 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                       className="w-4 h-4 rounded border-slate-300 cursor-pointer"
                     />
                     <span className="text-slate-700">{t.toRead}</span>
+                  </label>
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has(BookStatus.POSTPONED) && !selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle(BookStatus.POSTPONED)}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700">{t.postponed}</span>
+                  </label>
+                  <label className="flex items-center gap-3 px-4 py-3 hover:bg-[#D6E1D8] cursor-pointer text-sm border-b border-slate-100 last:border-0">
+                    <input
+                      type="checkbox"
+                      checked={selectedStatuses.has(BookStatus.ABANDONED) && !selectedStatuses.has('All')}
+                      onChange={() => handleStatusToggle(BookStatus.ABANDONED)}
+                      className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                    />
+                    <span className="text-slate-700">{t.abandoned}</span>
                   </label>
                 </div>
               </>
