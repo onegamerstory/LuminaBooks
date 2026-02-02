@@ -30,6 +30,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
   });
 
   useEffect(() => {
+    const todayStr = dayjs().format('YYYY-MM-DD');
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -40,8 +41,8 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         coverUrl: '',
         status: BookStatus.WANT_TO_READ,
         rating: 0,
-        startDate: '',
-        endDate: '',
+        startDate: todayStr,
+        endDate: todayStr,
         description: '',
       });
     }
