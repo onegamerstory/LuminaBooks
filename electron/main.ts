@@ -15,6 +15,69 @@ let tray: Tray | null = null;
 // Используем type assertion для добавления свойства isQuiting
 (app as any).isQuiting = false;
 
+// Single-instance lock логика
+// Предотвращаем запуск второго экземпляра приложения
+const gotTheLock = app.requestSingleInstanceLock();
+
+if (!gotTheLock) {
+  // Если не удалось получить блокировку, значит приложение уже запущено
+  // Выходим из второго экземпляра
+  app.quit();
+} else {
+  // Обработка события когда пользователь пытается запустить второй экземпляр
+  app.on('second-instance', () => {
+    // Восстанавливаем и показываем главное окно
+    if (mainWindow) {
+      if (mainWindow.isMinimized()) {
+        mainWindow.restore();
+      }
+      mainWindow.focus();
+      mainWindow.show();
+      // На macOS также показываем иконку в dock
+      if (process.platform === 'darwin') {
+        app.dock.show();
+      }
+    }
+  });
+
+  // Этот метод будет вызван когда Electron закончит инициализацию
+  app.whenReady().then(() => {
+    Menu.setApplicationMenu(null);
+    
+    // Создаем окно
+    createWindow();
+    
+    // Создаем трей
+    createTray();
+
+    app.on('activate', () => {
+      // На macOS обычно пересоздают окно в приложении когда кликают на иконку в dock
+      if (BrowserWindow.getAllWindows().length === 0) {
+        createWindow();
+      } else if (mainWindow) {
+        mainWindow.show();
+        app.dock.show();
+      }
+    });
+  });
+
+  // Выйти когда все окна закрыты - не закрываем приложение, сворачиваем в трей
+  app.on('window-all-closed', () => {
+    // Не закрываем приложение, оно будет работать в трее
+    // Приложение закроется только при явном выборе "Выход" из меню трея
+    // На macOS приложение продолжает работать даже когда все окна закрыты
+  });
+
+  // Очистка при выходе
+  app.on('before-quit', () => {
+    (app as any).isQuiting = true;
+    if (tray) {
+      tray.destroy();
+      tray = null;
+    }
+  });
+}
+
 function createWindow() {
   mainWindow = new BrowserWindow({
     width: 1200,
@@ -325,44 +388,4 @@ function createTray() {
     }
   }
 }
-
-// Этот метод будет вызван когда Electron закончит инициализацию
-app.whenReady().then(() => {
-  Menu.setApplicationMenu(null);
-  
-  // Создаем окно
-  createWindow();
-  
-  // Создаем трей
-  createTray();
-
-  app.on('activate', () => {
-    // На macOS обычно пересоздают окно в приложении когда кликают на иконку в dock
-    if (BrowserWindow.getAllWindows().length === 0) {
-      createWindow();
-    } else if (mainWindow) {
-      mainWindow.show();
-      app.dock.show();
-    }
-  });
-});
-
-// Выйти когда все окна закрыты - не закрываем приложение, сворачиваем в трей
-app.on('window-all-closed', () => {
-  // Не закрываем приложение, оно будет работать в трее
-  // Приложение закроется только при явном выборе "Выход" из меню трея
-  // На macOS приложение продолжает работать даже когда все окна закрыты
-});
-
-// Очистка при выходе
-app.on('before-quit', () => {
-  (app as any).isQuiting = true;
-  if (tray) {
-    tray.destroy();
-    tray = null;
-  }
-});
-
-// В этом файле можно включить остальную часть кода главного процесса приложения
-// или поместить их в отдельные файлы и подключить здесь.
-
+// Закрывающая скобка для else блока single-instance lock

@@ -166,8 +166,9 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
         newStatuses.add(status);
       }
       
-      // Если все статусы выбраны, переключаемся на 'All'
-      if (newStatuses.size === 3) {
+      // Если все 5 статусов выбраны, переключаемся на 'All'
+      const TOTAL_STATUSES = 5; // READING, READ, WANT_TO_READ, ABANDONED, POSTPONED
+      if (newStatuses.size === TOTAL_STATUSES) {
         newStatuses.clear();
         newStatuses.add('All');
       }

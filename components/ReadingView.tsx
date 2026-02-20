@@ -33,8 +33,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   const [manualSessionBookId, setManualSessionBookId] = useState<string | null>(null);
   const [manualSessionData, setManualSessionData] = useState<{
     date?: string;
-    startTime?: string;
-    endTime?: string;
+    durationHours?: string;
+    durationMinutes?: string;
     endPage?: string;
     endPercentage?: string;
   }>({});
@@ -252,27 +252,17 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
     const book = books.find(b => b.id === manualSessionBookId);
     if (!book) return;
 
-    // Валидация времени
-    if (!manualSessionData.startTime || !manualSessionData.endTime) {
-      addToast(lang === 'ru' ? 'Заполните время начала и конца' : 'Fill in start and end times', 'error');
-      return;
-    }
-
-    const [startHour, startMin] = manualSessionData.startTime.split(':').map(Number);
-    const [endHour, endMin] = manualSessionData.endTime.split(':').map(Number);
+    // Валидация продолжительности
+    const hours = parseInt(manualSessionData.durationHours || '0');
+    const minutes = parseInt(manualSessionData.durationMinutes || '0');
     
-    if (isNaN(startHour) || isNaN(startMin) || isNaN(endHour) || isNaN(endMin)) {
-      addToast(lang === 'ru' ? 'Неверный формат времени' : 'Invalid time format', 'error');
+    if (isNaN(hours) || isNaN(minutes) || (hours === 0 && minutes === 0)) {
+      addToast(lang === 'ru' ? 'Заполните продолжительность сессии' : 'Fill in session duration', 'error');
       return;
     }
 
-    // Создаем даты начала и конца
-    const [year, month, day] = manualSessionData.date.split('-').map(Number);
-    const startDateTime = new Date(year, month - 1, day, startHour, startMin);
-    const endDateTime = new Date(year, month - 1, day, endHour, endMin);
-
-    if (endDateTime <= startDateTime) {
-      addToast(lang === 'ru' ? 'Время конца должно быть позже времени начала' : 'End time must be after start time', 'error');
+    if (minutes < 0 || minutes > 59 || hours < 0) {
+      addToast(lang === 'ru' ? 'Неверный формат продолжительности' : 'Invalid duration format', 'error');
       return;
     }
 
@@ -283,7 +273,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
     }
 
     // Вычисляем продолжительность в секундах
-    const duration = Math.floor((endDateTime.getTime() - startDateTime.getTime()) / 1000);
+    const duration = (hours * 3600) + (minutes * 60);
+
+    // Создаем дату окончания (начинаем с полночи текущей даты и добавляем длительность)
+    const [year, month, day] = manualSessionData.date.split('-').map(Number);
+    const startDateTime = new Date(year, month - 1, day, 0, 0, 0);
+    const endDateTime = new Date(startDateTime.getTime() + duration * 1000);
 
     // Начальные значения берутся из текущего прогресса книги
     const startPage = book.currentPage || 0;
@@ -486,8 +481,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       <thead>
                         <tr className="bg-[#A1BAA5] border-b border-slate-200">
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Дата' : 'Date'}</th>
-                          <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Начало' : 'Start'}</th>
-                          <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Конец' : 'End'}</th>
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Длительность' : 'Duration'}</th>
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Страницы' : 'Pages'}</th>
                           <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Прочитано страниц' : 'Pages Read'}</th>
@@ -498,16 +491,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       <tbody>
                         {(expandedBookId === book.id ? book.sessions : book.sessions.slice(-3)).map(session => {
                           const startDate = new Date(session.startTime);
-                          const endDate = new Date(session.endTime);
                           const dateStr = startDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US');
-                          const startTimeStr = startDate.toLocaleTimeString(lang === 'ru' ? 'ru-RU' : 'en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
-                          const endTimeStr = endDate.toLocaleTimeString(lang === 'ru' ? 'ru-RU' : 'en-US', {
-                            hour: '2-digit',
-                            minute: '2-digit'
-                          });
                           const hours = Math.floor(session.duration / 3600);
                           const minutes = Math.floor((session.duration % 3600) / 60);
                           const durationStr = hours > 0 
@@ -517,8 +501,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                           return (
                             <tr key={session.id} className="border-b border-slate-100 hover:bg-[#D6E1D8]">
                               <td className="p-2 text-slate-700">{dateStr}</td>
-                              <td className="p-2 text-slate-700">{startTimeStr}</td>
-                              <td className="p-2 text-slate-700">{endTimeStr}</td>
                               <td className="p-2 text-slate-700 font-medium">{durationStr}</td>
                               <td className="p-2 text-slate-700">
                                 {session.startPage !== undefined && session.endPage !== undefined 
@@ -576,7 +558,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
           }}
         >
           <div className="bg-[#F0F4F1] rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
-            <h3 className="text-xl font-semibold text-[#1E2920] mb-4">
+            <h3 className="text-xl font-semibold text-[#6B9071] mb-4">
               {lang === 'ru' ? 'Завершить сессию' : 'End Session'}
             </h3>
             <p className="text-sm text-slate-600 mb-4">
@@ -641,7 +623,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               </button>
               <button
                 onClick={endSession}
-                className="flex-1 px-4 py-2 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Сохранить' : 'Save'}
               </button>
@@ -658,6 +640,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
           onClick={(e) => {
             if (e.target === e.currentTarget) {
               setManualSessionModalOpen(false);
+              setManualSessionBookId(null);
+              setManualSessionData({});
             }
           }}
         >
@@ -683,86 +667,42 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                 />
               </div>
 
-              {/* Время начала и конца */}
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {lang === 'ru' ? 'Время начала' : 'Start Time'} *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <NumberInput
-                        label={lang === 'ru' ? 'Часы' : 'Hours'}
-                        value={manualSessionData.startTime ? parseInt(manualSessionData.startTime.split(':')[0]) : undefined}
-                        onChange={(val) => {
-                          const minutes = manualSessionData.startTime ? manualSessionData.startTime.split(':')[1] : '00';
-                          setManualSessionData({
-                            ...manualSessionData,
-                            startTime: `${String(val || 0).padStart(2, '0')}:${minutes}`
-                          });
-                        }}
-                        min={0}
-                        max={23}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="text-lg font-semibold mt-5 text-slate-700">:</div>
-                    <div className="flex-1">
-                      <NumberInput
-                        label={lang === 'ru' ? 'Минуты' : 'Minutes'}
-                        value={manualSessionData.startTime ? parseInt(manualSessionData.startTime.split(':')[1]) : undefined}
-                        onChange={(val) => {
-                          const hours = manualSessionData.startTime ? manualSessionData.startTime.split(':')[0] : '00';
-                          setManualSessionData({
-                            ...manualSessionData,
-                            startTime: `${hours}:${String(val || 0).padStart(2, '0')}`
-                          });
-                        }}
-                        min={0}
-                        max={59}
-                        placeholder="0"
-                      />
-                    </div>
+              {/* Продолжительность сессии */}
+              <div>
+                <label className="block text-sm font-medium text-slate-700 mb-2">
+                  {lang === 'ru' ? 'Продолжительность сессии' : 'Session Duration'} *
+                </label>
+                <div className="flex items-center gap-2">
+                  <div className="flex-1">
+                    <NumberInput
+                      label={lang === 'ru' ? 'Часы' : 'Hours'}
+                      value={manualSessionData.durationHours ? parseInt(manualSessionData.durationHours) : undefined}
+                      onChange={(val) => {
+                        setManualSessionData({
+                          ...manualSessionData,
+                          durationHours: String(val || 0)
+                        });
+                      }}
+                      min={0}
+                      max={24}
+                      placeholder="0"
+                    />
                   </div>
-                </div>
-                <div>
-                  <label className="block text-sm font-medium text-slate-700 mb-2">
-                    {lang === 'ru' ? 'Время конца' : 'End Time'} *
-                  </label>
-                  <div className="flex items-center gap-2">
-                    <div className="flex-1">
-                      <NumberInput
-                        label={lang === 'ru' ? 'Часы' : 'Hours'}
-                        value={manualSessionData.endTime ? parseInt(manualSessionData.endTime.split(':')[0]) : undefined}
-                        onChange={(val) => {
-                          const minutes = manualSessionData.endTime ? manualSessionData.endTime.split(':')[1] : '00';
-                          setManualSessionData({
-                            ...manualSessionData,
-                            endTime: `${String(val || 0).padStart(2, '0')}:${minutes}`
-                          });
-                        }}
-                        min={0}
-                        max={23}
-                        placeholder="0"
-                      />
-                    </div>
-                    <div className="text-lg font-semibold mt-5 text-slate-700">:</div>
-                    <div className="flex-1">
-                      <NumberInput
-                        label={lang === 'ru' ? 'Минуты' : 'Minutes'}
-                        value={manualSessionData.endTime ? parseInt(manualSessionData.endTime.split(':')[1]) : undefined}
-                        onChange={(val) => {
-                          const hours = manualSessionData.endTime ? manualSessionData.endTime.split(':')[0] : '00';
-                          setManualSessionData({
-                            ...manualSessionData,
-                            endTime: `${hours}:${String(val || 0).padStart(2, '0')}`
-                          });
-                        }}
-                        min={0}
-                        max={59}
-                        placeholder="0"
-                      />
-                    </div>
+                  <div className="text-lg font-semibold text-slate-700">:</div>
+                  <div className="flex-1">
+                    <NumberInput
+                      label={lang === 'ru' ? 'Минуты' : 'Minutes'}
+                      value={manualSessionData.durationMinutes ? parseInt(manualSessionData.durationMinutes) : undefined}
+                      onChange={(val) => {
+                        setManualSessionData({
+                          ...manualSessionData,
+                          durationMinutes: String(val || 0)
+                        });
+                      }}
+                      min={0}
+                      max={59}
+                      placeholder="0"
+                    />
                   </div>
                 </div>
               </div>
@@ -814,7 +754,11 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
 
             <div className="flex gap-3">
               <button
-                onClick={() => setManualSessionModalOpen(false)}
+                onClick={() => {
+                  setManualSessionModalOpen(false);
+                  setManualSessionBookId(null);
+                  setManualSessionData({});
+                }}
                 className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Отмена' : 'Cancel'}
