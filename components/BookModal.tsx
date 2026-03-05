@@ -1,10 +1,11 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
-import { X } from 'lucide-react';
+import { X, Star } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
+import BookRatingModal from './BookRatingModal';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -28,9 +29,12 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
     endDate: '',
     description: '',
   });
+  const isEditingExistingBook = !!initialData;
+  const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showRatingEditModal, setShowRatingEditModal] = useState(false);
+  const [pendingBook, setPendingBook] = useState<Partial<Book> | null>(null);
 
   useEffect(() => {
-    const todayStr = dayjs().format('YYYY-MM-DD');
     if (initialData) {
       setFormData(initialData);
     } else {
@@ -41,8 +45,8 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         coverUrl: '',
         status: BookStatus.WANT_TO_READ,
         rating: 0,
-        startDate: todayStr,
-        endDate: todayStr,
+        startDate: '',
+        endDate: '',
         description: '',
       });
     }
@@ -70,24 +74,72 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
       status: formData.status as BookStatus,
       rating: Number(formData.rating) || 0,
     };
-    onSubmit(newBook);
+
+    // Проверяем, нужна ли оценка книги
+    // Книга считается завершённой, если:
+    // 1. Статус = "Прочитано" ИЛИ прогресс = 100%
+    // 2. ИЛИ есть и дата начала, и дата окончания (книга прочитана, но статус ещё не обновлён)
+    const hasStartDate = newBook.startDate && newBook.startDate.trim() !== '';
+    const hasEndDate = newBook.endDate && newBook.endDate.trim() !== '';
+    
+    const isBookCompleted = 
+      ((newBook.status === BookStatus.READ || newBook.currentPercentage === 100) ||
+       (hasStartDate && hasEndDate)) &&
+      newBook.rating === 0;
+
+    if (isBookCompleted) {
+      // Сохраняем книгу для последующего submit с оценкой
+      setPendingBook(newBook);
+      setShowRatingModal(true);
+    } else {
+      // Сразу submit если оценка уже есть или книга не завершена
+      onSubmit(newBook);
+      onClose();
+    }
+  };
+
+  const handleRatingSubmit = (rating: number) => {
+    if (pendingBook) {
+      const bookWithRating = { ...pendingBook, rating };
+      onSubmit(bookWithRating as Book);
+      setShowRatingModal(false);
+      setPendingBook(null);
+      onClose();
+    }
+  };
+
+  const handleRatingSkip = () => {
+    if (pendingBook) {
+      // Сохраняем книгу с рейтингом 0 (без оценки)
+      onSubmit(pendingBook as Book);
+      setShowRatingModal(false);
+      setPendingBook(null);
+      onClose();
+    }
+  };
+
+  const handleRatingEditSubmit = (rating: number) => {
+    // Обновляем форму с новой оценкой при редактировании
+    setFormData(prev => ({ ...prev, rating }));
+    setShowRatingEditModal(false);
   };
 
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-        <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-xl font-bold font-serif text-[#1E2920]">
-            {initialData ? t.editBook : t.addNewBook}
-          </h2>
-          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-            <X size={20} />
-          </button>
-        </div>
+    <>
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
+        <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
+          <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-xl font-bold font-serif text-[#1E2920]">
+              {initialData ? t.editBook : t.addNewBook}
+            </h2>
+            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+              <X size={20} />
+            </button>
+          </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="w-full sm:w-1/3 flex flex-col gap-2">
                <div className="aspect-[2/3] rounded-xl overflow-hidden bg-[#F0F4F1] border-2 border-dashed border-slate-200 relative group">
@@ -106,6 +158,20 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                  onChange={e => setFormData({...formData, coverUrl: e.target.value})}
                  className="text-xs px-2 py-1 bg-[#F0F4F1] border rounded "
                />
+               {isEditingExistingBook && (formData.rating || 0) > 0 && (
+                 <button
+                   type="button"
+                   onClick={() => setShowRatingEditModal(true)}
+                   className="flex items-center justify-center gap-1 py-2 px-3 bg-[#F9F3E6] border border-amber-200 rounded-lg hover:bg-[#FFF5E1] transition-colors group"
+                   title={lang === 'ru' ? 'Изменить оценку' : 'Change rating'}
+                 >
+                   <Star size={18} className="fill-amber-400 text-amber-400" />
+                   <span className="font-semibold text-amber-900">{(formData.rating || 0).toFixed(1)}</span>
+                   <span className="text-xs text-amber-700 group-hover:underline">
+                     {lang === 'ru' ? 'изменить' : 'edit'}
+                   </span>
+                 </button>
+               )}
             </div>
 
             <div className="flex-grow space-y-4">
@@ -167,7 +233,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                 />
               </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.status}</label>
                   <select
@@ -181,16 +247,6 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     <option value={BookStatus.POSTPONED}>{t.postponed}</option>
                     <option value={BookStatus.ABANDONED}>{t.abandoned}</option>
                   </select>
-                </div>
-                <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.rating}</label>
-                  <input 
-                    type="number" 
-                    min="0" max="10" step="0.5"
-                    value={formData.rating}
-                    onChange={e => setFormData({...formData, rating: Number(e.target.value)})}
-                    className="w-full px-4 bg-[#F0F4F1] py-2 text-slate-500 border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
-                  />
                 </div>
                 <div>
                   <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.description}</label>
@@ -248,8 +304,29 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
             </button>
           </div>
         </form>
+        </div>
       </div>
-    </div>
+
+      <BookRatingModal
+        isOpen={showRatingModal}
+        onClose={() => {
+          setShowRatingModal(false);
+          setPendingBook(null);
+        }}
+        onSubmit={handleRatingSubmit}
+        onSkip={handleRatingSkip}
+        bookTitle={formData.title || ''}
+        lang={lang}
+      />
+
+      <BookRatingModal
+        isOpen={showRatingEditModal}
+        onClose={() => setShowRatingEditModal(false)}
+        onSubmit={handleRatingEditSubmit}
+        bookTitle={formData.title || ''}
+        lang={lang}
+      />
+    </>
   );
 };
 

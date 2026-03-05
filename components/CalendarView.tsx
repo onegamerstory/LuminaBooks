@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo } from 'react';
 import { Book, BookStatus } from '../types';
-import { ChevronLeft, ChevronRight, HelpCircle, X } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle, X, Search } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
@@ -16,6 +16,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isBookSelectionModalOpen, setIsBookSelectionModalOpen] = useState(false);
+  const [bookSearchTerm, setBookSearchTerm] = useState('');
   const t = translations[lang];
 
   const daysInMonth = useMemo(() => {
@@ -80,6 +81,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   const handleDayContextMenu = (e: React.MouseEvent, day: Date) => {
     e.preventDefault();
     setSelectedDate(day);
+    setBookSearchTerm('');
     setIsBookSelectionModalOpen(true);
   };
 
@@ -90,7 +92,21 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       onStartReading(book.id, dateStr);
       setIsBookSelectionModalOpen(false);
       setSelectedDate(null);
+      setBookSearchTerm('');
     }
+  };
+
+  // Фильтруем книги для начала чтения по поисковому запросу
+  const getFilteredBooksToStart = () => {
+    const booksToStart = getBooksToStart();
+    if (!bookSearchTerm.trim()) {
+      return booksToStart;
+    }
+    const searchLower = bookSearchTerm.toLowerCase();
+    return booksToStart.filter(book => 
+      book.title.toLowerCase().includes(searchLower) || 
+      book.author.toLowerCase().includes(searchLower)
+    );
   };
 
   const weekDays = lang === 'ru' 
@@ -262,13 +278,29 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 }
               </div>
 
+              <div className="relative mb-4">
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <input 
+                  type="text" 
+                  placeholder={lang === 'ru' ? 'Поиск по названию/автору...' : 'Search by title/author...'}
+                  value={bookSearchTerm}
+                  onChange={(e) => setBookSearchTerm(e.target.value)}
+                  className="w-full pl-9 pr-4 py-2 bg-[#FFFFFF] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b9071] text-sm"
+                  autoFocus
+                />
+              </div>
+
               {getBooksToStart().length === 0 ? (
                 <div className="text-center py-8 text-slate-400">
                   {t.noBooksToStart}
                 </div>
+              ) : getFilteredBooksToStart().length === 0 ? (
+                <div className="text-center py-8 text-slate-400">
+                  {lang === 'ru' ? 'Книги не найдены' : 'No books found'}
+                </div>
               ) : (
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                  {getBooksToStart().map(book => (
+                  {getFilteredBooksToStart().map(book => (
                     <button
                       key={book.id}
                       onClick={() => handleBookSelect(book)}

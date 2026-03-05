@@ -10,6 +10,7 @@ import Toast, { ToastMessage } from './Toast';
 type ViewMode = 'large' | 'medium' | 'table';
 
 const VIEWMODE_STORAGE_KEY = 'lumina_catalog_viewmode';
+const FILTER_STORAGE_KEY = 'lumina_catalog_filter_statuses';
 
 interface CatalogViewProps {
   books: Book[];
@@ -64,8 +65,8 @@ const BookTableRow: React.FC<{
       <td className="p-4 text-center font-medium text-slate-700">
         {book.totalPages ? `${book.totalPages}` : '-'}
       </td>
-      <td className="p-4">
-        <span className={`px-2 py-1 rounded text-xs font-medium ${getStatusColor(book.status)}`}>
+      <td className="p-4 min-w-[120px]">
+        <span className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap inline-block ${getStatusColor(book.status)}`}>
           {(() => {
             switch (book.status) {
               case BookStatus.READING:
@@ -111,7 +112,22 @@ const BookTableRow: React.FC<{
 
 const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [selectedStatuses, setSelectedStatuses] = useState<Set<BookStatus | 'All'>>(new Set(['All']));
+  
+  // Helper function to load filter statuses from localStorage
+  const loadSavedStatuses = (): Set<BookStatus | 'All'> => {
+    try {
+      const saved = localStorage.getItem(FILTER_STORAGE_KEY);
+      if (saved) {
+        const parsed = JSON.parse(saved) as string[];
+        return new Set(parsed as (BookStatus | 'All')[]);
+      }
+    } catch (e) {
+      console.error('Failed to load filter statuses from localStorage:', e);
+    }
+    return new Set(['All']);
+  };
+
+  const [selectedStatuses, setSelectedStatuses] = useState<Set<BookStatus | 'All'>>(() => loadSavedStatuses());
   const [isFilterOpen, setIsFilterOpen] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
@@ -138,6 +154,15 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
     localStorage.setItem(VIEWMODE_STORAGE_KEY, newMode);
   };
 
+  // Helper function to save filter statuses to localStorage
+  const saveFilterStatuses = (statuses: Set<BookStatus | 'All'>) => {
+    try {
+      localStorage.setItem(FILTER_STORAGE_KEY, JSON.stringify(Array.from(statuses)));
+    } catch (e) {
+      console.error('Failed to save filter statuses to localStorage:', e);
+    }
+  };
+
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           book.author.toLowerCase().includes(searchTerm.toLowerCase());
@@ -146,7 +171,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   });
 
   const handleStatusToggle = (status: BookStatus | 'All') => {
-    const newStatuses = new Set(selectedStatuses);
+    const newStatuses: Set<BookStatus | 'All'> = new Set(selectedStatuses);
     
     if (status === 'All') {
       if (newStatuses.has('All')) {
@@ -180,6 +205,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
     }
     
     setSelectedStatuses(newStatuses);
+    saveFilterStatuses(newStatuses);
   };
 
   const sortedBooks = [...filteredBooks].sort((a, b) => {

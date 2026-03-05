@@ -6,6 +6,7 @@ import CalendarView from './components/CalendarView';
 import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
+import BookRatingModal from './components/BookRatingModal';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, X } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -132,6 +133,7 @@ const App: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'ru'>('ru');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
+  const [bookToRateId, setBookToRateId] = useState<string | null>(null);
 
   const t = translations[lang];
 
@@ -361,6 +363,11 @@ const App: React.FC = () => {
 
   const handleUpdateBook = (updatedBook: Book) => {
     setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
+    
+    // Проверяем если книга достигла 100% прогресса и у нее нет оценки
+    if ((updatedBook.status === BookStatus.READ || updatedBook.currentPercentage === 100) && updatedBook.rating === 0) {
+      setBookToRateId(updatedBook.id);
+    }
   };
 
   const handleStartReading = (bookId: string, startDate: string) => {
@@ -582,6 +589,24 @@ const App: React.FC = () => {
             </div>
           </div>
         </div>
+      )}
+
+      {bookToRateId && (
+        <BookRatingModal
+          isOpen={true}
+          onClose={() => setBookToRateId(null)}
+          onSubmit={(rating) => {
+            setBooks(prevBooks => prevBooks.map(b => 
+              b.id === bookToRateId 
+                ? { ...b, rating }
+                : b
+            ));
+            setBookToRateId(null);
+          }}
+          onSkip={() => setBookToRateId(null)}
+          bookTitle={books.find(b => b.id === bookToRateId)?.title || ''}
+          lang={lang}
+        />
       )}
       
       <footer className="py-8 border-t bg-[#F0F4F1] text-center text-slate-400 text-sm">
