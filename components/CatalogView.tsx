@@ -2,15 +2,17 @@
 import React, { useState } from 'react';
 import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronUp, ChevronDown } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
 import Toast, { ToastMessage } from './Toast';
 
 type ViewMode = 'large' | 'medium' | 'table';
+type TableSortOption = 'rating-desc' | 'rating-asc' | 'title-asc' | 'title-desc' | 'status-asc' | 'status-desc' | 'pages-desc' | 'pages-asc';
 
 const VIEWMODE_STORAGE_KEY = 'lumina_catalog_viewmode';
 const FILTER_STORAGE_KEY = 'lumina_catalog_filter_statuses';
+const TABLE_SORT_STORAGE_KEY = 'lumina_catalog_table_sort';
 
 interface CatalogViewProps {
   books: Book[];
@@ -46,67 +48,89 @@ const BookTableRow: React.FC<{
   const t = translations[lang];
 
   return (
-    <tr className="border-b border-slate-200 hover:bg-[#D6E1D8] transition-colors">
-      <td className="p-4">
+    <div className="bg-[#F0F4F1] rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-200 p-4 flex gap-4 items-start">
+      {/* Обложка */}
+      <div className="flex-shrink-0">
         {book.coverUrl && (
           <img 
             src={book.coverUrl} 
             alt={book.title}
-            className="w-12 h-16 object-cover rounded"
+            className="w-16 h-24 object-cover rounded-lg"
             onError={(e) => {
-              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 48 64"%3E%3Crect fill="%23e2e8f0" width="48" height="64"/%3E%3Ctext x="50%25" y="50%25" font-size="12" fill="%23cbd5e1" text-anchor="middle" dy=".3em"%3E%3C/text%3E%3C/svg%3E';
+              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 96"%3E%3Crect fill="%23e2e8f0" width="64" height="96"/%3E%3C/svg%3E';
             }}
           />
         )}
-      </td>
-      <td className="p-4 font-medium text-[#1E2920]">{book.title}</td>
-      <td className="p-4 text-slate-600">{book.author}</td>
-      <td className="p-4 text-slate-600">{book.year}</td>
-      <td className="p-4 text-center font-medium text-slate-700">
-        {book.totalPages ? `${book.totalPages}` : '-'}
-      </td>
-      <td className="p-4 min-w-[120px]">
-        <span className={`px-2 py-1 rounded text-xs font-medium whitespace-nowrap inline-block ${getStatusColor(book.status)}`}>
-          {(() => {
-            switch (book.status) {
-              case BookStatus.READING:
-                return lang === 'ru' ? 'Читаю' : 'Reading';
-              case BookStatus.READ:
-                return lang === 'ru' ? 'Прочитано' : 'Read';
-              case BookStatus.WANT_TO_READ:
-                return lang === 'ru' ? 'Буду читать' : 'To Read';
-              case BookStatus.ABANDONED:
-                return lang === 'ru' ? 'Брошено' : 'Abandoned';
-              case BookStatus.POSTPONED:
-                return lang === 'ru' ? 'Отложено' : 'Postponed';
-              default:
-                return book.status;
-            }
-          })()}
-        </span>
-      </td>
-      <td className="p-4 text-center">
-        <span className="font-semibold text-amber-600">★ {book.rating}</span>
-      </td>
-      <td className="p-4 text-slate-600 text-sm">{book.startDate || '-'}</td>
-      <td className="p-4 text-slate-600 text-sm">{book.endDate || '-'}</td>
-      <td className="p-4">
-        <div className="flex gap-2">
-          <button
-            onClick={onEdit}
-            className="px-2 py-1 text-xs bg-[#A1BAA5] text-[#1E2920] rounded hover:bg-[#87A68C] transition-colors"
-          >
-            {lang === 'ru' ? 'Ред.' : 'Edit'}
-          </button>
-          <button
-            onClick={onDelete}
-            className="px-2 py-1 text-xs bg-red-100 text-red-600 rounded hover:bg-red-200 transition-colors"
-          >
-            {lang === 'ru' ? 'Удал.' : 'Del'}
-          </button>
+      </div>
+
+      {/* Основная информация */}
+      <div className="flex-grow min-w-0">
+        <h3 className="font-bold text-[#1E2920] text-sm truncate">{book.title}</h3>
+        <p className="text-slate-600 text-xs mb-3">{book.author} • {book.year}</p>
+        
+        <div className="flex flex-wrap gap-3 items-center text-xs">
+          {/* Статус */}
+          <span className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap ${getStatusColor(book.status)}`}>
+            {(() => {
+              switch (book.status) {
+                case BookStatus.READING:
+                  return lang === 'ru' ? 'Читаю' : 'Reading';
+                case BookStatus.READ:
+                  return lang === 'ru' ? 'Прочитано' : 'Read';
+                case BookStatus.WANT_TO_READ:
+                  return lang === 'ru' ? 'Буду читать' : 'To Read';
+                case BookStatus.ABANDONED:
+                  return lang === 'ru' ? 'Брошено' : 'Abandoned';
+                case BookStatus.POSTPONED:
+                  return lang === 'ru' ? 'Отложено' : 'Postponed';
+                default:
+                  return book.status;
+              }
+            })()}
+          </span>
+
+          {/* Оценка */}
+          {book.rating > 0 && (
+            <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 rounded-lg">
+              <span className="text-amber-600 font-semibold">★</span>
+              <span className="text-amber-700 font-semibold">{book.rating.toFixed(1)}</span>
+            </div>
+          )}
+
+          {/* Страницы */}
+          {book.totalPages && (
+            <div className="text-slate-600">
+              {book.totalPages} {lang === 'ru' ? 'стр.' : 'pages'}
+            </div>
+          )}
+
+          {/* Даты */}
+          <div className="text-slate-500 text-xs">
+            {book.startDate && <span>{book.startDate}</span>}
+            {book.startDate && book.endDate && <span className="text-slate-400 mx-1">→</span>}
+            {book.endDate && <span>{book.endDate}</span>}
+          </div>
         </div>
-      </td>
-    </tr>
+      </div>
+
+      {/* Кнопки действия */}
+      <div className="flex-shrink-0 flex gap-2">
+        <button
+          onClick={onEdit}
+          className="p-2 bg-[#A1BAA5] text-[#1E2920] rounded-lg hover:bg-[#87A68C] transition-colors font-medium"
+          title={lang === 'ru' ? 'Редактировать' : 'Edit'}
+        >
+          <Edit2 size={16} />
+        </button>
+        <button
+          onClick={onDelete}
+          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium"
+          title={lang === 'ru' ? 'Удалить' : 'Delete'}
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
   );
 };
 
@@ -133,6 +157,17 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [sortColumn, setSortColumn] = useState<string | null>(null);
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const [tableSortOption, setTableSortOption] = useState<TableSortOption>(() => {
+    try {
+      const saved = localStorage.getItem(TABLE_SORT_STORAGE_KEY) as TableSortOption | null;
+      const validOptions: TableSortOption[] = ['rating-desc', 'rating-asc', 'title-asc', 'title-desc', 'status-asc', 'status-desc', 'pages-desc', 'pages-asc'];
+      return (saved && validOptions.includes(saved)) ? saved : 'rating-desc';
+    } catch (e) {
+      console.error('Failed to load table sort option from localStorage:', e);
+      return 'rating-desc';
+    }
+  });
+  const [isTableSortOpen, setIsTableSortOpen] = useState(false);
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
     return (saved && ['large', 'medium', 'table'].includes(saved)) ? saved : 'large';
@@ -163,12 +198,53 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
     }
   };
 
+  // Helper function to save table sort option to localStorage
+  const saveTableSortOption = (option: TableSortOption) => {
+    try {
+      localStorage.setItem(TABLE_SORT_STORAGE_KEY, option);
+    } catch (e) {
+      console.error('Failed to save table sort option to localStorage:', e);
+    }
+  };
+
+  // Helper function to handle table sort option change
+  const handleTableSortChange = (option: TableSortOption) => {
+    setTableSortOption(option);
+    saveTableSortOption(option);
+  };
+
   const filteredBooks = books.filter(book => {
     const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           book.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatuses.has('All') || selectedStatuses.has(book.status);
     return matchesSearch && matchesStatus;
   });
+
+  // Функция сортировки для таблицы
+  const getTableSortedBooks = (booksToSort: Book[]): Book[] => {
+    return [...booksToSort].sort((a, b) => {
+      switch (tableSortOption) {
+        case 'rating-desc':
+          return (b.rating || 0) - (a.rating || 0);
+        case 'rating-asc':
+          return (a.rating || 0) - (b.rating || 0);
+        case 'title-asc':
+          return a.title.toLowerCase().localeCompare(b.title.toLowerCase());
+        case 'title-desc':
+          return b.title.toLowerCase().localeCompare(a.title.toLowerCase());
+        case 'status-asc':
+          return a.status.localeCompare(b.status);
+        case 'status-desc':
+          return b.status.localeCompare(a.status);
+        case 'pages-desc':
+          return (b.totalPages || 0) - (a.totalPages || 0);
+        case 'pages-asc':
+          return (a.totalPages || 0) - (b.totalPages || 0);
+        default:
+          return 0;
+      }
+    });
+  };
 
   const handleStatusToggle = (status: BookStatus | 'All') => {
     const newStatuses: Set<BookStatus | 'All'> = new Set(selectedStatuses);
@@ -423,6 +499,205 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
               title={lang === 'ru' ? 'Таблица' : 'Table'}
             />
           </div>
+
+          {/* Кнопка сортировки (только для таблицы) */}
+          {viewMode === 'table' && (
+            <div className="relative">
+              <button
+                onClick={() => setIsTableSortOpen(!isTableSortOpen)}
+                className="flex items-center gap-2 bg-[#F0F4F1] border border-slate-200 rounded-lg px-3 py-2 hover:border-slate-300 transition-colors"
+              >
+                {(tableSortOption === 'rating-desc' || tableSortOption === 'rating-asc') && (
+                  <>
+                    <span className="text-sm text-[#1E2920] font-medium">{lang === 'ru' ? 'Рейтинг' : 'Rating'}</span>
+                    {tableSortOption === 'rating-desc' && <TrendingDown size={16} className="text-slate-600" />}
+                    {tableSortOption === 'rating-asc' && <TrendingUp size={16} className="text-slate-600" />}
+                  </>
+                )}
+                {(tableSortOption === 'title-asc' || tableSortOption === 'title-desc') && (
+                  <>
+                    <span className="text-sm text-[#1E2920] font-medium">{lang === 'ru' ? 'Название' : 'Name'}</span>
+                    {tableSortOption === 'title-asc' && <ArrowDownAZ size={16} className="text-slate-600" />}
+                    {tableSortOption === 'title-desc' && <ArrowUpAZ size={16} className="text-slate-600" />}
+                  </>
+                )}
+                {(tableSortOption === 'status-asc' || tableSortOption === 'status-desc') && (
+                  <>
+                    <span className="text-sm text-[#1E2920] font-medium">{lang === 'ru' ? 'Статус' : 'Status'}</span>
+                    {tableSortOption === 'status-desc' && <ArrowDownAZ size={16} className="text-slate-600" />}
+                    {tableSortOption === 'status-asc' && <ArrowUpAZ size={16} className="text-slate-600" />}
+                  </>
+                )}
+                {(tableSortOption === 'pages-asc' || tableSortOption === 'pages-desc') && (
+                  <>
+                    <span className="text-sm text-[#1E2920] font-medium">{lang === 'ru' ? 'Страницы' : 'Pages'}</span>
+                    {tableSortOption === 'pages-desc' && <ArrowDown01 size={16} className="text-slate-600" />}
+                    {tableSortOption === 'pages-asc' && <ArrowUp01 size={16} className="text-slate-600" />}
+                  </>
+                )}
+                <ChevronDown size={16} className="text-slate-400" />
+              </button>
+
+              {isTableSortOpen && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-10" 
+                    onClick={() => setIsTableSortOpen(false)}
+                  />
+                  <div className="absolute top-full mt-2 right-0 bg-[#F0F4F1] border border-slate-200 rounded-lg shadow-lg z-20 min-w-max">
+                    {/* Рейтинг */}
+                    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Рейтинг' : 'Rating'}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('rating-desc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'rating-desc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'По убыванию' : 'Descending' }
+                          >
+                            <TrendingDown size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('rating-asc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'rating-asc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'По возрастанию' : 'Ascending' }
+                          > 
+                            <TrendingUp size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Название */}
+                    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Название' : 'Name'}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('title-asc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'title-asc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'A-Z' : 'A-Z'}
+                          >
+                            <ArrowDownAZ size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('title-desc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'title-desc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'Z-A' : 'Z-A'}
+                          >
+                            <ArrowUpAZ size={16} />
+                          </button>
+                          
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Статус */}
+                    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Статус' : 'Status'}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('status-desc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'status-desc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'A-Z' : 'A-Z'}
+                          >
+                            <ArrowDownAZ size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('status-asc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'status-asc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'Z-A' : 'Z-A'}
+                          >
+                            <ArrowUpAZ size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Страницы */}
+                    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+                      <div className="flex items-center justify-between gap-4">
+                        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Страницы' : 'Pages'}</span>
+                        <div className="flex gap-2">
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('pages-desc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'pages-desc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'По убыванию' : 'Descending' }
+                          >
+                            <ArrowDown01 size={16} />
+                          </button>
+                          <button
+                            onClick={() => {
+                              handleTableSortChange('pages-asc');
+                              setIsTableSortOpen(false);
+                            }}
+                            className={`p-2 rounded transition-colors ${
+                              tableSortOption === 'pages-asc'
+                                ? 'bg-[#6b9071] text-white'
+                                : 'text-slate-600 hover:bg-[#D6E1D8]'
+                            }`}
+                            title={lang === 'ru' ? 'По возрастанию' : 'Ascending' }
+                          >
+                            <ArrowUp01 size={16} />
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </>
+              )}
+            </div>
+          )}
         </div>
       </div>
 
@@ -457,98 +732,16 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
           )}
 
           {viewMode === 'table' && (
-            <div className="bg-[#F0F4F1] rounded-xl shadow-md border border-slate-200 overflow-x-auto">
-              <table className="w-full">
-                <thead>
-                  <tr className="bg-[#BCCDBE] border-b border-slate-200">
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Обложка' : 'Cover'}</th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('title')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.title}
-                        {sortColumn === 'title' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('author')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.author}
-                        {sortColumn === 'author' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('year')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.year}
-                        {sortColumn === 'year' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('totalPages')}
-                    >
-                      <div className="flex items-center gap-2 justify-center">
-                        {lang === 'ru' ? 'Страниц' : 'Pages'}
-                        {sortColumn === 'totalPages' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('status')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.status}
-                        {sortColumn === 'status' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-center text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('rating')}
-                    >
-                      <div className="flex items-center gap-2 justify-center">
-                        {t.rating}
-                        {sortColumn === 'rating' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('startDate')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.startDate}
-                        {sortColumn === 'startDate' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th 
-                      className="p-4 text-left text-sm font-semibold text-slate-600 cursor-pointer hover:bg-[#87A68C] transition-colors"
-                      onClick={() => handleColumnSort('endDate')}
-                    >
-                      <div className="flex items-center gap-2">
-                        {t.endDate}
-                        {sortColumn === 'endDate' && (sortDirection === 'asc' ? <ChevronUp size={14} /> : <ChevronDown size={14} />)}
-                      </div>
-                    </th>
-                    <th className="p-4 text-left text-sm font-semibold text-slate-600">{lang === 'ru' ? 'Действия' : 'Actions'}</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {sortedBooks.map(book => (
-                    <BookTableRow
-                      key={book.id}
-                      book={book}
-                      onEdit={() => onEdit(book)}
-                      onDelete={() => onDelete(book.id)}
-                      lang={lang}
-                    />
-                  ))}
-                </tbody>
-              </table>
+            <div className="space-y-3">
+              {getTableSortedBooks(filteredBooks).map(book => (
+                <BookTableRow
+                  key={book.id}
+                  book={book}
+                  onEdit={() => onEdit(book)}
+                  onDelete={() => onDelete(book.id)}
+                  lang={lang}
+                />
+              ))}
             </div>
           )}
         </>
