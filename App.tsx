@@ -328,18 +328,14 @@ const App: React.FC = () => {
           const currentPageToKeep = existingBook.currentPage ?? duplicateImportedBook.currentPage;
           const currentPercentageToKeep = existingBook.currentPercentage ?? duplicateImportedBook.currentPercentage;
 
-          // Для totalHours: если существуют локальные сессии, вычисляем часы из них
-          // Иначе используем импортированное значение
-          let finalTotalHours = duplicateImportedBook.totalHours || 0;
-          if (sessionsToKeep && sessionsToKeep.length > 0) {
-            const totalSeconds = sessionsToKeep.reduce((sum, session) => sum + (session.duration || 0), 0);
-            finalTotalHours = Math.round((totalSeconds / 3600) * 10) / 10;
-          }
+          // Для totalHours используем базовое значение из импорта
+          // (реальное значение часов вычисляется в calculateBookTotalHours как сумма базовых + сессии)
+          const baseHoursToKeep = duplicateImportedBook.totalHours ?? existingBook.totalHours;
 
           return {
             ...duplicateImportedBook,
             id: existingBook.id, // Сохраняем оригинальный ID
-            totalHours: finalTotalHours, // Часы вычисляются из сессий или берутся из импорта
+            totalHours: baseHoursToKeep, // Базовые часы (реальная сумма вычисляется в calculateBookTotalHours)
             currentPage: currentPageToKeep, // Текущая страница с приоритетом местным данным
             currentPercentage: currentPercentageToKeep, // Процент с приоритетом местным данным
             sessions: sessionsToKeep // Сессии с приоритетом местным данным

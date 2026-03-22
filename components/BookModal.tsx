@@ -6,6 +6,7 @@ import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
+import { calculateBookTotalHours } from '../utils/dateUtils';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -221,16 +222,28 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{lang === 'ru' ? 'Всего часов' : 'Total Hours'}</label>
+                <div className="block text-xs font-semibold text-slate-500 uppercase mb-1 flex justify-between items-center">
+                  <span>{lang === 'ru' ? 'Базовые часы чтения' : 'Base Reading Hours'}</span>
+                  {initialData && (
+                    <span className="text-[#6B9071] text-xs font-normal">
+                      {lang === 'ru' ? `Всего: ${calculateBookTotalHours(initialData)} часов` : `Total: ${calculateBookTotalHours(initialData)} hours`}
+                    </span>
+                  )}
+                </div>
                 <input 
                   type="number" 
                   min="0"
                   step="0.5"
                   value={formData.totalHours || ''}
                   onChange={e => setFormData({...formData, totalHours: e.target.value ? parseFloat(e.target.value) : undefined})}
-                  placeholder={lang === 'ru' ? 'Количество часов чтения' : 'Hours spent reading'}
+                  placeholder={lang === 'ru' ? 'Доп. часы для добавления к сессиям' : 'Additional hours to add'}
                   className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                 />
+                <p className="text-xs text-slate-400 mt-1">
+                  {lang === 'ru' 
+                    ? 'Сессии автоматически добавляют часы. Это поле для доп. значений.' 
+                    : 'Sessions automatically add hours. This field is for additional values.'}
+                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

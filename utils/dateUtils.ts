@@ -18,7 +18,10 @@ export const calculateDaysDifference = (startDate: string, endDate?: string): nu
 };
 
 // Вычисляет общее количество часов для книги
-// Итоговые часы = часы из сессий + базовое значение totalHours (установленное пользователем)
+// Расчет общего количества часов чтения
+// Правило: общие часы = часы из сессий + базовое значение (введенное пользователем)
+// - Если есть сессии: складываем их часы + базовое значение totalHours
+// - Если нет сессий: используется только базовое значение totalHours
 export const calculateBookTotalHours = (book: { sessions?: Array<{duration: number}>; totalHours?: number }): number => {
   // Часы из сессий, добавленных в приложении
   let sessionHours = 0;
