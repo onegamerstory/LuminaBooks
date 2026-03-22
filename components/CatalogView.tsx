@@ -4,7 +4,7 @@ import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
 import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
 import { translations } from '../App';
-import { exportBooksToExcel, importBooksFromExcel } from '../utils/excelUtils';
+import { exportBooksToJson, importBooksFromJson } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
 
 type ViewMode = 'large' | 'medium' | 'table';
@@ -319,7 +319,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
   };
 
   const handleExport = () => {
-    exportBooksToExcel(books);
+    exportBooksToJson(books);
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -328,11 +328,11 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
 
     setIsImporting(true);
     try {
-      const importedBooks = await importBooksFromExcel(file);
+      const importedBooks = await importBooksFromJson(file);
       onImport(importedBooks);
       addToast(lang === 'ru' ? `Успешно импортировано ${importedBooks.length} книг(и)` : `Successfully imported ${importedBooks.length} book(s)`, 'success');
     } catch (error) {
-      addToast(lang === 'ru' ? 'Ошибка при импорте файла' : 'Error importing file', 'error');
+      addToast(lang === 'ru' ? (error instanceof Error ? error.message : 'Ошибка при импорте файла') : 'Error importing file', 'error');
       console.error(error);
     } finally {
       setIsImporting(false);
@@ -370,7 +370,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
               onClick={handleExport}
               disabled={books.length === 0}
               className="flex items-center gap-2 px-3 py-2 bg-[#9E8F8F] text-white rounded-lg hover:bg-[#887777] disabled:bg-[#D6E1D8] disabled:cursor-not-allowed transition-colors"
-              title={lang === 'ru' ? 'Экспортировать в Excel' : 'Export to Excel'}
+              title={lang === 'ru' ? 'Экспортировать в JSON' : 'Export to JSON'}
             >
               <Upload size={18} />
               <span className="text-sm">{lang === 'ru' ? 'Экспорт' : 'Export'}</span>
@@ -381,7 +381,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
               <span className="text-sm">{lang === 'ru' ? 'Импорт' : 'Import'}</span>
               <input
                 type="file"
-                accept=".xlsx,.xls"
+                accept=".json"
                 onChange={handleImport}
                 disabled={isImporting}
                 className="hidden"

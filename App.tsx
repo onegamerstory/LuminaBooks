@@ -315,29 +315,34 @@ const App: React.FC = () => {
             importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
         );
 
-        // Если найдена дубликат - обновляем все параметры, но сохраняем историю сессий
+        // Если найдена дубликат - обновляем все параметры с учетом сессий
         if (duplicateImportedBook) {
-          // Вычисляем часы из существующих сессий
-          let existingSessionHours = 0;
-          if (existingBook.sessions && existingBook.sessions.length > 0) {
-            const totalSeconds = existingBook.sessions.reduce((sum, session) => sum + (session.duration || 0), 0);
-            existingSessionHours = Math.round((totalSeconds / 3600) * 10) / 10;
-          }
+          // Стратегия для сессий:
+          // 1. Если локальная книга имеет сессии, сохраняем их (приоритет местным данным)
+          // 2. Если локальной книги нет сессий, но они есть в импортированной - используем импортированные
+          const sessionsToKeep = existingBook.sessions && existingBook.sessions.length > 0 
+            ? existingBook.sessions 
+            : duplicateImportedBook.sessions;
 
-          // Вычитаем часы из существующих сессий из импортированного значения
-          // Это предотвращает двойной учет часов при переимпорте
-          let adjustedTotalHours = duplicateImportedBook.totalHours || 0;
-          if (existingSessionHours > 0 && adjustedTotalHours > existingSessionHours) {
-            adjustedTotalHours = Math.round((adjustedTotalHours - existingSessionHours) * 10) / 10;
+          // Аналогично для текущей страницы и процента
+          const currentPageToKeep = existingBook.currentPage ?? duplicateImportedBook.currentPage;
+          const currentPercentageToKeep = existingBook.currentPercentage ?? duplicateImportedBook.currentPercentage;
+
+          // Для totalHours: если существуют локальные сессии, вычисляем часы из них
+          // Иначе используем импортированное значение
+          let finalTotalHours = duplicateImportedBook.totalHours || 0;
+          if (sessionsToKeep && sessionsToKeep.length > 0) {
+            const totalSeconds = sessionsToKeep.reduce((sum, session) => sum + (session.duration || 0), 0);
+            finalTotalHours = Math.round((totalSeconds / 3600) * 10) / 10;
           }
 
           return {
             ...duplicateImportedBook,
             id: existingBook.id, // Сохраняем оригинальный ID
-            totalHours: adjustedTotalHours, // Используем скорректированное значение часов
-            currentPage: existingBook.currentPage, // Сохраняем текущую страницу
-            currentPercentage: existingBook.currentPercentage, // Сохраняем текущий процент
-            sessions: existingBook.sessions // Сохраняем историю сессий
+            totalHours: finalTotalHours, // Часы вычисляются из сессий или берутся из импорта
+            currentPage: currentPageToKeep, // Текущая страница с приоритетом местным данным
+            currentPercentage: currentPercentageToKeep, // Процент с приоритетом местным данным
+            sessions: sessionsToKeep // Сессии с приоритетом местным данным
           };
         }
 
