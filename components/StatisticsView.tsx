@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
 import { translations } from '../App';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
@@ -11,7 +11,8 @@ import {
   Clock, 
   Library,
   Award,
-  AlertCircle
+  AlertCircle,
+  User
 } from 'lucide-react';
 
 interface StatisticsViewProps {
@@ -19,8 +20,27 @@ interface StatisticsViewProps {
   lang: 'en' | 'ru';
 }
 
+interface UserProfile {
+  nickname: string;
+  photoUrl: string;
+  defaultCoverUrl: string;
+}
+
 const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const t = translations[lang];
+  const [profile, setProfile] = useState<UserProfile | null>(null);
+
+  useEffect(() => {
+    // Load user profile from localStorage
+    const saved = localStorage.getItem('lumina_user_profile');
+    if (saved) {
+      try {
+        setProfile(JSON.parse(saved));
+      } catch (e) {
+        console.error("Failed to load profile", e);
+      }
+    }
+  }, []);
 
   // Общее количество книг
   const totalBooks = books.length;
@@ -81,7 +101,42 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
   return (
     <div className="space-y-6">
-      <h2 className="text-2xl font-bold text-[#1E2920]">{t.statistics}</h2>
+      {/* Profile Section */}
+      {profile && (profile.nickname || profile.photoUrl) && (
+        <div className="bg-gradient-to-r from-[#6B9071] to-[#59785E] rounded-2xl p-8 shadow-lg">
+          <div className="flex items-center gap-6">
+            {/* Profile Photo */}
+            <div className="flex-shrink-0">
+              <div className="w-32 h-32 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+                {profile.photoUrl ? (
+                  <img 
+                    src={profile.photoUrl} 
+                    alt="Profile"
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  <User size={60} className="text-slate-400" />
+                )}
+              </div>
+            </div>
+
+            {/* Profile Info */}
+            <div className="flex-grow">
+              <h2 className="text-3xl font-bold text-white mb-2">
+                {profile.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
+              </h2>
+              <p className="text-white/80">
+                {lang === 'ru' 
+                  ? `Ты прочитал ${books.filter(b => b.status === BookStatus.READ).length} книг`
+                  : `You've read ${books.filter(b => b.status === BookStatus.READ).length} books`
+                }
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
 
       {/* Основные метрики */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">

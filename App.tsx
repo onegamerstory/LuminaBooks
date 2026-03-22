@@ -7,7 +7,9 @@ import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
-import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, X } from 'lucide-react';
+import UserProfileModal from './components/UserProfileModal';
+import { UserProfile } from './utils/jsonUtils';
+import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
@@ -62,12 +64,17 @@ export const translations = {
     book: 'book',
     books: 'books',
     booksPlural: 'books',
+    userProfile: 'User Profile',
+    nickname: 'Nickname',
+    enterNickname: 'Enter your nickname...',
+    profilePhoto: 'Profile Photo',
     defaultCoverSettings: 'Default Cover Settings',
     defaultCoverUrl: 'Default Cover URL',
     enterCoverUrl: 'Enter default cover URL...',
     save: 'Save',
     coverUrlSaved: 'Default cover URL saved',
-    coverUrlCleared: 'Default cover URL cleared'
+    coverUrlCleared: 'Default cover URL cleared',
+    profileSaved: 'Profile saved successfully'
   },
   ru: {
     catalog: 'Каталог',
@@ -116,12 +123,17 @@ export const translations = {
     book: 'книга',
     books: 'книг',
     booksPlural: 'книги',
+    userProfile: 'Профиль пользователя',
+    nickname: 'Никнейм',
+    enterNickname: 'Введите ваш никнейм...',
+    profilePhoto: 'Фотография профиля',
     defaultCoverSettings: 'Настройки обложки по умолчанию',
     defaultCoverUrl: 'URL обложки по умолчанию',
     enterCoverUrl: 'Введите URL обложки по умолчанию...',
     save: 'Сохранить',
     coverUrlSaved: 'URL обложки сохранён',
-    coverUrlCleared: 'URL обложки очищен'
+    coverUrlCleared: 'URL обложки очищен',
+    profileSaved: 'Профиль успешно сохранён'
   }
 };
 
@@ -131,7 +143,7 @@ const App: React.FC = () => {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | undefined>(undefined);
   const [lang, setLang] = useState<'en' | 'ru'>('ru');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
 
@@ -201,10 +213,25 @@ const App: React.FC = () => {
       setLang(savedLang);
     }
     
-    // Load default cover URL
-    const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
-    if (savedDefaultCoverUrl) {
-      setDefaultCoverUrl(savedDefaultCoverUrl);
+    // Load default cover URL from profile or legacy storage
+    const profileSaved = localStorage.getItem('lumina_user_profile');
+    if (profileSaved) {
+      try {
+        const profile = JSON.parse(profileSaved);
+        setDefaultCoverUrl(profile.defaultCoverUrl || '');
+      } catch (e) {
+        // Fallback to legacy storage
+        const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+        if (savedDefaultCoverUrl) {
+          setDefaultCoverUrl(savedDefaultCoverUrl);
+        }
+      }
+    } else {
+      // Load legacy default cover URL if it exists
+      const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+      if (savedDefaultCoverUrl) {
+        setDefaultCoverUrl(savedDefaultCoverUrl);
+      }
     }
   }, []);
 
@@ -305,7 +332,12 @@ const App: React.FC = () => {
     }
   };
 
-  const handleImport = (importedBooks: Book[]) => {
+  const handleImport = (importedBooks: Book[], userProfile?: UserProfile) => {
+    // Если в импорте есть информация о пользователе, обновляем его в localStorage
+    if (userProfile) {
+      localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
+    }
+
     setBooks(prev => {
       const updatedBooks = prev.map(existingBook => {
         // Проверяем, есть ли в импортированных книгах такая же комбинация название + автор
@@ -410,6 +442,17 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <nav className="flex items-center gap-1 bg-[#F0F4F1] p-1 rounded-xl">
               <button
+                onClick={() => setActiveView('statistics')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeView === 'statistics' 
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
+                  : 'text-slate-600 hover:text-[#1E2920]'
+                }`}
+              >
+                <BarChart3 size={18} />
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Профиль' : 'Profile'}</span>
+              </button>
+              <button
                 onClick={() => setActiveView('catalog')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'catalog' 
@@ -432,17 +475,6 @@ const App: React.FC = () => {
                 <span className="hidden sm:inline">{t.calendar}</span>
               </button>
               <button
-                onClick={() => setActiveView('statistics')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'statistics' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <BarChart3 size={18} />
-                <span className="hidden sm:inline">{t.statistics}</span>
-              </button>
-              <button
                 onClick={() => setActiveView('reading')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
                   activeView === 'reading' 
@@ -454,22 +486,22 @@ const App: React.FC = () => {
                 <span className="hidden sm:inline">{lang === 'ru' ? 'Чтение' : 'Reading'}</span>
               </button>
             </nav>
+          </div>
 
+          <div className="flex items-center gap-2">
             <button
               onClick={toggleLang}
-              className="p-2 hover:bg-[#D6E1D8] rounded-xl text-slate-600 flex items-center gap-2 transition-colors hover:border-slate-200"
+              className="p-2 hover:bg-[#D6E1D8] rounded-xl text-slate-600 flex items-center gap-2 transition-colors"
               title="Switch Language"
             >
               <Languages size={18} />
               <span className="text-xs font-bold uppercase">{lang}</span>
             </button>
-          </div>
 
-          <div className="flex items-center gap-2">
             <button
-              onClick={() => setIsSettingsOpen(true)}
+              onClick={() => setIsProfileOpen(true)}
               className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-xl text-sm font-semibold transition-colors"
-              title={lang === 'ru' ? 'Настройки обложки' : 'Cover settings'}
+              title={lang === 'ru' ? 'Профиль пользователя' : 'User profile'}
             >
               <Settings size={18} />
             </button>
@@ -528,68 +560,12 @@ const App: React.FC = () => {
         />
       )}
 
-      {isSettingsOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-          <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200">
-            <div className="border-b px-6 py-4 flex items-center justify-between">
-              <h2 className="text-xl font-bold font-serif text-[#1E2920]">
-                {t.defaultCoverSettings}
-              </h2>
-              <button onClick={() => setIsSettingsOpen(false)} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
-                <X size={20} />
-              </button>
-            </div>
-
-            <div className="p-6 space-y-4">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-2">{t.defaultCoverUrl}</label>
-                <input 
-                  type="text" 
-                  placeholder={t.enterCoverUrl}
-                  value={defaultCoverUrl}
-                  onChange={(e) => setDefaultCoverUrl(e.target.value)}
-                  className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
-                />
-                {defaultCoverUrl && (
-                  <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
-                    <p className="text-xs text-slate-600 mb-2">{lang === 'ru' ? 'Предпросмотр:' : 'Preview:'}</p>
-                    <img 
-                      src={defaultCoverUrl} 
-                      alt="Cover preview"
-                      className="w-20 h-28 object-cover rounded"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"%3E%3Crect fill="%23e2e8f0" width="60" height="80"/%3E%3Ctext x="50%25" y="50%25" font-size="12" fill="%23cbd5e1" text-anchor="middle" dy=".3em"%3EError%3C/text%3E%3C/svg%3E';
-                      }}
-                    />
-                  </div>
-                )}
-              </div>
-
-              <div className="flex gap-3 pt-4">
-                <button
-                  onClick={() => {
-                    if (defaultCoverUrl.trim()) {
-                      localStorage.setItem('lumina_default_cover_url', defaultCoverUrl);
-                    }
-                    setIsSettingsOpen(false);
-                  }}
-                  className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
-                >
-                  {t.save}
-                </button>
-                <button
-                  onClick={() => {
-                    setDefaultCoverUrl('');
-                    localStorage.removeItem('lumina_default_cover_url');
-                  }}
-                  className="flex-1 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-semibold transition-colors"
-                >
-                  {lang === 'ru' ? 'Очистить' : 'Clear'}
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+      {isProfileOpen && (
+        <UserProfileModal 
+          isOpen={isProfileOpen} 
+          onClose={() => setIsProfileOpen(false)}
+          lang={lang}
+        />
       )}
 
       {bookToRateId && (

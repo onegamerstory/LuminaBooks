@@ -1,20 +1,44 @@
 import { Book, BookStatus } from '../types';
 
+export interface UserProfile {
+  nickname: string;
+  photoUrl: string;
+  defaultCoverUrl: string;
+}
+
 export interface ExportData {
   version: '1.0';
   exportDate: string;
   totalBooks: number;
+  userProfile?: UserProfile;
   books: Book[];
 }
 
+export interface ImportResult {
+  books: Book[];
+  userProfile?: UserProfile;
+}
+
 /**
- * Экспортирует все книги со всеми данными (сессии, проценты, даты) в JSON формате
+ * Экспортирует все книги со всеми данными (сессии, проценты, даты) и информацию о пользователе в JSON формате
  */
 export const exportBooksToJson = (books: Book[]) => {
+  // Получаем профиль пользователя из localStorage
+  let userProfile: UserProfile | undefined = undefined;
+  try {
+    const savedProfile = localStorage.getItem('lumina_user_profile');
+    if (savedProfile) {
+      userProfile = JSON.parse(savedProfile);
+    }
+  } catch (e) {
+    console.error("Failed to load user profile for export", e);
+  }
+
   const exportData: ExportData = {
     version: '1.0',
     exportDate: new Date().toISOString(),
     totalBooks: books.length,
+    ...(userProfile && { userProfile }),
     books: books
   };
 
@@ -32,9 +56,9 @@ export const exportBooksToJson = (books: Book[]) => {
 };
 
 /**
- * Импортирует книги из JSON файла со всеми данными
+ * Импортирует книги и информацию о пользователе из JSON файла со всеми данными
  */
-export const importBooksFromJson = (file: File): Promise<Book[]> => {
+export const importBooksFromJson = (file: File): Promise<ImportResult> => {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
 
@@ -131,7 +155,15 @@ export const importBooksFromJson = (file: File): Promise<Book[]> => {
           return importedBook;
         });
 
-        resolve(importedBooks);
+        // Сохраняем профиль пользователя в localStorage, если он есть в импортированном файле
+        if (data.userProfile) {
+          localStorage.setItem('lumina_user_profile', JSON.stringify(data.userProfile));
+        }
+
+        resolve({
+          books: importedBooks,
+          userProfile: data.userProfile
+        });
       } catch (error) {
         if (error instanceof SyntaxError) {
           reject(new Error('Ошибка при парсинге JSON файла. Убедитесь, что файл является корректным JSON.'));

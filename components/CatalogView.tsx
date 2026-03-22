@@ -4,7 +4,7 @@ import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
 import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
 import { translations } from '../App';
-import { exportBooksToJson, importBooksFromJson } from '../utils/jsonUtils';
+import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
 
 type ViewMode = 'large' | 'medium' | 'table';
@@ -18,7 +18,7 @@ interface CatalogViewProps {
   books: Book[];
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
-  onImport: (books: Book[]) => void;
+  onImport: (books: Book[], userProfile?: UserProfile) => void;
   lang: 'en' | 'ru';
 }
 
@@ -340,9 +340,9 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
 
     setIsImporting(true);
     try {
-      const importedBooks = await importBooksFromJson(file);
-      onImport(importedBooks);
-      addToast(lang === 'ru' ? `Успешно импортировано ${importedBooks.length} книг(и)` : `Successfully imported ${importedBooks.length} book(s)`, 'success');
+      const importResult = await importBooksFromJson(file);
+      onImport(importResult.books, importResult.userProfile);
+      addToast(lang === 'ru' ? `Успешно импортировано ${importResult.books.length} книг(и)` : `Successfully imported ${importResult.books.length} book(s)`, 'success');
     } catch (error) {
       addToast(lang === 'ru' ? (error instanceof Error ? error.message : 'Ошибка при импорте файла') : 'Error importing file', 'error');
       console.error(error);
