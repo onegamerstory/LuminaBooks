@@ -60,24 +60,40 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity flex items-end p-4 justify-between">
-          <div className="flex gap-2">
-            <button 
-              onClick={(e) => { e.stopPropagation(); onEdit(); }}
-              className="p-2 bg-[#F0F4F1]/20 hover:bg-[#F0F4F1]/40 backdrop-blur-md rounded-lg text-white transition-colors"
-            >
-              <Edit2 size={16} />
-            </button>
-            <button 
-              onClick={(e) => { e.stopPropagation(); onDelete(); }}
-              className="p-2 bg-red-500/80 hover:bg-red-500 backdrop-blur-md rounded-lg text-white transition-colors"
-            >
-              <Trash2 size={16} />
-            </button>
-          </div>
+        {/* Кнопки в верхнем правом углу */}
+        <div className="absolute top-3 right-3 flex gap-2 z-10">
+          <button 
+            onClick={(e) => { e.stopPropagation(); onEdit(); }}
+            className="p-2 bg-[#F0F4F1]/90 hover:bg-[#F0F4F1] backdrop-blur-md rounded-lg text-[#1E2920] transition-colors shadow-md"
+            title={lang === 'ru' ? 'Редактировать' : 'Edit'}
+          >
+            <Edit2 size={16} />
+          </button>
+          <button 
+            onClick={(e) => { e.stopPropagation(); onDelete(); }}
+            className="p-2 bg-red-500/90 hover:bg-red-500 backdrop-blur-md rounded-lg text-white transition-colors shadow-md"
+            title={lang === 'ru' ? 'Удалить' : 'Delete'}
+          >
+            <Trash2 size={16} />
+          </button>
         </div>
+        {/* Hover эффект */}
+        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
         <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
           {getStatusLabel(book.status)}
+        </div>
+        {/* Процент прочтения под обложкой */}
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-2xl p-2 text-white text-xs text-center">
+          <div className="font-semibold text-sm">
+            {book.currentPercentage !== undefined 
+              ? `${book.currentPercentage}%` 
+              : book.currentPage && book.totalPages
+                ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
+                : book.status === BookStatus.READ
+                  ? '100%'
+                  : '0%'
+            }
+          </div>
         </div>
       </div>
 

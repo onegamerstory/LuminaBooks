@@ -42,7 +42,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const pagesInputRef = useRef<HTMLInputElement>(null);
 
-  const readingBooks = books.filter(b => b.status === BookStatus.READING);
+  const readingBooks = books.filter(b => b.status === BookStatus.READING || b.status === BookStatus.POSTPONED);
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = `toast_${Date.now()}`;
@@ -363,7 +363,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       {readingBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
           <Clock size={48} className="mb-4 opacity-20" />
-          <p className="text-lg">{lang === 'ru' ? 'Нет книг со статусом "Читаю"' : 'No books with "Reading" status'}</p>
+          <p className="text-lg">{lang === 'ru' ? 'Нет книг со статусом "Читаю" или "Отложено"' : 'No books with "Reading" or "Postponed" status'}</p>
           <p className="text-sm">{lang === 'ru' ? 'Добавьте книгу или измените её статус' : 'Add a book or change its status'}</p>
         </div>
       ) : (
@@ -381,25 +381,33 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                         e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"%3E%3Crect fill="%23e2e8f0" width="80" height="112"/%3E%3C/svg%3E';
                       }}
                     />
-                    {(book.currentPage !== undefined || book.currentPercentage !== undefined) && (
-                      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-lg p-2 text-white text-xs text-center">
-                        <div className="font-semibold text-sm">
-                          {book.currentPercentage !== undefined 
-                            ? `${book.currentPercentage}%` 
-                            : book.currentPage && book.totalPages
-                              ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
-                              : book.currentPage !== undefined 
-                                ? `${lang === 'ru' ? 'Стр.' : 'P.'} ${book.currentPage}`
-                                : '-'
-                          }
-                        </div>
+                    {/* Процент прочтения - всегда показывается */}
+                    <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-lg p-2 text-white text-xs text-center">
+                      <div className="font-semibold text-sm">
+                        {book.currentPercentage !== undefined 
+                          ? `${book.currentPercentage}%` 
+                          : book.currentPage && book.totalPages
+                            ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
+                            : book.status === BookStatus.READ
+                              ? '100%'
+                              : '0%'
+                        }
                       </div>
-                    )}
+                    </div>
                   </div>
                 )}
                 <div className="flex-1">
                   <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
                   <p className="text-sm text-slate-600">{book.author}</p>
+                  <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider mt-1 ${
+                    book.status === BookStatus.READING 
+                      ? 'bg-blue-100 text-blue-700' 
+                      : book.status === BookStatus.POSTPONED 
+                        ? 'bg-orange-100 text-orange-700'
+                        : 'bg-slate-100 text-slate-700'
+                  }`}>
+                    {book.status === BookStatus.READING ? (lang === 'ru' ? 'Читаю' : 'Reading') : (lang === 'ru' ? 'Отложено' : 'Postponed')}
+                  </div>
                 </div>
                 {sessionState?.bookId === book.id ? (
                   <div className="text-right">

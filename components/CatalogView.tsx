@@ -89,6 +89,18 @@ const BookTableRow: React.FC<{
             })()}
           </span>
 
+          {/* Процент прочтения */}
+          <div className="px-2.5 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium">
+            {book.currentPercentage !== undefined 
+              ? `${book.currentPercentage}%` 
+              : book.currentPage && book.totalPages
+                ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
+                : book.status === BookStatus.READ
+                  ? '100%'
+                  : '0%'
+            }
+          </div>
+
           {/* Оценка */}
           {book.rating > 0 && (
             <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 rounded-lg">
