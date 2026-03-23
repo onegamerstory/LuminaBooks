@@ -1,0 +1,283 @@
+import { Book, BookStatus, StatusChange } from '../types';
+
+/**
+ * Конвертирует старые значения статусов в новый UPPERCASE формат
+ * Используется для миграции данных из localStorage
+ * Старые значения: 'Reading', 'Read', 'To Read', 'Abandoned', 'Postponed'
+ * Новые значения: 'READING', 'READ', 'WANT_TO_READ', 'ABANDONED', 'POSTPONED'
+ */
+const migrateOldStatusValue = (oldStatus: any): BookStatus => {
+  if (!oldStatus) return BookStatus.WANT_TO_READ;
+
+  // Если уже в новом формате - возвращаем как есть
+  if (Object.values(BookStatus).includes(oldStatus)) {
+    return oldStatus;
+  }
+
+  // Преобразуем старые значения в новые
+  const statusMap: Record<string, BookStatus> = {
+    'Reading': BookStatus.READING,
+    'Read': BookStatus.READ,
+    'To Read': BookStatus.WANT_TO_READ,
+    'Abandoned': BookStatus.ABANDONED,
+    'Postponed': BookStatus.POSTPONED,
+    'READING': BookStatus.READING,
+    'READ': BookStatus.READ,
+    'WANT_TO_READ': BookStatus.WANT_TO_READ,
+    'ABANDONED': BookStatus.ABANDONED,
+    'POSTPONED': BookStatus.POSTPONED,
+  };
+
+  return statusMap[oldStatus] || BookStatus.WANT_TO_READ;
+};
+
+/**
+ * Мигрирует старую историю статусов на новый формат UPPERCASE
+ */
+export const migrateBookStatusHistory = (book: Book): Book => {
+  if (!book.statusHistory || book.statusHistory.length === 0) {
+    return book;
+  }
+
+  const migratedHistory = book.statusHistory.map(change => ({
+    ...change,
+    previousStatus: migrateOldStatusValue(change.previousStatus),
+    newStatus: migrateOldStatusValue(change.newStatus),
+  }));
+
+  return {
+    ...book,
+    // Мигрируем и текущий статус тоже
+    status: migrateOldStatusValue(book.status),
+    statusHistory: migratedHistory,
+  };
+};
+
+/**
+ * Мигрирует всю коллекцию книг
+ */
+export const migrateAllBooksStatusHistory = (books: Book[]): Book[] => {
+  return books.map(book => migrateBookStatusHistory(book));
+};
+
+/**
+ * Восстанавливает историю статусов из дат начала и конца чтения
+ * Если есть startDate и endDate - создает переход WANT_TO_READ → READING → READ
+ * Если есть только startDate - создает переход WANT_TO_READ → READING
+ * Если дат нет - возвращает пустой массив
+ */
+export const generateStatusHistoryFromDates = (book: Book): StatusChange[] => {
+  const history: StatusChange[] = [];
+
+  // Если история уже существует и валидна - возвращаем её
+  if (book.statusHistory && book.statusHistory.length > 0) {
+    return book.statusHistory;
+  }
+
+  // Проверяем наличие дат
+  const hasStartDate = book.startDate && typeof book.startDate === 'string' && book.startDate.trim() !== '';
+  const hasEndDate = book.endDate && typeof book.endDate === 'string' && book.endDate.trim() !== '';
+
+  if (!hasStartDate) {
+    // Нет дат - история не восстанавливается
+    return [];
+  }
+
+  // Есть дата начала - создаем переход WANT_TO_READ → READING
+  // Добавляем время начала дня (00:00:00)
+  const startDateTime = new Date(`${book.startDate}T00:00:00Z`).toISOString();
+  history.push({
+    timestamp: startDateTime,
+    previousStatus: BookStatus.WANT_TO_READ,
+    newStatus: BookStatus.READING
+  });
+
+  // Если есть дата конца - создаем переход READING → READ
+  // Добавляем время конца дня (23:59:59)
+  if (hasEndDate) {
+    const endDateTime = new Date(`${book.endDate}T23:59:59Z`).toISOString();
+    history.push({
+      timestamp: endDateTime,
+      previousStatus: BookStatus.READING,
+      newStatus: BookStatus.READ
+    });
+  }
+
+  return history;
+};
+
+/**
+ * Пополняет историю статусов из дат, если истории нет
+ */
+export const enrichBookStatusHistory = (book: Book): Book => {
+  // Если уже есть история - ничего не делаем
+  if (book.statusHistory && book.statusHistory.length > 0) {
+    return book;
+  }
+
+  // Генерируем историю из дат
+  const generatedHistory = generateStatusHistoryFromDates(book);
+
+  if (generatedHistory.length === 0) {
+    return book;
+  }
+
+  return {
+    ...book,
+    statusHistory: generatedHistory
+  };
+};
+
+/**
+ * Пополняет историю для всех книг, у которых её нет
+ */
+export const enrichAllBooksStatusHistory = (books: Book[]): Book[] => {
+  return books.map(book => enrichBookStatusHistory(book));
+};
+
+ /**
+ * Если история есть - берет последний (самый свежий) статус
+ * Если истории нет - использует установленный пользователем статус
+ */
+export const getCurrentBookStatus = (book: Book): BookStatus => {
+  // Если есть валидная история статусов, берем последний статус из неё
+  if (book.statusHistory && book.statusHistory.length > 0) {
+    return book.statusHistory[book.statusHistory.length - 1].newStatus;
+  }
+  // Иначе используем установленный статус
+  return book.status;
+};
+
+/**
+ * Записывает изменение статуса в историю, если статус действительно изменился
+ */
+export const recordStatusChange = (book: Book, newStatus: BookStatus): Book => {
+  // Если статус не изменился, просто возвращаем книгу как есть
+  if (book.status === newStatus) {
+    return book;
+  }
+
+  const statusChange: StatusChange = {
+    timestamp: new Date().toISOString(),
+    previousStatus: book.status,
+    newStatus: newStatus
+  };
+
+  return {
+    ...book,
+    status: newStatus,
+    statusHistory: [...(book.statusHistory || []), statusChange]
+  };
+};
+
+/**
+ * Получает все активные фазы чтения (периоды, когда статус был "Читаю")
+ * Возвращает массив объектов с датами начала и конца каждой активной фазы
+ */
+export const getActiveReadingPhases = (
+  book: Book
+): Array<{ startDate: string; endDate: string }> => {
+  const phases: Array<{ startDate: string; endDate: string }> = [];
+
+  if (!book.statusHistory || book.statusHistory.length === 0) {
+    // Если нет истории, используем старую логику
+    // Если текущий статус - "Читаю", значит есть активная фаза
+    if (book.status === BookStatus.READING && book.startDate) {
+      phases.push({
+        startDate: book.startDate,
+        endDate: book.endDate || new Date().toISOString().split('T')[0]
+      });
+    }
+    // Если текущий статус - "Прочитано", значит была активная фаза от startDate до endDate
+    else if (book.status === BookStatus.READ && book.startDate && book.endDate) {
+      phases.push({
+        startDate: book.startDate,
+        endDate: book.endDate
+      });
+    }
+    return phases;
+  }
+
+  // Проходим по истории статусов и ищем когда статус переходил в "Читаю" и из "Читаю"
+  let readingStartDate: string | null = null;
+
+  // Сначала проверяем начальный статус (может быть установлен до первого изменения)
+  if (book.statusHistory.length > 0) {
+    const firstChange = book.statusHistory[0];
+    // Если первое изменение - переход В "Читаю", значит до этого был другой статус
+    // Если первое изменение - переход ИЗ "Читаю", значит книга начиналась со статуса "Читаю"
+    if (
+      firstChange.previousStatus === BookStatus.READING &&
+      firstChange.newStatus !== BookStatus.READING &&
+      book.startDate
+    ) {
+      // Была фаза чтения от startDate до даты первого изменения
+      phases.push({
+        startDate: book.startDate,
+        endDate: new Date(firstChange.timestamp).toISOString().split('T')[0]
+      });
+    }
+  }
+
+  // Проходим по истории статусов
+  for (const change of book.statusHistory) {
+    if (change.newStatus === BookStatus.READING) {
+      // Переход В статус "Читаю"
+      // Начало активной фазы - это дата изменения
+      readingStartDate = new Date(change.timestamp).toISOString().split('T')[0];
+    } else if (change.previousStatus === BookStatus.READING) {
+      // Переход ИЗ статуса "Читаю" В другой статус
+      if (readingStartDate) {
+        const endDate = new Date(change.timestamp).toISOString().split('T')[0];
+        phases.push({
+          startDate: readingStartDate,
+          endDate: endDate
+        });
+        readingStartDate = null;
+      }
+    }
+  }
+
+  // Если статус заканчивается на "Читаю", добавляем открытую фазу
+  if (readingStartDate && book.status === BookStatus.READING) {
+    phases.push({
+      startDate: readingStartDate,
+      endDate: book.endDate || new Date().toISOString().split('T')[0]
+    });
+  }
+  // Если статус закончился на "Прочитано", добавляем закрытую фазу
+  else if (
+    book.statusHistory.length > 0 &&
+    book.statusHistory[book.statusHistory.length - 1].newStatus === BookStatus.READ &&
+    readingStartDate === null
+  ) {
+    // Ищем последний переход ИЗ "Читаю" в "Прочитано"
+    for (let i = book.statusHistory.length - 1; i >= 0; i--) {
+      const change = book.statusHistory[i];
+      if (
+        change.previousStatus === BookStatus.READING &&
+        change.newStatus === BookStatus.READ
+      ) {
+        // Ищем начало этой фазы читчя (последний переход В "Читаю" перед этим)
+        let phaseStart = book.startDate;
+        for (let j = i - 1; j >= 0; j--) {
+          if (book.statusHistory[j].newStatus === BookStatus.READING) {
+            phaseStart = new Date(book.statusHistory[j].timestamp)
+              .toISOString()
+              .split('T')[0];
+            break;
+          }
+        }
+        if (phaseStart && book.endDate) {
+          phases.push({
+            startDate: phaseStart,
+            endDate: book.endDate
+          });
+        }
+        break;
+      }
+    }
+  }
+
+  return phases;
+};

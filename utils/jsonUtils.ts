@@ -1,4 +1,5 @@
-import { Book, BookStatus } from '../types';
+import { Book, BookStatus, StatusChange } from '../types';
+import { migrateBookStatusHistory, enrichBookStatusHistory } from './statusHistoryUtils';
 
 export interface UserProfile {
   nickname: string;
@@ -34,12 +35,15 @@ export const exportBooksToJson = (books: Book[]) => {
     console.error("Failed to load user profile for export", e);
   }
 
+  // Пополняем историю статусов из дат, если её нет
+  const enrichedBooks = books.map(book => enrichBookStatusHistory(book));
+
   const exportData: ExportData = {
     version: '1.0',
     exportDate: new Date().toISOString(),
-    totalBooks: books.length,
+    totalBooks: enrichedBooks.length,
     ...(userProfile && { userProfile }),
-    books: books
+    books: enrichedBooks
   };
 
   const jsonString = JSON.stringify(exportData, null, 2);
@@ -134,22 +138,45 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
               .filter((session): session is any => session !== null)
             : undefined;
 
+          // Валидация и обработка истории статусов
+          const validatedStatusHistory = Array.isArray(book.statusHistory) 
+            ? book.statusHistory.filter((change: any) => {
+                // Валидируем каждое изменение статуса
+                return (
+                  change.timestamp && 
+                  typeof change.timestamp === 'string' &&
+                  change.previousStatus && 
+                  Object.values(BookStatus).includes(change.previousStatus) &&
+                  change.newStatus && 
+                  Object.values(BookStatus).includes(change.newStatus)
+                );
+              })
+            : undefined;
+
+          // Определяем текущий статус: если есть история, берем последний статус из неё
+          // Иначе используем статус из JSON
+          let finalStatus = status;
+          if (validatedStatusHistory && validatedStatusHistory.length > 0) {
+            finalStatus = validatedStatusHistory[validatedStatusHistory.length - 1].newStatus;
+          }
+
           const importedBook: Book = {
             id: book.id || `imported_${Date.now()}_${index}`,
             title: book.title,
             author: book.author,
             year: book.year || new Date().getFullYear(),
             coverUrl: book.coverUrl || '',
-            status,
+            status: finalStatus,
             rating,
             startDate: book.startDate || '',
             endDate: book.endDate || '',
             description: book.description || '',
             totalPages,
             currentPage,
-            currentPercentage,
+            currentPercentage: currentPercentage ?? (sessions && sessions.length > 0 ? sessions[sessions.length - 1].endPercentage : undefined),
             totalHours,
-            sessions: sessions && sessions.length > 0 ? sessions : undefined
+            sessions: sessions && sessions.length > 0 ? sessions : undefined,
+            statusHistory: validatedStatusHistory
           };
 
           return importedBook;
@@ -160,8 +187,14 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
           localStorage.setItem('lumina_user_profile', JSON.stringify(data.userProfile));
         }
 
+        // Мигрируем старые форматы статусов
+        let migratedBooks = importedBooks.map(book => migrateBookStatusHistory(book));
+        
+        // Пополняем историю статусов из дат, если её нет
+        const enrichedBooks = migratedBooks.map(book => enrichBookStatusHistory(book));
+
         resolve({
-          books: importedBooks,
+          books: enrichedBooks,
           userProfile: data.userProfile
         });
       } catch (error) {

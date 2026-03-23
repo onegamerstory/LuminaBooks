@@ -1,6 +1,7 @@
 
 import React, { useMemo } from 'react';
 import { Book } from '../types';
+import { getActiveReadingPhases } from '../utils/statusHistoryUtils';
 
 interface GitHubCalendarProps {
   books: Book[];
@@ -18,26 +19,50 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
     ? ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
     : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
 
-  // Подсчет завершенных книг по месяцам за последние 5 лет
+  // Подсчет дней с активным чтением по месяцам за последние 5 лет
+  // (дни когда была активная фаза чтения сразу)
   const monthlyCounts = useMemo(() => {
-    const counts = new Map<string, number>(); // key: `${year}-${month}`
+    const counts = new Map<string, Set<string>>(); // key: `${year}-${month}`, value: Set<day>
     const minYear = years[0];
     const maxYear = years[years.length - 1];
 
     books.forEach(book => {
-      if (!book.endDate || !book.endDate.trim()) return;
-      const date = new Date(book.endDate);
-      if (isNaN(date.getTime())) return;
-
-      const y = date.getFullYear();
-      const m = date.getMonth();
-      if (y < minYear || y > maxYear) return;
-
-      const key = `${y}-${m}`;
-      counts.set(key, (counts.get(key) || 0) + 1);
+      const phases = getActiveReadingPhases(book);
+      
+      phases.forEach(phase => {
+        // Парсим даты начала и конца активной фазы
+        const startDate = new Date(phase.startDate);
+        const endDate = new Date(phase.endDate);
+        
+        if (isNaN(startDate.getTime()) || isNaN(endDate.getTime())) return;
+        
+        // Проходим по всем дням в фазе
+        const currentDate = new Date(startDate);
+        while (currentDate <= endDate) {
+          const y = currentDate.getFullYear();
+          const m = currentDate.getMonth();
+          const d = currentDate.getDate();
+          
+          if (y >= minYear && y <= maxYear) {
+            const key = `${y}-${m}`;
+            if (!counts.has(key)) {
+              counts.set(key, new Set());
+            }
+            counts.get(key)!.add(String(d));
+          }
+          
+          currentDate.setDate(currentDate.getDate() + 1);
+        }
+      });
     });
 
-    return counts;
+    // Преобразуем Set в количество дней
+    const result = new Map<string, number>();
+    counts.forEach((days, key) => {
+      result.set(key, days.size);
+    });
+    
+    return result;
   }, [books, years]);
 
   const maxCount = useMemo(() => {
@@ -71,19 +96,19 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
   // Tooltip для месячной ячейки
   const getMonthTooltip = (year: number, month: number, count: number) => {
     const monthName = monthLabels[month];
-    const bookWord = lang === 'ru'
-      ? count === 1 ? 'книга' : count < 5 ? 'книги' : 'книг'
-      : count === 1 ? 'book' : 'books';
+    const dayWord = lang === 'ru'
+      ? count === 1 ? 'день' : count < 5 ? 'дня' : 'дней'
+      : count === 1 ? 'day' : 'days';
 
     if (count === 0) {
       return lang === 'ru'
-        ? `${monthName} ${year}\nНет завершенных книг`
-        : `${monthName} ${year}\nNo books finished`;
+        ? `${monthName} ${year}\nНет дней с активным чтением`
+        : `${monthName} ${year}\nNo reading days`;
     }
 
     return lang === 'ru'
-      ? `${monthName} ${year}\n${count} ${bookWord} завершено`
-      : `${monthName} ${year}\n${count} ${bookWord} finished`;
+      ? `${monthName} ${year}\n${count} ${dayWord} чтения`
+      : `${monthName} ${year}\n${count} ${dayWord} of reading`;
   };
 
   return (
@@ -94,8 +119,8 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
         </h3>
         <p className="text-sm text-slate-500">
           {lang === 'ru' 
-            ? 'Чем больше книг прочитано в месяц, тем темнее ячейка'
-            : 'The more books finished per month, the darker the cell'}
+            ? 'Чем больше дней чтения в месяц, тем темнее ячейка (активные фазы)'
+            : 'The more reading days per month, the darker the cell (active phases)'}
         </p>
       </div>
 

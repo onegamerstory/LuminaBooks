@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, HelpCircle, X, Search } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
+import { getActiveReadingPhases } from '../utils/statusHistoryUtils';
 
 interface CalendarViewProps {
   books: Book[];
@@ -59,16 +60,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
   const getBooksForDay = (day: Date) => {
     const dayStr = toLocalISOString(day);
-    const todayStr = toLocalISOString(new Date());
     
     return books.filter(book => {
-      if (!book.startDate) return false;
+      // Получаем все активные фазы чтения для книги
+      const activePhases = getActiveReadingPhases(book);
       
-      const start = book.startDate;
-      // If no end date, we assume the book is still being read up to today
-      const end = book.endDate || todayStr;
-      
-      return dayStr >= start && dayStr <= end;
+      // Проверяем, попадает ли текущий день в какую-либо активную фазу
+      return activePhases.some(phase => dayStr >= phase.startDate && dayStr <= phase.endDate);
     });
   };
 

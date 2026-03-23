@@ -9,6 +9,7 @@ import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
 import UserProfileModal from './components/UserProfileModal';
 import { UserProfile } from './utils/jsonUtils';
+import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -149,6 +150,22 @@ const App: React.FC = () => {
 
   const t = translations[lang];
 
+  // Функция для синхронизации текущего статуса из истории статусов
+  // Берет последний (самый свежий) статус из statusHistory
+  // Если истории нет, оставляет установленный пользователем статус
+  const syncStatusFromHistory = (books: Book[]): Book[] => {
+    return books.map(book => {
+      const currentStatus = getCurrentBookStatus(book);
+      if (currentStatus !== book.status) {
+        return {
+          ...book,
+          status: currentStatus
+        };
+      }
+      return book;
+    });
+  };
+
   // Функция для автоматического обновления статусов на основе наличия дат
   // Правила:
   // 1. Если есть дата начала И дата окончания → статус "Прочитано"
@@ -173,17 +190,26 @@ const App: React.FC = () => {
                         typeof book.endDate === 'string' && 
                         book.endDate.trim() !== '';
 
+      let newStatus: BookStatus | null = null;
+
       // Правило 1: Если есть и дата начала, и дата окончания → статус "Прочитано"
       if (hasStartDate && hasEndDate) {
-        updatedBook.status = BookStatus.READ;
+        newStatus = BookStatus.READ;
       }
       // Правило 2: Если есть только дата начала (без даты окончания) → статус "Читаю"
       else if (hasStartDate && !hasEndDate) {
-        updatedBook.status = BookStatus.READING;
+        newStatus = BookStatus.READING;
       }
       // Правило 3: Если нет никаких дат → статус "Буду читать"
       else {
-        updatedBook.status = BookStatus.WANT_TO_READ;
+        newStatus = BookStatus.WANT_TO_READ;
+      }
+
+      // Если статус изменился, используем recordStatusChange для записи в историю
+      if (newStatus && newStatus !== book.status) {
+        updatedBook = recordStatusChange(updatedBook, newStatus);
+      } else if (newStatus) {
+        updatedBook.status = newStatus;
       }
 
       return updatedBook;
@@ -201,8 +227,12 @@ const App: React.FC = () => {
           startDate: book.startDate?.trim() || '',
           endDate: book.endDate?.trim() || '',
         }));
+        // Мигрируем старые форматы статусов
+        let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
         // Обновляем статусы при загрузке книг на основе наличия дат
-        const updatedBooks = updateBookStatusBasedOnDates(normalizedBooks);
+        let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+        // Синхронизируем статусы из истории (приоритет у истории)
+        updatedBooks = syncStatusFromHistory(updatedBooks);
         setBooks(updatedBooks);
       } catch (e) {
         console.error("Failed to load books", e);
@@ -300,7 +330,7 @@ const App: React.FC = () => {
   const handleAddBook = (book: Book) => {
     setBooks(prev => {
       // Нормализуем даты: пустые строки, null, undefined → пустая строка
-      const normalizedBook: Book = {
+      let normalizedBook: Book = {
         ...book,
         startDate: book.startDate?.trim() || '',
         endDate: book.endDate?.trim() || '',
@@ -308,6 +338,15 @@ const App: React.FC = () => {
       
       let updatedBooks: Book[];
       if (editingBook) {
+        // При редактировании проверяем, изменился ли статус
+        const oldStatus = editingBook.status;
+        const newStatus = normalizedBook.status;
+        
+        // Если статус изменился вручную, записываем в историю
+        if (oldStatus !== newStatus) {
+          normalizedBook = recordStatusChange(normalizedBook, newStatus);
+        }
+        
         updatedBooks = prev.map(b => b.id === normalizedBook.id ? normalizedBook : b);
       } else {
         updatedBooks = [...prev, normalizedBook];
@@ -339,38 +378,28 @@ const App: React.FC = () => {
     }
 
     setBooks(prev => {
+      // Мигрируем импортированные книги на всякий случай
+      const migratedImportedBooks = migrateAllBooksStatusHistory(importedBooks);
+
       const updatedBooks = prev.map(existingBook => {
         // Проверяем, есть ли в импортированных книгах такая же комбинация название + автор
-        const duplicateImportedBook = importedBooks.find(
+        const duplicateImportedBook = migratedImportedBooks.find(
           importedBook => 
             importedBook.title.toLowerCase().trim() === existingBook.title.toLowerCase().trim() &&
             importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
         );
 
-        // Если найдена дубликат - обновляем все параметры с учетом сессий
+        // Если найдена дубликат - заменяем локальные данные на импортированные
+        // Приоритет отдается JSON файлу
         if (duplicateImportedBook) {
-          // Стратегия для сессий:
-          // 1. Если локальная книга имеет сессии, сохраняем их (приоритет местным данным)
-          // 2. Если локальной книги нет сессий, но они есть в импортированной - используем импортированные
-          const sessionsToKeep = existingBook.sessions && existingBook.sessions.length > 0 
-            ? existingBook.sessions 
-            : duplicateImportedBook.sessions;
-
-          // Аналогично для текущей страницы и процента
-          const currentPageToKeep = existingBook.currentPage ?? duplicateImportedBook.currentPage;
-          const currentPercentageToKeep = existingBook.currentPercentage ?? duplicateImportedBook.currentPercentage;
-
-          // Для totalHours используем базовое значение из импорта
-          // (реальное значение часов вычисляется в calculateBookTotalHours как сумма базовых + сессии)
-          const baseHoursToKeep = duplicateImportedBook.totalHours ?? existingBook.totalHours;
-
           return {
             ...duplicateImportedBook,
-            id: existingBook.id, // Сохраняем оригинальный ID
-            totalHours: baseHoursToKeep, // Базовые часы (реальная сумма вычисляется в calculateBookTotalHours)
-            currentPage: currentPageToKeep, // Текущая страница с приоритетом местным данным
-            currentPercentage: currentPercentageToKeep, // Процент с приоритетом местным данным
-            sessions: sessionsToKeep // Сессии с приоритетом местным данным
+            id: existingBook.id, // Сохраняем оригинальный ID, все остальное берем из JSON
+            sessions: duplicateImportedBook.sessions, // Сессии из JSON (авторитетный источник)
+            statusHistory: duplicateImportedBook.statusHistory, // История статусов из JSON (авторитетный источник)
+            currentPage: duplicateImportedBook.currentPage, // Текущая страница из JSON
+            currentPercentage: duplicateImportedBook.currentPercentage, // Процент из JSON
+            totalHours: duplicateImportedBook.totalHours // Часы из JSON
           };
         }
 
@@ -382,15 +411,18 @@ const App: React.FC = () => {
         updatedBooks.map(b => `${b.title.toLowerCase().trim()}_${b.author.toLowerCase().trim()}`)
       );
 
-      const newBooks = importedBooks.filter(
+      const newBooks = migratedImportedBooks.filter(
         importedBook => 
           !existingTitlesAuthors.has(
             `${importedBook.title.toLowerCase().trim()}_${importedBook.author.toLowerCase().trim()}`
           )
       );
 
-      const finalBooks = [...updatedBooks, ...newBooks];
-      return updateBookStatusBasedOnDates(finalBooks);
+      const combinedBooks = [...updatedBooks, ...newBooks];
+      // Сначала обновляем статусы по датам, потом синхронизируем из истории
+      let finalBooks = updateBookStatusBasedOnDates(combinedBooks);
+      finalBooks = syncStatusFromHistory(finalBooks);
+      return finalBooks;
     });
   };
 

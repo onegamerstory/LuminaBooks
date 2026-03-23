@@ -7,6 +7,7 @@ import Toast, { ToastMessage } from './Toast';
 import { DateInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
 import dayjs from 'dayjs';
+import { recordStatusChange } from '../utils/statusHistoryUtils';
 
 interface ReadingViewProps {
   books: Book[];
@@ -217,7 +218,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       finalCurrentPercentage = book.currentPercentage;
     }
 
-    const updatedBook: Book = {
+    let updatedBook: Book = {
       ...book,
       // Обновляем текущую страницу если была указана конечная страница
       currentPage: finalEndPage || book.currentPage,
@@ -229,6 +230,19 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
       endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
+
+    // Записываем в историю если статус изменился
+    if (updatedBook.status !== book.status) {
+      updatedBook = recordStatusChange(book, updatedBook.status);
+      // Восстанавливаем другие изменения (сессии, проценты, даты), которые были добавлены выше
+      updatedBook = {
+        ...updatedBook,
+        currentPage: finalEndPage || book.currentPage,
+        currentPercentage: finalCurrentPercentage,
+        sessions: [...(book.sessions || []), newSession],
+        endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
+      };
+    }
 
     onUpdateBook(updatedBook);
     
@@ -335,7 +349,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       finalCurrentPercentage = book.currentPercentage;
     }
 
-    const updatedBook: Book = {
+    let updatedBook: Book = {
       ...book,
       currentPage: finalEndPage || book.currentPage,
       currentPercentage: finalCurrentPercentage,
@@ -345,6 +359,19 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
       endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
+
+    // Записываем в историю если статус изменился
+    if (updatedBook.status !== book.status) {
+      updatedBook = recordStatusChange(book, updatedBook.status);
+      // Восстанавливаем другие изменения (сессии, проценты, даты), которые были добавлены выше
+      updatedBook = {
+        ...updatedBook,
+        currentPage: finalEndPage || book.currentPage,
+        currentPercentage: finalCurrentPercentage,
+        sessions: [...(book.sessions || []), newSession],
+        endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
+      };
+    }
 
     onUpdateBook(updatedBook);
 

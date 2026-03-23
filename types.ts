@@ -1,10 +1,10 @@
 
 export enum BookStatus {
-  READING = 'Reading',
-  READ = 'Read',
-  WANT_TO_READ = 'To Read',
-  ABANDONED = 'Abandoned',
-  POSTPONED = 'Postponed'
+  READING = 'READING',
+  READ = 'READ',
+  WANT_TO_READ = 'WANT_TO_READ',
+  ABANDONED = 'ABANDONED',
+  POSTPONED = 'POSTPONED'
 }
 
 export interface ReadingSession {
@@ -18,6 +18,12 @@ export interface ReadingSession {
   startPercentage?: number; // Процент, с которого начали сессию
   endPercentage?: number; // Процент, на котором закончили сессию
   percentageRead?: number; // Вычисленное количество прочитанных процентов (endPercentage - startPercentage)
+}
+
+export interface StatusChange {
+  timestamp: string; // ISO timestamp
+  previousStatus: BookStatus;
+  newStatus: BookStatus;
 }
 
 export interface Book {
@@ -36,6 +42,7 @@ export interface Book {
   currentPercentage?: number; // Текущий процент прочитанной книги
   totalHours?: number; // Базовое значение часов, установленное пользователем или импортированное
   sessions?: ReadingSession[];
+  statusHistory?: StatusChange[]; // История смены статусов
 }
 
 export type ViewType = 'catalog' | 'calendar' | 'statistics' | 'reading';
