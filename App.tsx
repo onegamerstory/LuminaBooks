@@ -173,21 +173,31 @@ const App: React.FC = () => {
   // 3. Если нет никаких дат → статус "Буду читать"
   // Эти правила применяются ВСЕГДА, независимо от текущего статуса книги
   // ИСКЛЮЧЕНИЕ: если статус "Брошено" или "Отложено", они не изменяются
+  // ИСКЛЮЧЕНИЕ 2: если в истории статусов последний статус READ, не изменять его
   const updateBookStatusBasedOnDates = (books: Book[]): Book[] => {
     return books.map(book => {
       let updatedBook = { ...book };
-      
+
       // Не изменяем статусы "Брошено" и "Отложено"
       if (book.status === BookStatus.ABANDONED || book.status === BookStatus.POSTPONED) {
         return updatedBook;
       }
-      
+
+      // Не изменяем статус READ, если он уже зафиксирован в истории статусов
+      // Это нужно для случаев, когда пользователь явно установил статус READ
+      if (book.statusHistory && book.statusHistory.length > 0) {
+        const lastStatus = book.statusHistory[book.statusHistory.length - 1].newStatus;
+        if (lastStatus === BookStatus.READ && book.status === BookStatus.READ) {
+          return updatedBook;
+        }
+      }
+
       // Проверяем наличие дат (исключаем пустые строки и null/undefined)
-      const hasStartDate = book.startDate && 
-                          typeof book.startDate === 'string' && 
+      const hasStartDate = book.startDate &&
+                          typeof book.startDate === 'string' &&
                           book.startDate.trim() !== '';
-      const hasEndDate = book.endDate && 
-                        typeof book.endDate === 'string' && 
+      const hasEndDate = book.endDate &&
+                        typeof book.endDate === 'string' &&
                         book.endDate.trim() !== '';
 
       let newStatus: BookStatus | null = null;
@@ -335,26 +345,37 @@ const App: React.FC = () => {
         startDate: book.startDate?.trim() || '',
         endDate: book.endDate?.trim() || '',
       };
-      
+
       let updatedBooks: Book[];
       if (editingBook) {
-        // При редактировании проверяем, изменился ли статус
+        // При редактировании проверяем, изменился ли статус вручную
         const oldStatus = editingBook.status;
         const newStatus = normalizedBook.status;
+
+        // Сначала обновляем статусы на основе дат (это создаст историю из дат если нужно)
+        const booksWithUpdatedDates = updateBookStatusBasedOnDates(prev.map(b => 
+          b.id === normalizedBook.id ? { ...normalizedBook, status: oldStatus } : b
+        ));
         
-        // Если статус изменился вручную, записываем в историю
-        if (oldStatus !== newStatus) {
-          normalizedBook = recordStatusChange(normalizedBook, newStatus);
+        // Находим обновленную книгу
+        const dateUpdatedBook = booksWithUpdatedDates.find(b => b.id === normalizedBook.id)!;
+        
+        // Если пользователь явно изменил статус вручную (отличается от того, что установили даты)
+        // и это не было учтено в updateBookStatusBasedOnDates, записываем в историю
+        if (oldStatus !== newStatus && dateUpdatedBook.status !== newStatus) {
+          normalizedBook = recordStatusChange({ ...dateUpdatedBook, status: oldStatus }, newStatus);
+          updatedBooks = prev.map(b => b.id === normalizedBook.id ? normalizedBook : b);
+        } else {
+          // Используем книгу с обновленными датами
+          updatedBooks = booksWithUpdatedDates;
         }
-        
-        updatedBooks = prev.map(b => b.id === normalizedBook.id ? normalizedBook : b);
       } else {
         updatedBooks = [...prev, normalizedBook];
+        // Для новых книг сразу применяем логику на основе дат
+        updatedBooks = updateBookStatusBasedOnDates(updatedBooks);
       }
-      
-      // Обновляем статусы на основе дат после добавления/редактирования
-      // Это автоматически установит правильный статус на основе наличия дат
-      return updateBookStatusBasedOnDates(updatedBooks);
+
+      return updatedBooks;
     });
     setIsModalOpen(false);
     setEditingBook(undefined);

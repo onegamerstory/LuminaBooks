@@ -108,6 +108,7 @@ export const generateStatusHistoryFromDates = (book: Book): StatusChange[] => {
 
 /**
  * Пополняет историю статусов из дат, если истории нет
+ * Если у книги статус READ, но нет истории и нет дат - создает фиктивную историю
  */
 export const enrichBookStatusHistory = (book: Book): Book => {
   // Если уже есть история - ничего не делаем
@@ -119,6 +120,27 @@ export const enrichBookStatusHistory = (book: Book): Book => {
   const generatedHistory = generateStatusHistoryFromDates(book);
 
   if (generatedHistory.length === 0) {
+    // Если истории нет и дат нет, но статус READ - создаем фиктивную историю
+    // Это нужно для случаев, когда пользователь поставил статус READ без дат
+    if (book.status === BookStatus.READ) {
+      const now = new Date().toISOString();
+      const fakeHistory: StatusChange[] = [
+        {
+          timestamp: now,
+          previousStatus: BookStatus.WANT_TO_READ,
+          newStatus: BookStatus.READING
+        },
+        {
+          timestamp: now,
+          previousStatus: BookStatus.READING,
+          newStatus: BookStatus.READ
+        }
+      ];
+      return {
+        ...book,
+        statusHistory: fakeHistory
+      };
+    }
     return book;
   }
 
@@ -149,7 +171,67 @@ export const getCurrentBookStatus = (book: Book): BookStatus => {
 };
 
 /**
+ * Создает записи истории статусов для прямого перехода WANT_TO_READ → READ
+ * Если у книги есть startDate и/или endDate, использует их для создания записей:
+ * - startDate: WANT_TO_READ → READING
+ * - endDate: READING → READ
+ * Если дат нет, использует текущее время
+ */
+const createStatusHistoryForDirectRead = (
+  book: Book,
+  newStatus: BookStatus
+): StatusChange[] => {
+  const history: StatusChange[] = [];
+
+  // Проверяем наличие дат
+  const hasStartDate = book.startDate && typeof book.startDate === 'string' && book.startDate.trim() !== '';
+  const hasEndDate = book.endDate && typeof book.endDate === 'string' && book.endDate.trim() !== '';
+
+  // Если есть дата начала - создаем переход WANT_TO_READ → READING
+  if (hasStartDate) {
+    // Добавляем время начала дня (00:00:00)
+    const startDateTime = new Date(`${book.startDate}T00:00:00Z`).toISOString();
+    history.push({
+      timestamp: startDateTime,
+      previousStatus: BookStatus.WANT_TO_READ,
+      newStatus: BookStatus.READING
+    });
+  }
+
+  // Если есть дата конца - создаем переход READING → READ
+  if (hasEndDate) {
+    // Добавляем время конца дня (23:59:59)
+    const endDateTime = new Date(`${book.endDate}T23:59:59Z`).toISOString();
+    history.push({
+      timestamp: endDateTime,
+      previousStatus: BookStatus.READING,
+      newStatus: BookStatus.READ
+    });
+  }
+
+  // Если дат нет, используем текущее время для прямого перехода
+  if (!hasStartDate && !hasEndDate) {
+    const now = new Date().toISOString();
+    // Добавляем промежуточный статус READING с тем же timestamp
+    history.push({
+      timestamp: now,
+      previousStatus: BookStatus.WANT_TO_READ,
+      newStatus: BookStatus.READING
+    });
+    history.push({
+      timestamp: now,
+      previousStatus: BookStatus.READING,
+      newStatus: BookStatus.READ
+    });
+  }
+
+  return history;
+};
+
+/**
  * Записывает изменение статуса в историю, если статус действительно изменился
+ * Если пользователь перевел книгу из WANT_TO_READ сразу в READ,
+ * создает промежуточные записи: WANT_TO_READ → READING → READ
  */
 export const recordStatusChange = (book: Book, newStatus: BookStatus): Book => {
   // Если статус не изменился, просто возвращаем книгу как есть
@@ -157,6 +239,23 @@ export const recordStatusChange = (book: Book, newStatus: BookStatus): Book => {
     return book;
   }
 
+  // Особый случай: прямой переход WANT_TO_READ → READ
+  // Создаем промежуточные записи истории
+  if (book.status === BookStatus.WANT_TO_READ && newStatus === BookStatus.READ) {
+    const intermediateHistory = createStatusHistoryForDirectRead(book, newStatus);
+
+    // Объединяем с существующей историей (если есть)
+    const existingHistory = book.statusHistory || [];
+    const combinedHistory = [...existingHistory, ...intermediateHistory];
+
+    return {
+      ...book,
+      status: newStatus,
+      statusHistory: combinedHistory
+    };
+  }
+
+  // Обычный случай - просто добавляем изменение в историю
   const statusChange: StatusChange = {
     timestamp: new Date().toISOString(),
     previousStatus: book.status,
