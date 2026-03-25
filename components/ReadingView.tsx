@@ -43,7 +43,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const pagesInputRef = useRef<HTMLInputElement>(null);
 
-  const readingBooks = books.filter(b => b.status === BookStatus.READING || b.status === BookStatus.POSTPONED);
+  const readingBooks = books
+    .filter(b => b.status === BookStatus.READING || b.status === BookStatus.POSTPONED)
+    .sort((a, b) => {
+      // Книги со статусом "Читаю" (READING) выше, "Отложено" (POSTPONED) ниже
+      if (a.status === BookStatus.READING && b.status === BookStatus.POSTPONED) return -1;
+      if (a.status === BookStatus.POSTPONED && b.status === BookStatus.READING) return 1;
+      return 0;
+    });
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = `toast_${Date.now()}`;
