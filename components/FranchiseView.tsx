@@ -4,6 +4,7 @@ import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
 import { translations } from '../App';
 import FranchiseModal from './FranchiseModal.tsx';
 import Toast, { ToastMessage } from './Toast';
+import ConfirmationModal from './ConfirmationModal';
 
 interface FranchiseViewProps {
   franchises: Franchise[];
@@ -115,6 +116,13 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
   const [editingFranchise, setEditingFranchise] = useState<Franchise | undefined>();
   const [searchTerm, setSearchTerm] = useState('');
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    franchiseId: string | null;
+  }>({
+    isOpen: false,
+    franchiseId: null,
+  });
 
   const addToast = (message: string, type: 'success' | 'error' | 'info') => {
     const id = crypto.randomUUID();
@@ -139,12 +147,23 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(lang === 'ru' ? 'Удалить эту франшизу?' : 'Delete this franchise?')) {
-      onDeleteFranchise(id);
+    setConfirmationModal({
+      isOpen: true,
+      franchiseId: id,
+    });
+  };
+
+  const confirmDelete = () => {
+    if (confirmationModal.franchiseId) {
+      onDeleteFranchise(confirmationModal.franchiseId);
       addToast(
         lang === 'ru' ? 'Франшиза удалена' : 'Franchise deleted',
         'success'
       );
+      setConfirmationModal({
+        isOpen: false,
+        franchiseId: null,
+      });
     }
   };
 
@@ -260,6 +279,18 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       <Toast 
         messages={toasts} 
         onRemove={(id) => setToasts((prev) => prev.filter((t) => t.id !== id))} 
+      />
+
+      {/* Модаль подтверждения удаления */}
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title={lang === 'ru' ? 'Удалить франшизу' : 'Delete Franchise'}
+        message={lang === 'ru' ? 'Вы уверены, что хотите удалить эту франшизу?' : 'Are you sure you want to delete this franchise?'}
+        confirmText={lang === 'ru' ? 'Удалить' : 'Delete'}
+        cancelText={lang === 'ru' ? 'Отмена' : 'Cancel'}
+        onConfirm={confirmDelete}
+        onCancel={() => setConfirmationModal({ isOpen: false, franchiseId: null })}
+        isDangerous={true}
       />
     </div>
   );

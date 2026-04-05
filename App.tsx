@@ -9,6 +9,8 @@ import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
 import UserProfileModal from './components/UserProfileModal';
+import Toast, { ToastMessage } from './components/Toast';
+import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
@@ -168,8 +170,55 @@ const App: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
+  const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [confirmationModal, setConfirmationModal] = useState<{
+    isOpen: boolean;
+    title: string;
+    message: string;
+    confirmText: string;
+    cancelText: string;
+    onConfirm: () => void;
+    isDangerous?: boolean;
+  }>({
+    isOpen: false,
+    title: '',
+    message: '',
+    confirmText: '',
+    cancelText: '',
+    onConfirm: () => {},
+  });
 
   const t = translations[lang];
+
+  const addToast = (message: string, type: 'success' | 'error' | 'info') => {
+    const id = crypto.randomUUID();
+    setToasts(prev => [...prev, { id, message, type, duration: 4000 }]);
+  };
+
+  const removeToast = (id: string) => {
+    setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const showConfirmation = (
+    title: string,
+    message: string,
+    onConfirm: () => void,
+    isDangerous: boolean = false
+  ) => {
+    setConfirmationModal({
+      isOpen: true,
+      title,
+      message,
+      confirmText: lang === 'ru' ? 'Удалить' : 'Delete',
+      cancelText: lang === 'ru' ? 'Отмена' : 'Cancel',
+      onConfirm,
+      isDangerous,
+    });
+  };
+
+  const closeConfirmation = () => {
+    setConfirmationModal(prev => ({ ...prev, isOpen: false }));
+  };
 
   // Функция для синхронизации текущего статуса из истории статусов
   // Берет последний (самый свежий) статус из statusHistory
@@ -452,9 +501,20 @@ const App: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    if (window.confirm(t.deleteConfirm)) {
-      setBooks(prev => prev.filter(b => b.id !== id));
-    }
+    const bookToDelete = books.find(b => b.id === id);
+    showConfirmation(
+      lang === 'ru' ? 'Удалить книгу' : 'Delete Book',
+      t.deleteConfirm,
+      () => {
+        setBooks(prev => prev.filter(b => b.id !== id));
+        addToast(
+          lang === 'ru' ? 'Книга удалена' : 'Book deleted',
+          'success'
+        );
+        closeConfirmation();
+      },
+      true
+    );
   };
 
   const handleAddToQueue = (book: Book) => {
@@ -763,6 +823,22 @@ const App: React.FC = () => {
           lang={lang}
         />
       )}
+
+      <Toast messages={toasts} onRemove={removeToast} />
+
+      <ConfirmationModal
+        isOpen={confirmationModal.isOpen}
+        title={confirmationModal.title}
+        message={confirmationModal.message}
+        confirmText={confirmationModal.confirmText}
+        cancelText={confirmationModal.cancelText}
+        onConfirm={() => {
+          confirmationModal.onConfirm();
+          closeConfirmation();
+        }}
+        onCancel={closeConfirmation}
+        isDangerous={confirmationModal.isDangerous}
+      />
       
       <footer className="py-8 border-t bg-[#F0F4F1] text-center text-slate-400 text-sm">
         &copy; {new Date().getFullYear()} LuminaBooks. {lang === 'ru' ? 'Следите за своим прогрессом чтения.' : 'Track your reading journey.'}

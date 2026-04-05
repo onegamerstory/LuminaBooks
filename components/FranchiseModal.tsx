@@ -27,6 +27,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
   });
   const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [error, setError] = useState('');
 
   useEffect(() => {
     if (initialData) {
@@ -42,15 +43,18 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
       });
       setSelectedBookIds([]);
     }
+    setError('');
   }, [initialData, isOpen]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      alert(lang === 'ru' ? 'Введите название франшизы' : 'Enter franchise name');
+      setError(lang === 'ru' ? 'Введите название франшизы' : 'Enter franchise name');
       return;
     }
+
+    setError('');
 
     const newFranchise: Franchise = {
       id: initialData?.id || crypto.randomUUID(),
@@ -121,6 +125,13 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
         </div>
 
         <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          {error && (
+            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium flex items-center gap-2">
+              <span>⚠️</span>
+              <span>{error}</span>
+            </div>
+          )}
+          
           {/* Название и описание */}
           <div className="space-y-4">
             <div>
