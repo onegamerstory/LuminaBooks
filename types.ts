@@ -57,4 +57,4 @@ export interface Franchise {
   updatedAt: string; // ISO timestamp
 }
 
-export type ViewType = 'catalog' | 'franchises' | 'calendar' | 'statistics' | 'reading';
+export type ViewType = 'catalog' | 'collections' | 'calendar' | 'statistics' | 'reading';

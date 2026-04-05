@@ -1,4 +1,4 @@
-import { Book, BookStatus, StatusChange } from '../types';
+import { Book, BookStatus, StatusChange, Franchise } from '../types';
 import { migrateBookStatusHistory, enrichBookStatusHistory } from './statusHistoryUtils';
 
 export interface UserProfile {
@@ -12,18 +12,20 @@ export interface ExportData {
   exportDate: string;
   totalBooks: number;
   userProfile?: UserProfile;
+  franchises?: Franchise[];
   books: Book[];
 }
 
 export interface ImportResult {
   books: Book[];
   userProfile?: UserProfile;
+  franchises?: Franchise[];
 }
 
 /**
- * Экспортирует все книги со всеми данными (сессии, проценты, даты) и информацию о пользователе в JSON формате
+ * Экспортирует все книги со всеми данными (сессии, проценты, даты), франшизы и информацию о пользователе в JSON формате
  */
-export const exportBooksToJson = (books: Book[]) => {
+export const exportBooksToJson = (books: Book[], franchises?: Franchise[]) => {
   // Получаем профиль пользователя из localStorage
   let userProfile: UserProfile | undefined = undefined;
   try {
@@ -35,14 +37,18 @@ export const exportBooksToJson = (books: Book[]) => {
     console.error("Failed to load user profile for export", e);
   }
 
-  // Пополняем историю статусов из дат, если её нет
-  const enrichedBooks = books.map(book => enrichBookStatusHistory(book));
+  // Пополняем историю статусов из дат, если её нет и нормализуем inQueue
+  const enrichedBooks = books.map(book => ({
+    ...enrichBookStatusHistory(book),
+    inQueue: book.inQueue === true ? true : false,
+  }));
 
   const exportData: ExportData = {
     version: '1.0',
     exportDate: new Date().toISOString(),
     totalBooks: enrichedBooks.length,
     ...(userProfile && { userProfile }),
+    ...(franchises && franchises.length > 0 && { franchises }),
     books: enrichedBooks
   };
 
@@ -160,6 +166,16 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
             finalStatus = validatedStatusHistory[validatedStatusHistory.length - 1].newStatus;
           }
 
+          // Валидация очереди
+          const inQueue = typeof book.inQueue === 'boolean' ? book.inQueue : false;
+
+          // Валидация франшиз
+          const franchiseIds = Array.isArray(book.franchiseIds)
+            ? book.franchiseIds.filter(id => typeof id === 'string')
+            : undefined;
+
+          const isPartOfSeries = typeof book.isPartOfSeries === 'boolean' ? book.isPartOfSeries : (franchiseIds && franchiseIds.length > 0);
+
           const importedBook: Book = {
             id: book.id || `imported_${Date.now()}_${index}`,
             title: book.title,
@@ -176,7 +192,10 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
             currentPercentage: currentPercentage ?? (sessions && sessions.length > 0 ? sessions[sessions.length - 1].endPercentage : undefined),
             totalHours,
             sessions: sessions && sessions.length > 0 ? sessions : undefined,
-            statusHistory: validatedStatusHistory
+            statusHistory: validatedStatusHistory,
+            inQueue,
+            franchiseIds,
+            isPartOfSeries
           };
 
           return importedBook;
@@ -193,9 +212,27 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
         // Пополняем историю статусов из дат, если её нет
         const enrichedBooks = migratedBooks.map(book => enrichBookStatusHistory(book));
 
+        // Валидация франшиз
+        const importedFranchises: Franchise[] = [];
+        if (data.franchises && Array.isArray(data.franchises)) {
+          for (const franchise of data.franchises) {
+            if (franchise.id && franchise.name && Array.isArray(franchise.bookIds)) {
+              importedFranchises.push({
+                id: franchise.id,
+                name: franchise.name,
+                description: franchise.description || undefined,
+                bookIds: franchise.bookIds.filter(id => typeof id === 'string'),
+                createdAt: franchise.createdAt || new Date().toISOString(),
+                updatedAt: franchise.updatedAt || new Date().toISOString(),
+              });
+            }
+          }
+        }
+
         resolve({
           books: enrichedBooks,
-          userProfile: data.userProfile
+          userProfile: data.userProfile,
+          franchises: importedFranchises.length > 0 ? importedFranchises : undefined
         });
       } catch (error) {
         if (error instanceof SyntaxError) {

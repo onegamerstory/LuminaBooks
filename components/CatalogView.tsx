@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Book, BookStatus } from '../types';
+import { Book, BookStatus, Franchise } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
@@ -16,10 +16,11 @@ const TABLE_SORT_STORAGE_KEY = 'lumina_catalog_table_sort';
 
 interface CatalogViewProps {
   books: Book[];
+  franchises?: Franchise[];
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
   onAddToQueue: (book: Book) => void;
-  onImport: (books: Book[], userProfile?: UserProfile) => void;
+  onImport: (books: Book[], userProfile?: UserProfile, franchises?: Franchise[]) => void;
   lang: 'en' | 'ru';
 }
 
@@ -134,13 +135,26 @@ const BookTableRow: React.FC<{
 
       {/* Кнопки действия */}
       <div className="flex-shrink-0 flex gap-2">
-        {book.status === BookStatus.WANT_TO_READ && !book.inQueue && onAddToQueue && (
+        {onAddToQueue && (
           <button
-            onClick={onAddToQueue}
-            className="p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors font-medium"
+            onClick={() => {
+              if (book.status === BookStatus.WANT_TO_READ && !book.inQueue) {
+                onAddToQueue();
+              }
+            }}
+            disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
+            className={`p-2 rounded-lg text-white transition-colors font-medium ${
+              book.status === BookStatus.WANT_TO_READ && !book.inQueue
+                ? 'bg-cyan-500 hover:bg-cyan-600'
+                : 'bg-slate-400 cursor-not-allowed'
+            }`}
             title={lang === 'ru' ? 'В очередь' : 'To Queue'}
           >
-            <Library size={16} />
+            {book.status === BookStatus.WANT_TO_READ && book.inQueue ? (
+              <Check size={16} />
+            ) : (
+              <Library size={16} />
+            )}
           </button>
         )}
         <button
@@ -162,7 +176,7 @@ const BookTableRow: React.FC<{
   );
 };
 
-const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onAddToQueue, onImport, lang }) => {
+const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, onDelete, onAddToQueue, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Helper function to load filter statuses from localStorage
@@ -347,7 +361,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onAd
   };
 
   const handleExport = () => {
-    exportBooksToJson(books);
+    exportBooksToJson(books, franchises);
   };
 
   const handleImport = async (event: React.ChangeEvent<HTMLInputElement>) => {
@@ -357,7 +371,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onAd
     setIsImporting(true);
     try {
       const importResult = await importBooksFromJson(file);
-      onImport(importResult.books, importResult.userProfile);
+      onImport(importResult.books, importResult.userProfile, importResult.franchises);
       addToast(lang === 'ru' ? `Успешно импортировано ${importResult.books.length} книг(и)` : `Successfully imported ${importResult.books.length} book(s)`, 'success');
     } catch (error) {
       addToast(lang === 'ru' ? (error instanceof Error ? error.message : 'Ошибка при импорте файла') : 'Error importing file', 'error');

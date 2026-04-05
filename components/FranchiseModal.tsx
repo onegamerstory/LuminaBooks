@@ -50,7 +50,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
     e.preventDefault();
 
     if (!formData.name.trim()) {
-      setError(lang === 'ru' ? 'Введите название франшизы' : 'Enter franchise name');
+      setError(lang === 'ru' ? 'Введите название коллекции' : 'Enter collection name');
       return;
     }
 
@@ -110,11 +110,11 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
           <h2 className="text-xl font-bold font-serif text-[#1E2920]">
             {initialData
               ? lang === 'ru'
-                ? 'Редактировать франшизу'
-                : 'Edit Franchise'
+                ? 'Редактировать коллекцию'
+                : 'Edit Collection'
               : lang === 'ru'
-              ? 'Новая франшиза'
-              : 'New Franchise'}
+              ? 'Новая коллекция'
+              : 'New Collection'}
           </h2>
           <button
             onClick={onClose}
@@ -155,7 +155,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
               <textarea
                 value={formData.description}
                 onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                placeholder={lang === 'ru' ? 'Опишите эту франшизу...' : 'Describe this franchise...'}
+                placeholder={lang === 'ru' ? 'Опишите эту коллекцию...' : 'Describe this collection...'}
                 className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-20"
               />
             </div>
@@ -165,7 +165,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
           {selectedBooks.length > 0 && (
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-3">
-                {lang === 'ru' ? 'Книги в франшизе' : 'Books in franchise'} ({selectedBooks.length})
+                {lang === 'ru' ? 'Книги в коллекции' : 'Books in collection'} ({selectedBooks.length})
               </label>
               <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-50 rounded-lg p-3">
                 {selectedBooks.map((book) => (

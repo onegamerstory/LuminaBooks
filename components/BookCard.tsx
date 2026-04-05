@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Book, BookStatus } from '../types';
-import { Star, Edit2, Trash2, Calendar, User, Link, Library } from 'lucide-react';
+import { Star, Edit2, Trash2, Calendar, User, Link, Library, Check } from 'lucide-react';
 import { translations } from '../App';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 
@@ -63,13 +63,27 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueu
         />
         {/* Кнопки в верхнем правом углу */}
         <div className="absolute top-3 right-3 flex gap-2 z-10">
-          {book.status === BookStatus.WANT_TO_READ && !book.inQueue && onAddToQueue && (
+          {onAddToQueue && (
             <button 
-              onClick={(e) => { e.stopPropagation(); onAddToQueue(); }}
-              className="p-2 bg-cyan-500/90 hover:bg-cyan-500 backdrop-blur-md rounded-lg text-white transition-colors shadow-md"
+              onClick={(e) => { 
+                e.stopPropagation(); 
+                if (book.status === BookStatus.WANT_TO_READ && !book.inQueue) {
+                  onAddToQueue();
+                }
+              }}
+              disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
+              className={`p-2 backdrop-blur-md rounded-lg text-white transition-colors shadow-md ${
+                book.status === BookStatus.WANT_TO_READ && !book.inQueue
+                  ? 'bg-cyan-500/90 hover:bg-cyan-500 cursor-pointer'
+                  : 'bg-slate-400/50 cursor-not-allowed'
+              }`}
               title={lang === 'ru' ? 'В очередь' : 'To Queue'}
             >
-              <Library size={16} />
+              {book.status === BookStatus.WANT_TO_READ && book.inQueue ? (
+                <Check size={16} />
+              ) : (
+                <Library size={16} />
+              )}
             </button>
           )}
           <button 
@@ -114,7 +128,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueu
               {book.title}
             </h3>
             {book.isPartOfSeries && (
-              <div className="flex-shrink-0 pt-1" title={lang === 'ru' ? 'Часть цикла/франшизы' : 'Part of series/franchise'}>
+              <div className="flex-shrink-0 pt-1" title={lang === 'ru' ? 'Часть цикла/коллекции' : 'Part of series/collection'}>
                 <Link size={16} className="text-[#6B9071]" />
               </div>
             )}

@@ -525,10 +525,33 @@ const App: React.FC = () => {
     ));
   };
 
-  const handleImport = (importedBooks: Book[], userProfile?: UserProfile) => {
+  const handleImport = (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
     // Если в импорте есть информация о пользователе, обновляем его в localStorage
     if (userProfile) {
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
+    }
+
+    // Обновляем франшизы если они есть в импортированных данных
+    if (importedFranchises && importedFranchises.length > 0) {
+      setFranchises(prev => {
+        // Сначала обновляем существующие франшизы
+        let updated = prev.map(existingFranchise => {
+          const importedFranchise = importedFranchises.find(f => f.id === existingFranchise.id);
+          if (importedFranchise) {
+            return {
+              ...importedFranchise,
+              createdAt: existingFranchise.createdAt, // Сохраняем оригинальную дату создания
+            };
+          }
+          return existingFranchise;
+        });
+
+        // Затем добавляем новые франшизы
+        const existingIds = new Set(updated.map(f => f.id));
+        const newFranchises = importedFranchises.filter(f => !existingIds.has(f.id));
+
+        return [...updated, ...newFranchises];
+      });
     }
 
     setBooks(prev => {
@@ -553,7 +576,10 @@ const App: React.FC = () => {
             statusHistory: duplicateImportedBook.statusHistory, // История статусов из JSON (авторитетный источник)
             currentPage: duplicateImportedBook.currentPage, // Текущая страница из JSON
             currentPercentage: duplicateImportedBook.currentPercentage, // Процент из JSON
-            totalHours: duplicateImportedBook.totalHours // Часы из JSON
+            totalHours: duplicateImportedBook.totalHours, // Часы из JSON
+            inQueue: duplicateImportedBook.inQueue, // Статус очереди из JSON
+            franchiseIds: duplicateImportedBook.franchiseIds, // Франшизы из JSON
+            isPartOfSeries: duplicateImportedBook.isPartOfSeries, // Статус серии из JSON
           };
         }
 
@@ -678,15 +704,15 @@ const App: React.FC = () => {
                 <span className="hidden sm:inline">{t.catalog}</span>
               </button>
               <button
-                onClick={() => setActiveView('franchises')}
+                onClick={() => setActiveView('collections')}
                 className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'franchises' 
+                  activeView === 'collections' 
                   ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
                   : 'text-slate-600 hover:text-[#1E2920]'
                 }`}
               >
                 <Link size={18} />
-                <span className="hidden sm:inline">{lang === 'ru' ? 'Франшизы' : 'Franchises'}</span>
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Коллекции' : 'Collections'}</span>
               </button>
               <button
                 onClick={() => setActiveView('calendar')}
@@ -749,13 +775,14 @@ const App: React.FC = () => {
         {activeView === 'catalog' ? (
           <CatalogView 
             books={books} 
+            franchises={franchises}
             onEdit={handleEdit} 
             onDelete={handleDelete}
             onAddToQueue={handleAddToQueue}
             onImport={handleImport}
             lang={lang}
           />
-        ) : activeView === 'franchises' ? (
+        ) : activeView === 'collections' ? (
           <FranchiseView 
             franchises={franchises}
             books={books}

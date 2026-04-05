@@ -191,12 +191,12 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-6">
         <div className="flex-grow">
           <h1 className="text-2xl font-bold text-[#1E2920] mb-2">
-            {lang === 'ru' ? 'Франшизы' : 'Franchises'}
+            {lang === 'ru' ? 'Коллекции' : 'Collections'}
           </h1>
           <p className="text-sm text-slate-500">
             {lang === 'ru'
-              ? `${franchises.length} франшиз`
-              : `${franchises.length} franchises`}
+              ? `${franchises.length} коллекций`
+              : `${franchises.length} collections`}
           </p>
         </div>
 
@@ -206,7 +206,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
         >
           <Plus size={20} />
           <span className="hidden sm:inline">
-            {lang === 'ru' ? 'Новая франшиза' : 'New Franchise'}
+            {lang === 'ru' ? 'Новая коллекция' : 'New Collection'}
           </span>
         </button>
       </div>
@@ -217,7 +217,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
         <input
           type="text"
           placeholder={
-            lang === 'ru' ? 'Поиск франшиз...' : 'Search franchises...'
+            lang === 'ru' ? 'Поиск коллекций...' : 'Search collections...'
           }
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
@@ -245,11 +245,11 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
             <p className="text-slate-400 mb-2">
               {searchTerm
                 ? lang === 'ru'
-                  ? 'Франшизы не найдены'
-                  : 'No franchises found'
+                  ? 'Коллекции не найдены'
+                  : 'No collections found'
                 : lang === 'ru'
-                ? 'Нет франшиз'
-                : 'No franchises yet'}
+                ? 'Нет коллекций'
+                : 'No collections yet'}
             </p>
             {!searchTerm && (
               <button

@@ -50,7 +50,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
       <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
         <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-[#1E2920]">
-            {lang === 'ru' ? 'Выбрать франшизы' : 'Select Franchises'}
+            {lang === 'ru' ? 'Выбрать коллекции' : 'Select Collections'}
           </h2>
           <button
             onClick={onClose}
