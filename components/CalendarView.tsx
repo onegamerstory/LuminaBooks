@@ -35,8 +35,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
     const date = new Date(year, month, 1);
     const days = [];
     
-    // Fill leading empty days
-    const firstDayIndex = date.getDay();
+    // Fill leading empty days (week starts on Monday)
+    const firstDayIndex = date.getDay() === 0 ? 6 : date.getDay() - 1;
     for (let i = 0; i < firstDayIndex; i++) {
       days.push(null);
     }
@@ -129,8 +129,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   };
 
   const weekDays = lang === 'ru' 
-    ? ['Вс', 'Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб']
-    : ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    ? ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс']
+    : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
     <div className="bg-[#F0F4F1] rounded-2xl shadow-md border border-slate-100 overflow-hidden">
