@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Book, BookStatus } from '../types';
-import { Star, Edit2, Trash2, Calendar, User } from 'lucide-react';
+import { Star, Edit2, Trash2, Calendar, User, Link } from 'lucide-react';
 import { translations } from '../App';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 
@@ -99,9 +99,16 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
 
       <div className="p-4 flex flex-col flex-grow space-y-2">
         <div className="flex items-start justify-between gap-2">
-          <h3 className="font-bold text-[#1E2920] line-clamp-1 text-lg leading-tight" title={book.title}>
-            {book.title}
-          </h3>
+          <div className="flex items-start gap-1 flex-grow min-w-0">
+            <h3 className="font-bold text-[#1E2920] line-clamp-1 text-lg leading-tight" title={book.title}>
+              {book.title}
+            </h3>
+            {book.isPartOfSeries && (
+              <div className="flex-shrink-0 pt-1" title={lang === 'ru' ? 'Часть цикла/франшизы' : 'Part of series/franchise'}>
+                <Link size={16} className="text-[#6B9071]" />
+              </div>
+            )}
+          </div>
           <div className="flex items-center gap-1 text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded text-sm font-bold">
             <Star size={14} fill="currentColor" />
             {book.rating}

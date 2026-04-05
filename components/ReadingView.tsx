@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../App';
 import Toast, { ToastMessage } from './Toast';
@@ -431,7 +431,12 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   </div>
                 )}
                 <div className="flex-1">
-                  <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
+                  <div className="flex items-center gap-1">
+                    <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
+                    {book.isPartOfSeries && (
+                      <Link size={18} className="text-[#6B9071] flex-shrink-0" />
+                    )}
+                  </div>
                   <p className="text-sm text-slate-600">{book.author}</p>
                   <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider mt-1 ${
                     book.status === BookStatus.READING 

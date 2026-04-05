@@ -41,6 +41,7 @@ export interface Book {
   currentPage?: number; // Текущая страница прочитанной книги
   currentPercentage?: number; // Текущий процент прочитанной книги
   totalHours?: number; // Базовое значение часов, установленное пользователем или импортированное
+  isPartOfSeries?: boolean; // Является ли книга частью цикла/франшизы
   sessions?: ReadingSession[];
   statusHistory?: StatusChange[]; // История смены статусов
 }

@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
-import { X, Star } from 'lucide-react';
+import { X, Star, Link } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
@@ -29,6 +29,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
     startDate: '',
     endDate: '',
     description: '',
+    isPartOfSeries: false,
   });
   const isEditingExistingBook = !!initialData;
   const [showRatingModal, setShowRatingModal] = useState(false);
@@ -37,7 +38,10 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
 
   useEffect(() => {
     if (initialData) {
-      setFormData(initialData);
+      setFormData({
+        ...initialData,
+        isPartOfSeries: initialData.isPartOfSeries ?? false,
+      });
     } else {
       setFormData({
         title: '',
@@ -49,6 +53,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         startDate: '',
         endDate: '',
         description: '',
+        isPartOfSeries: false,
       });
     }
   }, [initialData, isOpen]);
@@ -74,6 +79,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
       coverUrl: finalCoverUrl,
       status: formData.status as BookStatus,
       rating: Number(formData.rating) || 0,
+      isPartOfSeries: formData.isPartOfSeries ?? false,
     };
 
     // Проверяем, нужна ли оценка книги
@@ -177,15 +183,33 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
 
             <div className="flex-grow space-y-4">
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.title}</label>
-                <input 
-                  required
-                  type="text" 
-                  value={formData.title}
-                  onChange={e => setFormData({...formData, title: e.target.value})}
-                  className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
-                  placeholder="e.g. The Great Gatsby"
-                />
+                <div className="flex items-center justify-between gap-3">
+                  <div className="flex-grow">
+                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.title}</label>
+                    <input 
+                      required
+                      type="text" 
+                      value={formData.title}
+                      onChange={e => setFormData({...formData, title: e.target.value})}
+                      className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
+                      placeholder="e.g. The Great Gatsby"
+                    />
+                  </div>
+                  <div className="flex flex-col items-center justify-end h-full pt-6">
+                    <button
+                      type="button"
+                      onClick={() => setFormData({...formData, isPartOfSeries: !formData.isPartOfSeries})}
+                      className={`p-2 rounded-lg transition-all ${
+                        formData.isPartOfSeries 
+                          ? 'bg-[#6B9071] text-white shadow-md' 
+                          : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
+                      }`}
+                      title={lang === 'ru' ? 'Часть цикла/франшизы' : 'Part of series/franchise'}
+                    >
+                      <Link size={18} />
+                    </button>
+                  </div>
+                </div>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

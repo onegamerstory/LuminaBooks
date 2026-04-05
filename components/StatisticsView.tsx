@@ -12,7 +12,8 @@ import {
   Library,
   Award,
   AlertCircle,
-  User
+  User,
+  Link
 } from 'lucide-react';
 
 interface StatisticsViewProps {
@@ -242,7 +243,12 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                 {maxRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-amber-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-[#1E2920]">{book.title}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium text-[#1E2920]">{book.title}</p>
+                        {book.isPartOfSeries && (
+                          <Link size={14} className="text-[#6B9071] flex-shrink-0" />
+                        )}
+                      </div>
                       <p className="text-sm text-slate-500">{book.author}</p>
                     </div>
                     <div className="flex items-center gap-1 text-amber-500 font-bold">
@@ -274,7 +280,12 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                 {minRatingBooks.slice(0, 5).map(book => (
                   <div key={book.id} className="flex items-center justify-between p-3 bg-slate-50 rounded-lg">
                     <div className="flex-1">
-                      <p className="font-medium text-[#1E2920]">{book.title}</p>
+                      <div className="flex items-center gap-1">
+                        <p className="font-medium text-[#1E2920]">{book.title}</p>
+                        {book.isPartOfSeries && (
+                          <Link size={14} className="text-[#6B9071] flex-shrink-0" />
+                        )}
+                      </div>
                       <p className="text-sm text-slate-500">{book.author}</p>
                     </div>
                     <div className="flex items-center gap-1 text-slate-400 font-bold">

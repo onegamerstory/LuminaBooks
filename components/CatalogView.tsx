@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { Book, BookStatus } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
@@ -65,7 +65,12 @@ const BookTableRow: React.FC<{
 
       {/* Основная информация */}
       <div className="flex-grow min-w-0">
-        <h3 className="font-bold text-[#1E2920] text-sm truncate">{book.title}</h3>
+        <div className="flex items-center gap-1">
+          <h3 className="font-bold text-[#1E2920] text-sm truncate">{book.title}</h3>
+          {book.isPartOfSeries && (
+            <Link size={14} className="text-[#6B9071] flex-shrink-0" />
+          )}
+        </div>
         <p className="text-slate-600 text-xs mb-3">{book.author} • {book.year}</p>
         
         <div className="flex flex-wrap gap-3 items-center text-xs">
@@ -517,7 +522,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
             <div className="relative">
               <button
                 onClick={() => setIsTableSortOpen(!isTableSortOpen)}
-                className="flex items-center gap-2 bg-[#F0F4F1] border border-slate-200 rounded-lg px-3 py-2 hover:border-slate-300 transition-colors"
+                className="flex items-center gap-2 bg-[#F0F4F1] border border-slate-200 rounded-lg px-3 py-2.5 hover:border-slate-300 transition-colors"
               >
                 {(tableSortOption === 'rating-desc' || tableSortOption === 'rating-asc') && (
                   <>

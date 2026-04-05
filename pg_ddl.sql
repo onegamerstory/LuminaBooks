@@ -38,6 +38,7 @@ CREATE TABLE books (
     year VARCHAR(10),
     cover_url TEXT,
     description TEXT,
+    is_part_of_series BOOLEAN DEFAULT FALSE,
     
     -- Статус и оценка
     status book_status NOT NULL DEFAULT 'WANT_TO_READ',

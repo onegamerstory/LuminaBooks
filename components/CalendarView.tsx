@@ -1,7 +1,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
-import { ChevronLeft, ChevronRight, HelpCircle, X, Search } from 'lucide-react';
+import { ChevronLeft, ChevronRight, HelpCircle, X, Search, Link } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
@@ -358,7 +358,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                         className="w-16 h-24 object-cover rounded shadow-md border border-slate-200"
                       />
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-bold text-[#1E2920] truncate">{book.title}</h3>
+                        <div className="flex items-center gap-1">
+                          <h3 className="font-bold text-[#1E2920] truncate">{book.title}</h3>
+                          {book.isPartOfSeries && (
+                            <Link size={14} className="text-[#6B9071] flex-shrink-0" />
+                          )}
+                        </div>
                         <p className="text-sm text-slate-500 truncate">{book.author}</p>
                         {book.year && (
                           <p className="text-xs text-slate-400 mt-1">{book.year}</p>
