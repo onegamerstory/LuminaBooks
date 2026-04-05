@@ -1,5 +1,5 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
 import { ChevronLeft, ChevronRight, HelpCircle, X, Search } from 'lucide-react';
 import { translations } from '../App';
@@ -13,12 +13,21 @@ interface CalendarViewProps {
   onStartReading: (bookId: string, startDate: string) => void;
 }
 
-const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading }) => {
+const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading }: CalendarViewProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isBookSelectionModalOpen, setIsBookSelectionModalOpen] = useState(false);
   const [bookSearchTerm, setBookSearchTerm] = useState('');
-  const t = translations[lang];
+  const [viewMode, setViewMode] = useState<'phases' | 'sessions'>(() => {
+    const saved = localStorage.getItem('calendarViewMode');
+    return (saved as 'phases' | 'sessions') || 'phases';
+  });
+  const t = translations[lang as 'en' | 'ru'];
+
+  // Сохраняем состояние тумблера в localStorage
+  useEffect(() => {
+    localStorage.setItem('calendarViewMode', viewMode);
+  }, [viewMode]);
 
   const daysInMonth = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -60,19 +69,31 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
   const getBooksForDay = (day: Date) => {
     const dayStr = toLocalISOString(day);
-    
-    return books.filter(book => {
-      // Получаем все активные фазы чтения для книги
-      const activePhases = getActiveReadingPhases(book);
-      
-      // Проверяем, попадает ли текущий день в какую-либо активную фазу
-      return activePhases.some(phase => dayStr >= phase.startDate && dayStr <= phase.endDate);
-    });
+
+    if (viewMode === 'sessions') {
+      // Режим сессий: показываем книги, у которых были сессии в этот день
+      return books.filter((book: Book) => {
+        if (!book.sessions || book.sessions.length === 0) return false;
+        return book.sessions.some((session: any) => {
+          const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
+          return sessionDate === dayStr;
+        });
+      });
+    } else {
+      // Режим фаз: показываем книги в активных фазах чтения
+      return books.filter((book: Book) => {
+        // Получаем все активные фазы чтения для книги
+        const activePhases = getActiveReadingPhases(book);
+
+        // Проверяем, попадает ли текущий день в какую-либо активную фазу
+        return activePhases.some((phase: any) => dayStr >= phase.startDate && dayStr <= phase.endDate);
+      });
+    }
   };
 
   // Получаем список книг со статусом "Буду читать"
   const getBooksToStart = () => {
-    return books.filter(book => book.status === BookStatus.WANT_TO_READ);
+    return books.filter((book: Book) => book.status === BookStatus.WANT_TO_READ);
   };
 
   // Обработчик правого клика на день
@@ -101,7 +122,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       return booksToStart;
     }
     const searchLower = bookSearchTerm.toLowerCase();
-    return booksToStart.filter(book => 
+    return booksToStart.filter((book: Book) => 
       book.title.toLowerCase().includes(searchLower) || 
       book.author.toLowerCase().includes(searchLower)
     );
@@ -121,16 +142,44 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             </div>
           </div>
 
-          <div className="flex items-center gap-4 bg-[#BCCDBE] p-1 rounded-xl">
-            <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-[#87A68C] rounded-lg transition-colors">
-              <ChevronLeft size={20} />
-            </button>
-            <span className="font-bold text-slate-700 min-w-[140px] text-center capitalize">
-              {monthName} {year}
-            </span>
-            <button onClick={() => changeMonth(1)} className="p-2 hover:bg-[#87A68C] rounded-lg transition-colors">
-              <ChevronRight size={20} />
-            </button>
+          <div className="flex items-center gap-4">
+            {/* Toggle переключатель режимов */}
+            <div className="flex items-center gap-2 bg-[#BCCDBE] p-1 rounded-xl">
+              <button
+                onClick={() => setViewMode('phases')}
+                className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                  viewMode === 'phases'
+                    ? 'bg-[#6B9071] text-white'
+                    : 'text-slate-700 hover:bg-[#87A68C]'
+                }`}
+                title={lang === 'ru' ? 'Показывать активные фазы чтения' : 'Show active reading phases'}
+              >
+                {lang === 'ru' ? 'Фазы' : 'Phases'}
+              </button>
+              <button
+                onClick={() => setViewMode('sessions')}
+                className={`px-3 py-2 rounded-lg transition-colors text-sm font-medium ${
+                  viewMode === 'sessions'
+                    ? 'bg-[#6B9071] text-white'
+                    : 'text-slate-700 hover:bg-[#87A68C]'
+                }`}
+                title={lang === 'ru' ? 'Показывать дни с сессиями' : 'Show days with sessions'}
+              >
+                {lang === 'ru' ? 'Сессии' : 'Sessions'}
+              </button>
+            </div>
+
+            <div className="flex items-center gap-1 bg-[#BCCDBE] p-1 rounded-xl">
+              <button onClick={() => changeMonth(-1)} className="p-2 hover:bg-[#87A68C] rounded-lg transition-colors">
+                <ChevronLeft size={20} />
+              </button>
+              <span className="font-bold text-slate-700 min-w-[140px] text-center capitalize">
+                {monthName} {year}
+              </span>
+              <button onClick={() => changeMonth(1)} className="p-2 hover:bg-[#87A68C] rounded-lg transition-colors">
+                <ChevronRight size={20} />
+              </button>
+            </div>
           </div>
         </div>
 
@@ -139,13 +188,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
           <label className="text-sm font-medium text-slate-600">{lang === 'ru' ? 'Перейти к дате:' : 'Go to date:'}</label>
           <DateInput
             value={new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())}
-            onChange={(date) => {
+            onChange={(date: Date | null) => {
               if (date) {
                 setCurrentDate(new Date(dayjs(date).format('YYYY-MM-DD')));
               }
             }}
             placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
-            format="DD.MM.YYYY"
             valueFormat="YYYY-MM-DD"
             clearable={false}
             className="w-40"
@@ -160,7 +208,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       </div>
 
       <div className="grid grid-cols-7 border-b bg-[#BCCDBE]">
-        {weekDays.map(day => (
+        {weekDays.map((day: string) => (
           <div key={day} className="py-2 text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
             {day}
           </div>
@@ -168,7 +216,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       </div>
 
       <div className="grid grid-cols-7 auto-rows-[140px] sm:auto-rows-[180px]">
-        {daysInMonth.map((day, idx) => {
+        {daysInMonth.map((day: Date | null, idx: number) => {
           if (!day) return <div key={`empty-${idx}`} className="bg-slate-50/50 border-r border-b border-slate-100" />;
           
           const booksToday = getBooksForDay(day);
@@ -178,7 +226,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             <div 
               key={day.toISOString()} 
               className={`relative border-r border-b border-slate-100 p-1 group hover:bg-[#87A68C]/20 transition-colors cursor-pointer ${isToday ? 'bg-[#87A68C]/40' : ''}`}
-              onContextMenu={(e) => handleDayContextMenu(e, day)}
+              onContextMenu={(e: React.MouseEvent) => handleDayContextMenu(e, day)}
               title={lang === 'ru' ? 'Правый клик для начала чтения книги' : 'Right click to start reading a book'}
             >
               <span className={`absolute top-2 left-2 z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full ${
@@ -192,7 +240,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 {booksToday.slice(0, 4).length > 2 ? (
                   // Для более чем 2 обложек - стопка со смещением, поднята вверх
                   <div className="relative w-full flex items-start justify-center" style={{ height: '115px', marginTop: '-30px' }}>
-                    {booksToday.slice(0, 4).map((book, idx) => (
+                    {booksToday.slice(0, 4).map((book: Book, idx: number) => (
                       <div 
                         key={book.id} 
                         className="absolute group/cover aspect-[2/3] w-[60px] shadow-md border border-slate-200 rounded"
@@ -215,7 +263,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 ) : (
                   // Для 2 и менее обложек - обычное отображение в ряд
                   <div className="flex flex-wrap gap-1 justify-center w-full">
-                    {booksToday.slice(0, 4).map(book => (
+                    {booksToday.slice(0, 4).map((book: Book) => (
                       <div key={book.id} className="relative group/cover w-[calc(50%-4px)] aspect-[2/3] max-w-[60px]">
                         <img 
                           src={book.coverUrl} 
@@ -251,7 +299,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         >
           <div 
             className="bg-[#F0F4F1] rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl"
-            onClick={(e) => e.stopPropagation()}
+            onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold font-serif text-[#1E2920]">
@@ -298,7 +346,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 </div>
               ) : (
                 <div className="space-y-2 max-h-[60vh] overflow-y-auto">
-                  {getFilteredBooksToStart().map(book => (
+                  {getFilteredBooksToStart().map((book: Book) => (
                     <button
                       key={book.id}
                       onClick={() => handleBookSelect(book)}

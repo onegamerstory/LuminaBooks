@@ -64,7 +64,9 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
     return (
       <button
         key={index}
-        ref={(el) => (starRefs.current[index] = el)}
+        ref={(el: HTMLButtonElement | null) => {
+          if (el) starRefs.current[index] = el;
+        }}
         onMouseMove={(e) => handleStarHover(index, e)}
         onMouseLeave={() => setHoveredRating(0)}
         onClick={(e) => handleStarClick(index, e)}

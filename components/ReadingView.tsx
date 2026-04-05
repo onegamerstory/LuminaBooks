@@ -702,7 +702,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   value={manualSessionData.date ? dayjs(manualSessionData.date).toDate() : null}
                   onChange={(date) => setManualSessionData({ ...manualSessionData, date: date ? dayjs(date).format('YYYY-MM-DD') : '' })}
                   placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
-                  format="DD.MM.YYYY"
                   valueFormat="YYYY-MM-DD"
                   clearable
                   className="w-full"

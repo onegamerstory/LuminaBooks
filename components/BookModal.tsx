@@ -279,7 +279,6 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     value={formData.startDate ? dayjs(formData.startDate).toDate() : null}
                     onChange={(date) => setFormData({...formData, startDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
                     placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
-                    format="DD.MM.YYYY"
                     valueFormat="YYYY-MM-DD"
                     clearable
                     className="w-full"
@@ -291,7 +290,6 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                     value={formData.endDate ? dayjs(formData.endDate).toDate() : null}
                     onChange={(date) => setFormData({...formData, endDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
                     placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
-                    format="DD.MM.YYYY"
                     valueFormat="YYYY-MM-DD"
                     clearable
                     className="w-full"
