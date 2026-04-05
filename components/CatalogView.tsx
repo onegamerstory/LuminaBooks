@@ -18,6 +18,7 @@ interface CatalogViewProps {
   books: Book[];
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
+  onAddToQueue: (book: Book) => void;
   onImport: (books: Book[], userProfile?: UserProfile) => void;
   lang: 'en' | 'ru';
 }
@@ -43,8 +44,9 @@ const BookTableRow: React.FC<{
   book: Book;
   onEdit: () => void;
   onDelete: () => void;
+  onAddToQueue?: () => void;
   lang: 'en' | 'ru';
-}> = ({ book, onEdit, onDelete, lang }) => {
+}> = ({ book, onEdit, onDelete, onAddToQueue, lang }) => {
   const t = translations[lang];
 
   return (
@@ -132,6 +134,15 @@ const BookTableRow: React.FC<{
 
       {/* Кнопки действия */}
       <div className="flex-shrink-0 flex gap-2">
+        {book.status === BookStatus.WANT_TO_READ && !book.inQueue && onAddToQueue && (
+          <button
+            onClick={onAddToQueue}
+            className="p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 transition-colors font-medium"
+            title={lang === 'ru' ? 'В очередь' : 'To Queue'}
+          >
+            <Library size={16} />
+          </button>
+        )}
         <button
           onClick={onEdit}
           className="p-2 bg-[#A1BAA5] text-[#1E2920] rounded-lg hover:bg-[#87A68C] transition-colors font-medium"
@@ -151,7 +162,7 @@ const BookTableRow: React.FC<{
   );
 };
 
-const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onImport, lang }) => {
+const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onAddToQueue, onImport, lang }) => {
   const [searchTerm, setSearchTerm] = useState('');
   
   // Helper function to load filter statuses from localStorage
@@ -728,6 +739,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                   book={book} 
                   onEdit={() => onEdit(book)} 
                   onDelete={() => onDelete(book.id)}
+                  onAddToQueue={() => onAddToQueue(book)}
                   lang={lang}
                 />
               ))}
@@ -742,6 +754,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                   book={book} 
                   onEdit={() => onEdit(book)} 
                   onDelete={() => onDelete(book.id)}
+                  onAddToQueue={() => onAddToQueue(book)}
                   lang={lang}
                 />
               ))}
@@ -756,6 +769,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, onEdit, onDelete, onIm
                   book={book}
                   onEdit={() => onEdit(book)}
                   onDelete={() => onDelete(book.id)}
+                  onAddToQueue={() => onAddToQueue(book)}
                   lang={lang}
                 />
               ))}

@@ -77,7 +77,16 @@ export const translations = {
     save: 'Save',
     coverUrlSaved: 'Default cover URL saved',
     coverUrlCleared: 'Default cover URL cleared',
-    profileSaved: 'Profile saved successfully'
+    profileSaved: 'Profile saved successfully',
+    queue: 'Queue',
+    toQueue: 'To Queue',
+    addToQueue: 'Add to Queue',
+    removeFromQueue: 'Remove from Queue',
+    startReadingButton: 'Start Reading',
+    queueAdded: 'Book added to queue',
+    queueRemoved: 'Book removed from queue',
+    readingStarted: 'Reading started',
+    noQueueBooks: 'No books in queue'
   },
   ru: {
     catalog: 'Каталог',
@@ -136,7 +145,16 @@ export const translations = {
     save: 'Сохранить',
     coverUrlSaved: 'URL обложки сохранён',
     coverUrlCleared: 'URL обложки очищен',
-    profileSaved: 'Профиль успешно сохранён'
+    profileSaved: 'Профиль успешно сохранён',
+    queue: 'Очередь',
+    toQueue: 'В очередь',
+    addToQueue: 'Добавить в очередь',
+    removeFromQueue: 'Убрать из очереди',
+    startReadingButton: 'Начать чтение',
+    queueAdded: 'Книга добавлена в очередь',
+    queueRemoved: 'Книга удалена из очереди',
+    readingStarted: 'Чтение началось',
+    noQueueBooks: 'Нет книг в очереди'
   }
 };
 
@@ -439,6 +457,14 @@ const App: React.FC = () => {
     }
   };
 
+  const handleAddToQueue = (book: Book) => {
+    setBooks(prev => prev.map(b => 
+      b.id === book.id 
+        ? { ...b, inQueue: true }
+        : b
+    ));
+  };
+
   const handleImport = (importedBooks: Book[], userProfile?: UserProfile) => {
     // Если в импорте есть информация о пользователе, обновляем его в localStorage
     if (userProfile) {
@@ -665,6 +691,7 @@ const App: React.FC = () => {
             books={books} 
             onEdit={handleEdit} 
             onDelete={handleDelete}
+            onAddToQueue={handleAddToQueue}
             onImport={handleImport}
             lang={lang}
           />

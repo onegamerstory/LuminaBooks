@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2 } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../App';
 import Toast, { ToastMessage } from './Toast';
@@ -51,6 +51,8 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       if (a.status === BookStatus.POSTPONED && b.status === BookStatus.READING) return 1;
       return 0;
     });
+
+  const queueBooks = books.filter(b => b.inQueue === true && b.status === BookStatus.WANT_TO_READ);
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
     const id = `toast_${Date.now()}`;
@@ -394,11 +396,18 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       <Toast messages={toasts} onRemove={removeToast} />
       <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Чтение' : 'Reading'}</h2>
 
-      {readingBooks.length === 0 ? (
+      {/* Раздел чтения */}
+      {readingBooks.length === 0 && queueBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
           <Clock size={48} className="mb-4 opacity-20" />
           <p className="text-lg">{lang === 'ru' ? 'Нет книг со статусом "Читаю" или "Отложено"' : 'No books with "Reading" or "Postponed" status'}</p>
           <p className="text-sm">{lang === 'ru' ? 'Добавьте книгу или измените её статус' : 'Add a book or change its status'}</p>
+        </div>
+      ) : readingBooks.length === 0 ? (
+        <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
+          <Clock size={48} className="mb-4 opacity-20" />
+          <p className="text-lg">{lang === 'ru' ? 'Нет книг со статусом "Читаю" или "Отложено"' : 'No books with "Reading" or "Postponed" status'}</p>
+          <p className="text-sm">{lang === 'ru' ? 'Начните чтение книги из очереди' : 'Start reading a book from queue'}</p>
         </div>
       ) : (
         <div className="space-y-4">
@@ -591,6 +600,81 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               )}
             </div>
           ))}
+        </div>
+      )}
+
+      {/* Раздел очереди */}
+      {queueBooks.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Очередь' : 'Queue'}</h3>
+          <div className="space-y-3">
+            {queueBooks.map(book => (
+              <div key={book.id} className="bg-cyan-50 rounded-xl shadow-md border border-cyan-200 p-6">
+                <div className="flex justify-between items-start mb-4 gap-4">
+                  {book.coverUrl && (
+                    <div className="flex-shrink-0 relative">
+                      <img
+                        src={book.coverUrl}
+                        alt={book.title}
+                        className="w-20 h-28 object-cover rounded-lg shadow-md"
+                        onError={(e) => {
+                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"%3E%3Crect fill="%23e2e8f0" width="80" height="112"/%3E%3C/svg%3E';
+                        }}
+                      />
+                    </div>
+                  )}
+                  <div className="flex-1">
+                    <div className="flex items-center gap-1">
+                      <h4 className="text-lg font-semibold text-[#1E2920]">{book.title}</h4>
+                      {book.isPartOfSeries && (
+                        <Link size={18} className="text-[#6B9071] flex-shrink-0" />
+                      )}
+                    </div>
+                    <p className="text-sm text-slate-600">{book.author} • {book.year}</p>
+                    {book.description && (
+                      <p className="text-sm text-slate-600 mt-2 line-clamp-2">{book.description}</p>
+                    )}
+                  </div>
+                  <div className="flex gap-2 flex-col">
+                    <button
+                      onClick={() => {
+                        const updatedBook: Book = {
+                          ...book,
+                          status: BookStatus.READING,
+                          startDate: dayjs().format('YYYY-MM-DD'),
+                          inQueue: false
+                        };
+                        // Очищаем историю дат и записываем новый статус
+                        const bookWithHistory = recordStatusChange(book, BookStatus.READING);
+                        const finalBook = {
+                          ...bookWithHistory,
+                          startDate: dayjs().format('YYYY-MM-DD'),
+                          inQueue: false
+                        };
+                        onUpdateBook(finalBook);
+                        addToast(lang === 'ru' ? 'Начато чтение' : 'Reading started', 'success');
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors text-sm font-medium whitespace-nowrap"
+                    >
+                      <Play size={16} />
+                      <span>{lang === 'ru' ? 'Начать' : 'Start'}</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        const updatedBook = { ...book, inQueue: false };
+                        onUpdateBook(updatedBook);
+                        addToast(lang === 'ru' ? 'Книга удалена из очереди' : 'Book removed from queue', 'success');
+                      }}
+                      className="flex items-center gap-2 px-4 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors text-sm font-medium whitespace-nowrap"
+                    >
+                      <Trash2 size={16} />
+                      <span>{lang === 'ru' ? 'Убрать' : 'Remove'}</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       )}
 

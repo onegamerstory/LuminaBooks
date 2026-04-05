@@ -45,6 +45,7 @@ export interface Book {
   franchiseIds?: string[]; // IDs франшиз, к которым принадлежит книга
   sessions?: ReadingSession[];
   statusHistory?: StatusChange[]; // История смены статусов
+  inQueue?: boolean; // Находится ли книга в очереди чтения
 }
 
 export interface Franchise {

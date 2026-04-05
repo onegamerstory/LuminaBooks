@@ -1,7 +1,7 @@
 
 import React from 'react';
 import { Book, BookStatus } from '../types';
-import { Star, Edit2, Trash2, Calendar, User, Link } from 'lucide-react';
+import { Star, Edit2, Trash2, Calendar, User, Link, Library } from 'lucide-react';
 import { translations } from '../App';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 
@@ -9,10 +9,11 @@ interface BookCardProps {
   book: Book;
   onEdit: () => void;
   onDelete: () => void;
+  onAddToQueue?: () => void;
   lang: 'en' | 'ru';
 }
 
-const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => {
+const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueue, lang }) => {
   const t = translations[lang];
   
   const statusColors = {
@@ -62,6 +63,15 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
         />
         {/* Кнопки в верхнем правом углу */}
         <div className="absolute top-3 right-3 flex gap-2 z-10">
+          {book.status === BookStatus.WANT_TO_READ && !book.inQueue && onAddToQueue && (
+            <button 
+              onClick={(e) => { e.stopPropagation(); onAddToQueue(); }}
+              className="p-2 bg-cyan-500/90 hover:bg-cyan-500 backdrop-blur-md rounded-lg text-white transition-colors shadow-md"
+              title={lang === 'ru' ? 'В очередь' : 'To Queue'}
+            >
+              <Library size={16} />
+            </button>
+          )}
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
             className="p-2 bg-[#F0F4F1]/90 hover:bg-[#F0F4F1] backdrop-blur-md rounded-lg text-[#1E2920] transition-colors shadow-md"
@@ -79,7 +89,7 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, lang }) => 
         </div>
         {/* Hover эффект */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className={`absolute top-3 left-3 px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
+        <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
           {getStatusLabel(book.status)}
         </div>
         {/* Процент прочтения под обложкой */}
