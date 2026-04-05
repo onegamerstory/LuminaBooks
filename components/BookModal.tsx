@@ -156,7 +156,7 @@ const BookModal: React.FC<BookModalProps> = ({
       isPartOfSeries: selectedIds.length > 0, // Auto-update isPartOfSeries based on franchise count
     }));
 
-    // Если пользователь хочет создать новую франшизу
+    // Если пользователь хочет создать новую коллекцию
     if (newFranchiseName && newFranchiseName.trim() && onFranchisesUpdated) {
       const newFranchise: Franchise = {
         id: crypto.randomUUID(),
@@ -166,10 +166,10 @@ const BookModal: React.FC<BookModalProps> = ({
         updatedAt: new Date().toISOString(),
       };
       
-      // Добавляем только новую франшизу в приложение
+      // Добавляем только новую коллекцию в приложение
       onFranchisesUpdated(newFranchise);
 
-      // Добавляем новую франшизу в selectedIds
+      // Добавляем новую коллекцию в selectedIds
       setFormData(prev => ({
         ...prev,
         franchiseIds: [...selectedIds, newFranchise.id],
@@ -253,7 +253,7 @@ const BookModal: React.FC<BookModalProps> = ({
                           ? 'bg-[#6B9071] text-white shadow-md' 
                           : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
                       }`}
-                      title={lang === 'ru' ? 'Добавить в франшизу' : 'Add to franchise'}
+                      title={lang === 'ru' ? 'Добавить в коллекцию' : 'Add to collection'}
                     >
                       <Link size={18} />
                       {formData.franchiseIds && formData.franchiseIds.length > 0 && (

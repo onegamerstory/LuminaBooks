@@ -157,7 +157,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
     if (confirmationModal.franchiseId) {
       onDeleteFranchise(confirmationModal.franchiseId);
       addToast(
-        lang === 'ru' ? 'Франшиза удалена' : 'Franchise deleted',
+        lang === 'ru' ? 'Коллекция удалена' : 'Collection deleted',
         'success'
       );
       setConfirmationModal({
@@ -171,13 +171,13 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
     if (editingFranchise) {
       onUpdateFranchise(franchise);
       addToast(
-        lang === 'ru' ? 'Франшиза обновлена' : 'Franchise updated',
+        lang === 'ru' ? 'Коллекция обновлена' : 'Collection updated',
         'success'
       );
     } else {
       onAddFranchise(franchise);
       addToast(
-        lang === 'ru' ? 'Франшиза создана' : 'Franchise created',
+        lang === 'ru' ? 'Коллекция создана' : 'Collection created',
         'success'
       );
     }
@@ -225,7 +225,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
         />
       </div>
 
-      {/* Сетка франшиз */}
+      {/* Сетка коллекцию */}
       {filteredFranchises.length > 0 ? (
         <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 flex-grow">
           {filteredFranchises.map((franchise) => (
@@ -284,8 +284,8 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       {/* Модаль подтверждения удаления */}
       <ConfirmationModal
         isOpen={confirmationModal.isOpen}
-        title={lang === 'ru' ? 'Удалить франшизу' : 'Delete Franchise'}
-        message={lang === 'ru' ? 'Вы уверены, что хотите удалить эту франшизу?' : 'Are you sure you want to delete this franchise?'}
+        title={lang === 'ru' ? 'Удалить коллекцию' : 'Delete Collection'}
+        message={lang === 'ru' ? 'Вы уверены, что хотите удалить эту коллекцию?' : 'Are you sure you want to delete this collection?'}
         confirmText={lang === 'ru' ? 'Удалить' : 'Delete'}
         cancelText={lang === 'ru' ? 'Отмена' : 'Cancel'}
         onConfirm={confirmDelete}

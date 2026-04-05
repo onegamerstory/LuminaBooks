@@ -23,7 +23,7 @@ export interface ImportResult {
 }
 
 /**
- * Экспортирует все книги со всеми данными (сессии, проценты, даты), франшизы и информацию о пользователе в JSON формате
+ * Экспортирует все книги со всеми данными (сессии, проценты, даты), коллекции и информацию о пользователе в JSON формате
  */
 export const exportBooksToJson = (books: Book[], franchises?: Franchise[]) => {
   // Получаем профиль пользователя из localStorage
@@ -169,7 +169,7 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
           // Валидация очереди
           const inQueue = typeof book.inQueue === 'boolean' ? book.inQueue : false;
 
-          // Валидация франшиз
+          // Валидация коллекцию
           const franchiseIds = Array.isArray(book.franchiseIds)
             ? book.franchiseIds.filter(id => typeof id === 'string')
             : undefined;
@@ -212,7 +212,7 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
         // Пополняем историю статусов из дат, если её нет
         const enrichedBooks = migratedBooks.map(book => enrichBookStatusHistory(book));
 
-        // Валидация франшиз
+        // Валидация коллекцию
         const importedFranchises: Franchise[] = [];
         if (data.franchises && Array.isArray(data.franchises)) {
           for (const franchise of data.franchises) {

@@ -61,11 +61,11 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
         </div>
 
         <div className="p-6 space-y-6">
-          {/* Существующие франшизы */}
+          {/* Существующие коллекции */}
           {franchises.length > 0 && (
             <div>
               <label className="block text-sm font-semibold text-slate-600 mb-3">
-                {lang === 'ru' ? 'Добавить в существующие франшизы' : 'Add to existing franchises'}
+                {lang === 'ru' ? 'Добавить в существующие коллекции' : 'Add to existing collections'}
               </label>
               <div className="space-y-2">
                 {franchises.map((franchise) => (
@@ -94,12 +94,12 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
           {franchises.length === 0 && !createNew && (
             <div className="text-center py-4">
               <p className="text-sm text-slate-500 mb-3">
-                {lang === 'ru' ? 'Нет доступных франшиз' : 'No franchises available'}
+                {lang === 'ru' ? 'Нет доступных коллекций' : 'No collections available'}
               </p>
             </div>
           )}
 
-          {/* Создать новую франшизу */}
+          {/* Создать новую коллекцию */}
           <div className="border-t pt-4">
             {!createNew ? (
               <button
@@ -108,13 +108,13 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
               >
                 <Plus size={16} />
                 <span className="text-sm font-medium">
-                  {lang === 'ru' ? 'Или создать новую франшизу' : 'Or create new franchise'}
+                  {lang === 'ru' ? 'Или создать новую коллекцию' : 'Or create new collection'}
                 </span>
               </button>
             ) : (
               <div className="space-y-3">
                 <label className="block text-sm font-semibold text-slate-600">
-                  {lang === 'ru' ? 'Название новой франшизы' : 'New franchise name'}
+                  {lang === 'ru' ? 'Название новой коллекции' : 'New collection name'}
                 </label>
                 <input
                   type="text"

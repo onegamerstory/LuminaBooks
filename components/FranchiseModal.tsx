@@ -65,7 +65,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
       updatedAt: new Date().toISOString(),
     };
 
-    // Обновляем книги: добавляем франшизу к их franchiseIds и устанавливаем isPartOfSeries
+    // Обновляем книги: добавляем коллекцию к их franchiseIds и устанавливаем isPartOfSeries
     const updatedBooks = books.map((book) => {
       if (selectedBookIds.includes(book.id)) {
         return {
@@ -77,12 +77,12 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
           ],
         };
       } else if (initialData && initialData.bookIds.includes(book.id)) {
-        // Удаляем франшизу из книг, которые были раньше, но сейчас не выбраны
+        // Удаляем коллекцию из книг, которые были раньше, но сейчас не выбраны
         const remainingFranchiseIds = (book.franchiseIds || []).filter((id) => id !== initialData.id);
         return {
           ...book,
           franchiseIds: remainingFranchiseIds,
-          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше франшиз
+          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше коллекцию
         };
       }
       return book;

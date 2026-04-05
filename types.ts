@@ -41,8 +41,8 @@ export interface Book {
   currentPage?: number; // Текущая страница прочитанной книги
   currentPercentage?: number; // Текущий процент прочитанной книги
   totalHours?: number; // Базовое значение часов, установленное пользователем или импортированное
-  isPartOfSeries?: boolean; // Является ли книга частью цикла/франшизы
-  franchiseIds?: string[]; // IDs франшиз, к которым принадлежит книга
+  isPartOfSeries?: boolean; // Является ли книга частью цикла/коллекции
+  franchiseIds?: string[]; // IDs коллекции, к которым принадлежит книга
   sessions?: ReadingSession[];
   statusHistory?: StatusChange[]; // История смены статусов
   inQueue?: boolean; // Находится ли книга в очереди чтения
@@ -52,7 +52,7 @@ export interface Franchise {
   id: string;
   name: string;
   description?: string;
-  bookIds: string[]; // IDs книг в этой франшизе
+  bookIds: string[]; // IDs книг в этой коллекции
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp
 }

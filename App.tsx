@@ -15,7 +15,9 @@ import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
+// @ts-ignore
 import '@mantine/core/styles.css';
+// @ts-ignore
 import '@mantine/dates/styles.css';
 
 const STORAGE_KEY = 'lumina_books_v1';
@@ -531,10 +533,10 @@ const App: React.FC = () => {
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
     }
 
-    // Обновляем франшизы если они есть в импортированных данных
+    // Обновляем коллекции если они есть в импортированных данных
     if (importedFranchises && importedFranchises.length > 0) {
       setFranchises(prev => {
-        // Сначала обновляем существующие франшизы
+        // Сначала обновляем существующие коллекции
         let updated = prev.map(existingFranchise => {
           const importedFranchise = importedFranchises.find(f => f.id === existingFranchise.id);
           if (importedFranchise) {
@@ -546,7 +548,7 @@ const App: React.FC = () => {
           return existingFranchise;
         });
 
-        // Затем добавляем новые франшизы
+        // Затем добавляем новые коллекции
         const existingIds = new Set(updated.map(f => f.id));
         const newFranchises = importedFranchises.filter(f => !existingIds.has(f.id));
 
@@ -578,7 +580,7 @@ const App: React.FC = () => {
             currentPercentage: duplicateImportedBook.currentPercentage, // Процент из JSON
             totalHours: duplicateImportedBook.totalHours, // Часы из JSON
             inQueue: duplicateImportedBook.inQueue, // Статус очереди из JSON
-            franchiseIds: duplicateImportedBook.franchiseIds, // Франшизы из JSON
+            franchiseIds: duplicateImportedBook.franchiseIds, // коллекции из JSON
             isPartOfSeries: duplicateImportedBook.isPartOfSeries, // Статус серии из JSON
           };
         }
@@ -654,7 +656,7 @@ const App: React.FC = () => {
         return {
           ...b,
           franchiseIds: remainingFranchiseIds,
-          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше франшиз
+          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше коллекцию
         };
       })
     );
