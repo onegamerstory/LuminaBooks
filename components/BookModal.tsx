@@ -1,23 +1,35 @@
 
 import React, { useState, useEffect } from 'react';
-import { Book, BookStatus } from '../types';
+import { Book, BookStatus, Franchise } from '../types';
 import { X, Star, Link } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
+import FranchiseSelectModal from './FranchiseSelectModal.tsx';
 import { calculateBookTotalHours } from '../utils/dateUtils';
 
 interface BookModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSubmit: (book: Book) => void;
+  onFranchisesUpdated?: (franchise: Franchise) => void;
   initialData?: Book;
+  franchises?: Franchise[];
   lang: 'en' | 'ru';
   defaultCoverUrl?: string;
 }
 
-const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initialData, lang, defaultCoverUrl = '' }) => {
+const BookModal: React.FC<BookModalProps> = ({ 
+  isOpen, 
+  onClose, 
+  onSubmit, 
+  onFranchisesUpdated,
+  initialData, 
+  franchises = [],
+  lang, 
+  defaultCoverUrl = '' 
+}) => {
   const t = translations[lang];
   const [formData, setFormData] = useState<Partial<Book>>({
     title: '',
@@ -30,7 +42,9 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
     endDate: '',
     description: '',
     isPartOfSeries: false,
+    franchiseIds: [],
   });
+  const [showFranchiseSelect, setShowFranchiseSelect] = useState(false);
   const isEditingExistingBook = !!initialData;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingEditModal, setShowRatingEditModal] = useState(false);
@@ -38,9 +52,11 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
 
   useEffect(() => {
     if (initialData) {
+      const franchiseIds = initialData.franchiseIds ?? [];
       setFormData({
         ...initialData,
-        isPartOfSeries: initialData.isPartOfSeries ?? false,
+        isPartOfSeries: franchiseIds.length > 0 || (initialData.isPartOfSeries ?? false),
+        franchiseIds: franchiseIds,
       });
     } else {
       setFormData({
@@ -54,6 +70,7 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         endDate: '',
         description: '',
         isPartOfSeries: false,
+        franchiseIds: [],
       });
     }
   }, [initialData, isOpen]);
@@ -79,7 +96,8 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
       coverUrl: finalCoverUrl,
       status: formData.status as BookStatus,
       rating: Number(formData.rating) || 0,
-      isPartOfSeries: formData.isPartOfSeries ?? false,
+      isPartOfSeries: ((formData.franchiseIds && formData.franchiseIds.length > 0) || formData.isPartOfSeries) ?? false,
+      franchiseIds: formData.franchiseIds ?? [],
     };
 
     // Проверяем, нужна ли оценка книги
@@ -129,6 +147,37 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
     // Обновляем форму с новой оценкой при редактировании
     setFormData(prev => ({ ...prev, rating }));
     setShowRatingEditModal(false);
+  };
+
+  const handleFranchiseSelect = (selectedIds: string[], newFranchiseName?: string) => {
+    setFormData(prev => ({
+      ...prev,
+      franchiseIds: selectedIds,
+      isPartOfSeries: selectedIds.length > 0, // Auto-update isPartOfSeries based on franchise count
+    }));
+
+    // Если пользователь хочет создать новую франшизу
+    if (newFranchiseName && newFranchiseName.trim() && onFranchisesUpdated) {
+      const newFranchise: Franchise = {
+        id: crypto.randomUUID(),
+        name: newFranchiseName,
+        bookIds: [], // Книга будет добавлена при сохранении
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      };
+      
+      // Добавляем только новую франшизу в приложение
+      onFranchisesUpdated(newFranchise);
+
+      // Добавляем новую франшизу в selectedIds
+      setFormData(prev => ({
+        ...prev,
+        franchiseIds: [...selectedIds, newFranchise.id],
+        isPartOfSeries: true,
+      }));
+    }
+
+    setShowFranchiseSelect(false);
   };
 
   if (!isOpen) return null;
@@ -195,18 +244,23 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
                       placeholder="e.g. The Great Gatsby"
                     />
                   </div>
-                  <div className="flex flex-col items-center justify-end h-full pt-6">
+                  <div className="flex items-center justify-end h-full pt-6">
                     <button
                       type="button"
-                      onClick={() => setFormData({...formData, isPartOfSeries: !formData.isPartOfSeries})}
-                      className={`p-2 rounded-lg transition-all ${
-                        formData.isPartOfSeries 
+                      onClick={() => setShowFranchiseSelect(true)}
+                      className={`p-2 rounded-lg transition-all relative ${
+                        (formData.franchiseIds && formData.franchiseIds.length > 0) || formData.isPartOfSeries
                           ? 'bg-[#6B9071] text-white shadow-md' 
                           : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
                       }`}
-                      title={lang === 'ru' ? 'Часть цикла/франшизы' : 'Part of series/franchise'}
+                      title={lang === 'ru' ? 'Добавить в франшизу' : 'Add to franchise'}
                     >
                       <Link size={18} />
+                      {formData.franchiseIds && formData.franchiseIds.length > 0 && (
+                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                          {formData.franchiseIds.length}
+                        </span>
+                      )}
                     </button>
                   </div>
                 </div>
@@ -359,6 +413,15 @@ const BookModal: React.FC<BookModalProps> = ({ isOpen, onClose, onSubmit, initia
         onClose={() => setShowRatingEditModal(false)}
         onSubmit={handleRatingEditSubmit}
         bookTitle={formData.title || ''}
+        lang={lang}
+      />
+
+      <FranchiseSelectModal
+        isOpen={showFranchiseSelect}
+        onClose={() => setShowFranchiseSelect(false)}
+        onSubmit={handleFranchiseSelect}
+        selectedFranchiseIds={formData.franchiseIds ?? []}
+        franchises={franchises}
         lang={lang}
       />
     </>

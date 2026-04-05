@@ -42,8 +42,18 @@ export interface Book {
   currentPercentage?: number; // Текущий процент прочитанной книги
   totalHours?: number; // Базовое значение часов, установленное пользователем или импортированное
   isPartOfSeries?: boolean; // Является ли книга частью цикла/франшизы
+  franchiseIds?: string[]; // IDs франшиз, к которым принадлежит книга
   sessions?: ReadingSession[];
   statusHistory?: StatusChange[]; // История смены статусов
 }
 
-export type ViewType = 'catalog' | 'calendar' | 'statistics' | 'reading';
+export interface Franchise {
+  id: string;
+  name: string;
+  description?: string;
+  bookIds: string[]; // IDs книг в этой франшизе
+  createdAt: string; // ISO timestamp
+  updatedAt: string; // ISO timestamp
+}
+
+export type ViewType = 'catalog' | 'franchises' | 'calendar' | 'statistics' | 'reading';

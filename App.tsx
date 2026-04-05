@@ -1,7 +1,8 @@
 
 import React, { useState, useEffect } from 'react';
-import { Book, BookStatus, ViewType } from './types';
+import { Book, BookStatus, ViewType, Franchise } from './types';
 import CatalogView from './components/CatalogView';
+import FranchiseView from './components/FranchiseView';
 import CalendarView from './components/CalendarView';
 import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
@@ -10,12 +11,13 @@ import BookRatingModal from './components/BookRatingModal';
 import UserProfileModal from './components/UserProfileModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory } from './utils/statusHistoryUtils';
-import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings } from 'lucide-react';
+import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 
 const STORAGE_KEY = 'lumina_books_v1';
+const FRANCHISES_STORAGE_KEY = 'lumina_franchises_v1';
 
 export const translations = {
   en: {
@@ -140,6 +142,7 @@ export const translations = {
 
 const App: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
+  const [franchises, setFranchises] = useState<Franchise[]>([]);
   const [activeView, setActiveView] = useState<ViewType>('catalog');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingBook, setEditingBook] = useState<Book | undefined>(undefined);
@@ -248,6 +251,18 @@ const App: React.FC = () => {
         console.error("Failed to load books", e);
       }
     }
+
+    // Load franchises
+    const savedFranchises = localStorage.getItem(FRANCHISES_STORAGE_KEY);
+    if (savedFranchises) {
+      try {
+        const loadedFranchises = JSON.parse(savedFranchises);
+        setFranchises(loadedFranchises);
+      } catch (e) {
+        console.error("Failed to load franchises", e);
+      }
+    }
+
     const savedLang = localStorage.getItem('lumina_lang');
     if (savedLang === 'en' || savedLang === 'ru') {
       setLang(savedLang);
@@ -317,6 +332,10 @@ const App: React.FC = () => {
   }, [books]);
 
   useEffect(() => {
+    localStorage.setItem(FRANCHISES_STORAGE_KEY, JSON.stringify(franchises));
+  }, [franchises]);
+
+  useEffect(() => {
     localStorage.setItem('lumina_lang', lang);
   }, [lang]);
 
@@ -377,6 +396,34 @@ const App: React.FC = () => {
 
       return updatedBooks;
     });
+
+    // Update franchises based on book's new franchiseIds
+    setFranchises(prev =>
+      prev.map(franchise => {
+        const shouldIncludeBook = book.franchiseIds?.includes(franchise.id) ?? false;
+        const currentlyIncludesBook = franchise.bookIds.includes(book.id);
+
+        if (shouldIncludeBook && !currentlyIncludesBook) {
+          // Add book to franchise
+          return {
+            ...franchise,
+            bookIds: [...franchise.bookIds, book.id],
+            updatedAt: new Date().toISOString(),
+          };
+        } else if (!shouldIncludeBook && currentlyIncludesBook) {
+          // Remove book from franchise
+          return {
+            ...franchise,
+            bookIds: franchise.bookIds.filter(bid => bid !== book.id),
+            updatedAt: new Date().toISOString(),
+          };
+        }
+
+        // No change needed
+        return franchise;
+      })
+    );
+
     setIsModalOpen(false);
     setEditingBook(undefined);
   };
@@ -477,6 +524,34 @@ const App: React.FC = () => {
 
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ru' : 'en');
 
+  // Handlers for franchises
+  const handleAddFranchise = (franchise: Franchise) => {
+    setFranchises(prev => [...prev, franchise]);
+  };
+
+  const handleUpdateFranchise = (updatedFranchise: Franchise) => {
+    setFranchises(prev => prev.map(f => f.id === updatedFranchise.id ? updatedFranchise : f));
+  };
+
+  const handleDeleteFranchise = (id: string) => {
+    setFranchises(prev => prev.filter(f => f.id !== id));
+    // Remove franchise from books and update isPartOfSeries flag
+    setBooks(prev => 
+      prev.map(b => {
+        const remainingFranchiseIds = (b.franchiseIds || []).filter(fid => fid !== id);
+        return {
+          ...b,
+          franchiseIds: remainingFranchiseIds,
+          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше франшиз
+        };
+      })
+    );
+  };
+
+  const handleBooksUpdated = (updatedBooks: Book[]) => {
+    setBooks(updatedBooks);
+  };
+
   // Определяем платформу для применения macOS стилей
   const isMac = typeof window !== 'undefined' && window.electronAPI?.isMac === true;
 
@@ -515,6 +590,17 @@ const App: React.FC = () => {
               >
                 <Library size={18} />
                 <span className="hidden sm:inline">{t.catalog}</span>
+              </button>
+              <button
+                onClick={() => setActiveView('franchises')}
+                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
+                  activeView === 'franchises' 
+                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
+                  : 'text-slate-600 hover:text-[#1E2920]'
+                }`}
+              >
+                <Link size={18} />
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Франшизы' : 'Franchises'}</span>
               </button>
               <button
                 onClick={() => setActiveView('calendar')}
@@ -582,6 +668,16 @@ const App: React.FC = () => {
             onImport={handleImport}
             lang={lang}
           />
+        ) : activeView === 'franchises' ? (
+          <FranchiseView 
+            franchises={franchises}
+            books={books}
+            onAddFranchise={handleAddFranchise}
+            onUpdateFranchise={handleUpdateFranchise}
+            onDeleteFranchise={handleDeleteFranchise}
+            onBooksUpdated={handleBooksUpdated}
+            lang={lang}
+          />
         ) : activeView === 'calendar' ? (
           <CalendarView 
             books={books} 
@@ -610,6 +706,8 @@ const App: React.FC = () => {
           initialData={editingBook}
           lang={lang}
           defaultCoverUrl={defaultCoverUrl}
+          franchises={franchises}
+          onFranchisesUpdated={handleAddFranchise}
         />
       )}
 
