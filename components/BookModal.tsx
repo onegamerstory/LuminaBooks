@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
-import { X, Star, Link } from 'lucide-react';
+import { X, Star, Link, Clock } from 'lucide-react';
 import { translations } from '../App';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
@@ -43,6 +43,7 @@ const BookModal: React.FC<BookModalProps> = ({
     description: '',
     isPartOfSeries: false,
     franchiseIds: [],
+    totalHours: undefined,
   });
   const [showFranchiseSelect, setShowFranchiseSelect] = useState(false);
   const isEditingExistingBook = !!initialData;
@@ -57,6 +58,7 @@ const BookModal: React.FC<BookModalProps> = ({
         ...initialData,
         isPartOfSeries: franchiseIds.length > 0 || (initialData.isPartOfSeries ?? false),
         franchiseIds: franchiseIds,
+        totalHours: undefined,
       });
     } else {
       setFormData({
@@ -71,6 +73,7 @@ const BookModal: React.FC<BookModalProps> = ({
         description: '',
         isPartOfSeries: false,
         franchiseIds: [],
+        totalHours: undefined,
       });
     }
   }, [initialData, isOpen]);
@@ -218,7 +221,7 @@ const BookModal: React.FC<BookModalProps> = ({
                  <button
                    type="button"
                    onClick={() => setShowRatingEditModal(true)}
-                   className="flex items-center justify-center gap-1 py-2 px-3 bg-[#F9F3E6] border border-amber-200 rounded-lg hover:bg-[#FFF5E1] transition-colors group"
+                   className="flex items-center justify-center gap-1 py-2 px-3 bg-[#F9F3E6] border border-amber-200 rounded-lg hover:bg-[#FFF5E1] transition-colors group w-full"
                    title={lang === 'ru' ? 'Изменить оценку' : 'Change rating'}
                  >
                    <Star size={18} className="fill-amber-400 text-amber-400" />
@@ -227,6 +230,15 @@ const BookModal: React.FC<BookModalProps> = ({
                      {lang === 'ru' ? 'изменить' : 'edit'}
                    </span>
                  </button>
+               )}
+               {isEditingExistingBook && initialData && (
+                 <div className="flex items-center justify-center gap-2 py-2 px-3 bg-[#DFE9E2] border border-[#B8D4C0] rounded-lg w-full">
+                   <Clock size={18} className="text-[#6B9071]" />
+                   <span className="font-semibold text-[#1E2920]">{calculateBookTotalHours(initialData).toFixed(1)}</span>
+                   <span className="text-xs text-[#4A7056]">
+                     {lang === 'ru' ? 'часов' : 'hours'}
+                   </span>
+                 </div>
                )}
             </div>
 
@@ -297,31 +309,6 @@ const BookModal: React.FC<BookModalProps> = ({
                   placeholder={lang === 'ru' ? 'Количество страниц в книге' : 'Total number of pages'}
                   className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
                 />
-              </div>
-
-              <div>
-                <div className="block text-xs font-semibold text-slate-500 uppercase mb-1 flex justify-between items-center">
-                  <span>{lang === 'ru' ? 'Базовые часы чтения' : 'Base Reading Hours'}</span>
-                  {initialData && (
-                    <span className="text-[#6B9071] text-xs font-normal">
-                      {lang === 'ru' ? `Всего: ${calculateBookTotalHours(initialData)} часов` : `Total: ${calculateBookTotalHours(initialData)} hours`}
-                    </span>
-                  )}
-                </div>
-                <input 
-                  type="number" 
-                  min="0"
-                  step="0.5"
-                  value={formData.totalHours || ''}
-                  onChange={e => setFormData({...formData, totalHours: e.target.value ? parseFloat(e.target.value) : undefined})}
-                  placeholder={lang === 'ru' ? 'Доп. часы для добавления к сессиям' : 'Additional hours to add'}
-                  className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
-                />
-                <p className="text-xs text-slate-400 mt-1">
-                  {lang === 'ru' 
-                    ? 'Сессии автоматически добавляют часы. Это поле для доп. значений.' 
-                    : 'Sessions automatically add hours. This field is for additional values.'}
-                </p>
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

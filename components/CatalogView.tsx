@@ -2,12 +2,12 @@
 import React, { useState } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid3x3, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
 
-type ViewMode = 'large' | 'medium' | 'table';
+type ViewMode = 'large' | 'table';
 type TableSortOption = 'rating-desc' | 'rating-asc' | 'title-asc' | 'title-desc' | 'status-asc' | 'status-desc' | 'pages-desc' | 'pages-asc';
 
 const VIEWMODE_STORAGE_KEY = 'lumina_catalog_viewmode';
@@ -212,7 +212,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
   const [isTableSortOpen, setIsTableSortOpen] = useState(false);
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
-    return (saved && ['large', 'medium', 'table'].includes(saved)) ? saved : 'large';
+    return (saved && ['large', 'table'].includes(saved)) ? saved : 'large';
   });
   const t = translations[lang];
 
@@ -527,13 +527,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
           <div className="flex gap-1 bg-[#F0F4F1] p-1 rounded-lg border border-slate-200">
             <ViewModeButton
               mode="large"
-              icon={<Grid3x3 size={18} />}
-              title={lang === 'ru' ? 'Крупная сетка' : 'Large grid'}
-            />
-            <ViewModeButton
-              mode="medium"
               icon={<Grid2x2 size={18} />}
-              title={lang === 'ru' ? 'Средняя сетка' : 'Medium grid'}
+              title={lang === 'ru' ? 'Крупная сетка' : 'Large grid'}
             />
             <ViewModeButton
               mode="table"
@@ -747,21 +742,6 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
         <>
           {viewMode === 'large' && (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {filteredBooks.map(book => (
-                <BookCard 
-                  key={book.id} 
-                  book={book} 
-                  onEdit={() => onEdit(book)} 
-                  onDelete={() => onDelete(book.id)}
-                  onAddToQueue={() => onAddToQueue(book)}
-                  lang={lang}
-                />
-              ))}
-            </div>
-          )}
-
-          {viewMode === 'medium' && (
-            <div className="grid grid-cols-1 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
               {filteredBooks.map(book => (
                 <BookCard 
                   key={book.id} 

@@ -106,9 +106,6 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
           const totalPages = typeof book.totalPages === 'number' && book.totalPages > 0 ? book.totalPages : undefined;
           const currentPage = typeof book.currentPage === 'number' && book.currentPage > 0 ? book.currentPage : undefined;
           const currentPercentage = typeof book.currentPercentage === 'number' && book.currentPercentage >= 0 && book.currentPercentage <= 100 ? book.currentPercentage : undefined;
-          
-          // Валидация часов
-          const totalHours = typeof book.totalHours === 'number' && book.totalHours >= 0 ? Math.round(book.totalHours * 10) / 10 : undefined;
 
           // Валидация сессий чтения
           const sessions = Array.isArray(book.sessions) 
@@ -190,7 +187,6 @@ export const importBooksFromJson = (file: File): Promise<ImportResult> => {
             totalPages,
             currentPage,
             currentPercentage: currentPercentage ?? (sessions && sessions.length > 0 ? sessions[sessions.length - 1].endPercentage : undefined),
-            totalHours,
             sessions: sessions && sessions.length > 0 ? sessions : undefined,
             statusHistory: validatedStatusHistory,
             inQueue,

@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2 } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../App';
 import Toast, { ToastMessage } from './Toast';
@@ -8,6 +8,7 @@ import { DateInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
 import dayjs from 'dayjs';
 import { recordStatusChange } from '../utils/statusHistoryUtils';
+import { calculateBookTotalHours } from '../utils/dateUtils';
 
 interface ReadingViewProps {
   books: Book[];
@@ -234,8 +235,13 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       // Обновляем текущий процент (всегда вычисляем если возможно)
       currentPercentage: finalCurrentPercentage,
       sessions: [...(book.sessions || []), newSession],
+      // Если статус "Отложено", переводим в "Читаю" при добавлении сессии
       // Если достигнута 100% прочитанность, автоматически устанавливаем статус "Прочитано"
-      status: finalCurrentPercentage === 100 ? BookStatus.READ : book.status,
+      status: finalCurrentPercentage === 100 
+        ? BookStatus.READ 
+        : book.status === BookStatus.POSTPONED 
+          ? BookStatus.READING 
+          : book.status,
       // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
       endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
@@ -363,8 +369,13 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       currentPage: finalEndPage || book.currentPage,
       currentPercentage: finalCurrentPercentage,
       sessions: [...(book.sessions || []), newSession],
+      // Если статус "Отложено", переводим в "Читаю" при добавлении сессии
       // Если достигнута 100% прочитанность, автоматически устанавливаем статус "Прочитано"
-      status: finalCurrentPercentage === 100 ? BookStatus.READ : book.status,
+      status: finalCurrentPercentage === 100 
+        ? BookStatus.READ 
+        : book.status === BookStatus.POSTPONED 
+          ? BookStatus.READING 
+          : book.status,
       // Если достигнута 100%, устанавливаем дату окончания на дату последней сессии
       endDate: finalCurrentPercentage === 100 ? dayjs(newSession.endTime).format('YYYY-MM-DD') : book.endDate
     };
@@ -502,7 +513,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     </div>
                   </div>
                 ) : (
-                  <div className="flex gap-2">
+                  <div className="flex flex-wrap gap-2">
                     <button
                       onClick={() => startSession(book.id)}
                       className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
@@ -521,6 +532,60 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       <Clock size={18} />
                       <span className="text-sm">{lang === 'ru' ? 'Добавить вручную' : 'Add Manual'}</span>
                     </button>
+                    
+                    {book.status === BookStatus.READING && (
+                      <>
+                        <button
+                          onClick={() => {
+                            const updatedBook = recordStatusChange(book, BookStatus.POSTPONED);
+                            onUpdateBook(updatedBook);
+                            addToast(lang === 'ru' ? 'Книга отложена' : 'Book postponed', 'info');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-[#CD853F] text-white rounded-lg hover:bg-[#D2691E] transition-colors"
+                          title={lang === 'ru' ? 'Отложить' : 'Postpone'}
+                        >
+                          <Pause size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
+                            onUpdateBook(updatedBook);
+                            addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-[#8B0000] text-white rounded-lg hover:bg-[#800000] transition-colors"
+                          title={lang === 'ru' ? 'Бросить' : 'Abandon'}
+                        >
+                          <X size={18} />
+                        </button>
+                      </>
+                    )}
+                    
+                    {book.status === BookStatus.POSTPONED && (
+                      <>
+                        <button
+                          onClick={() => {
+                            const updatedBook = recordStatusChange(book, BookStatus.READING);
+                            onUpdateBook(updatedBook);
+                            addToast(lang === 'ru' ? 'Статус изменен на "Читаю"' : 'Status changed to "Reading"', 'info');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-[#6495ED] text-white rounded-lg hover:bg-[#4682B4] transition-colors"
+                          title={lang === 'ru' ? 'Читать' : 'Read'}
+                        >
+                          <BookOpen size={18} />
+                        </button>
+                        <button
+                          onClick={() => {
+                            const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
+                            onUpdateBook(updatedBook);
+                            addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
+                          }}
+                          className="flex items-center gap-2 px-4 py-2 bg-[#8B0000] text-white rounded-lg hover:bg-[#800000] transition-colors"
+                          title={lang === 'ru' ? 'Бросить' : 'Abandon'}
+                        >
+                          <X size={18} />
+                        </button>
+                      </>
+                    )}
                   </div>
                 )}
               </div>
@@ -528,9 +593,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               {/* История сессий */}
               {book.sessions && book.sessions.length > 0 && (
                 <div className="mt-6 border-t border-slate-200 pt-4">
-                  <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2">
-                    <Zap size={16} className="text-amber-500" />
-                    {lang === 'ru' ? 'История сессий' : 'Session History'} ({book.sessions.length})
+                  <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2 justify-between">
+                    <div className="flex items-center gap-2">
+                      <Zap size={16} className="text-amber-500" />
+                      <span>{lang === 'ru' ? 'История сессий' : 'Session History'} ({book.sessions.length})</span>
+                    </div>
+                    <div className="text-xs font-normal text-[#1E2920] bg-[#DFE9E2] border border-[#B8D4C0] px-2 py-1 rounded">
+                      {calculateBookTotalHours(book).toFixed(1)} {lang === 'ru' ? 'ч' : 'h'}
+                    </div>
                   </h4>
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm">
@@ -657,7 +727,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors text-sm font-medium whitespace-nowrap"
                     >
                       <Play size={16} />
-                      <span>{lang === 'ru' ? 'Начать' : 'Start'}</span>
+                      <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
                     </button>
                     <button
                       onClick={() => {

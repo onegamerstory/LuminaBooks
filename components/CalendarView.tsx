@@ -67,6 +67,46 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
     return `${y}-${m}-${d}`;
   };
 
+  // Получаем количество часов чтения за день
+  const getDailyHours = (day: Date): number => {
+    const dayStr = toLocalISOString(day);
+    let totalSeconds = 0;
+
+    books.forEach((book: Book) => {
+      if (!book.sessions || book.sessions.length === 0) return;
+      
+      book.sessions.forEach((session: any) => {
+        const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
+        if (sessionDate === dayStr) {
+          totalSeconds += session.duration || 0;
+        }
+      });
+    });
+
+    return Math.round((totalSeconds / 3600) * 10) / 10; // Округляем до 1 десятичного знака
+  };
+
+  // Получаем количество часов чтения за месяц
+  const getMonthlyHours = (): number => {
+    let totalSeconds = 0;
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const monthStart = `${year}-${String(month + 1).padStart(2, '0')}`;
+
+    books.forEach((book: Book) => {
+      if (!book.sessions || book.sessions.length === 0) return;
+      
+      book.sessions.forEach((session: any) => {
+        const sessionDate = dayjs(session.startTime).format('YYYY-MM');
+        if (sessionDate === monthStart) {
+          totalSeconds += session.duration || 0;
+        }
+      });
+    });
+
+    return Math.round((totalSeconds / 3600) * 10) / 10; // Округляем до 1 десятичного знака
+  };
+
   const getBooksForDay = (day: Date) => {
     const dayStr = toLocalISOString(day);
 
@@ -184,26 +224,39 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         </div>
 
         {/* Date Picker */}
-        <div className="flex items-center gap-3">
-          <label className="text-sm font-medium text-slate-600">{lang === 'ru' ? 'Перейти к дате:' : 'Go to date:'}</label>
-          <DateInput
-            value={new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())}
-            onChange={(date: Date | null) => {
-              if (date) {
-                setCurrentDate(new Date(dayjs(date).format('YYYY-MM-DD')));
-              }
-            }}
-            placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
-            valueFormat="YYYY-MM-DD"
-            clearable={false}
-            className="w-40"
-          />
-          <button
-            onClick={() => setCurrentDate(new Date())}
-            className="px-3 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] transition-colors text-sm font-medium"
-          >
-            {lang === 'ru' ? 'Сегодня' : 'Today'}
-          </button>
+        <div className="flex items-center justify-between gap-3">
+          <div className="flex items-center gap-3">
+            <label className="text-sm font-medium text-slate-600">{lang === 'ru' ? 'Перейти к дате:' : 'Go to date:'}</label>
+            <DateInput
+              value={new Date(currentDate.getFullYear(), currentDate.getMonth(), currentDate.getDate())}
+              onChange={(date: Date | null) => {
+                if (date) {
+                  setCurrentDate(new Date(dayjs(date).format('YYYY-MM-DD')));
+                }
+              }}
+              placeholder={lang === 'ru' ? 'Выберите дату' : 'Select date'}
+              valueFormat="YYYY-MM-DD"
+              clearable={false}
+              className="w-40"
+            />
+            <button
+              onClick={() => setCurrentDate(new Date())}
+              className="px-3 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] transition-colors text-sm font-medium"
+            >
+              {lang === 'ru' ? 'Сегодня' : 'Today'}
+            </button>
+          </div>
+          
+          {/* Monthly Hours Badge */}
+          <div className="bg-[#E8F0E6] border border-[#6B9071] rounded-lg px-4 py-2 flex items-center gap-2">
+            <span className="text-xs font-medium text-slate-600">
+              {lang === 'ru' ? 'Часов в месяце:' : 'Hours this month:'}
+            </span>
+            <span className="text-lg font-bold text-[#6B9071]">
+              {getMonthlyHours()}
+            </span>
+            <span className="text-xs text-slate-500">ч</span>
+          </div>
         </div>
       </div>
 
@@ -229,14 +282,23 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
               onContextMenu={(e: React.MouseEvent) => handleDayContextMenu(e, day)}
               title={lang === 'ru' ? 'Правый клик для начала чтения книги' : 'Right click to start reading a book'}
             >
-              <span className={`absolute top-2 left-2 z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full ${
-                isToday ? 'bg-[#6B9071] text-white' : 'text-slate-400'
-              }`}>
-                {day.getDate()}
-              </span>
+              <div className="flex items-center justify-between gap-1">
+                <span className={`z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full ${
+                  isToday ? 'bg-[#6B9071] text-white' : 'text-slate-400'
+                }`}>
+                  {day.getDate()}
+                </span>
+                
+                {/* Daily Hours - Top Right */}
+                {getDailyHours(day) > 0 && (
+                  <div className="bg-[#6B9071] text-white rounded px-1.5 py-0.5 flex items-center justify-center text-[10px] font-bold whitespace-nowrap">
+                    {getDailyHours(day)}h
+                  </div>
+                )}
+              </div>
               
               {/* Стопка обложек со смещением */}
-              <div className="mt-7 relative h-full flex flex-col items-start justify-center w-full">
+              <div className="mt-1 relative h-full flex flex-col items-start justify-center w-full">
                 {booksToday.slice(0, 4).length > 2 ? (
                   // Для более чем 2 обложек - стопка со смещением, поднята вверх
                   <div className="relative w-full flex items-start justify-center" style={{ height: '115px', marginTop: '-30px' }}>
@@ -262,7 +324,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                   </div>
                 ) : (
                   // Для 2 и менее обложек - обычное отображение в ряд
-                  <div className="flex flex-wrap gap-1 justify-center w-full">
+                  <div className="flex flex-wrap gap-1 justify-center w-full -mt-6">
                     {booksToday.slice(0, 4).map((book: Book) => (
                       <div key={book.id} className="relative group/cover w-[calc(50%-4px)] aspect-[2/3] max-w-[60px]">
                         <img 

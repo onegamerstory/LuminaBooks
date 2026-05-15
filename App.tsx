@@ -12,7 +12,7 @@ import UserProfileModal from './components/UserProfileModal';
 import Toast, { ToastMessage } from './components/Toast';
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
-import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory } from './utils/statusHistoryUtils';
+import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 // @ts-ignore
@@ -436,6 +436,23 @@ const App: React.FC = () => {
 
       let updatedBooks: Book[];
       if (editingBook) {
+        // При редактировании проверяем, изменились ли даты
+        const datesChanged = 
+          editingBook.startDate !== normalizedBook.startDate || 
+          editingBook.endDate !== normalizedBook.endDate;
+
+        // ВАЖНО: Если даты изменились, регенерируем историю статусов из новых дат
+        // Это гарантирует, что календарь будет показывать фазы согласно новым датам
+        if (datesChanged) {
+          const newStatusHistory = regenerateStatusHistoryFromDates(normalizedBook);
+          if (newStatusHistory.length > 0) {
+            normalizedBook = {
+              ...normalizedBook,
+              statusHistory: newStatusHistory
+            };
+          }
+        }
+
         // При редактировании проверяем, изменился ли статус вручную
         const oldStatus = editingBook.status;
         const newStatus = normalizedBook.status;
@@ -578,7 +595,7 @@ const App: React.FC = () => {
             statusHistory: duplicateImportedBook.statusHistory, // История статусов из JSON (авторитетный источник)
             currentPage: duplicateImportedBook.currentPage, // Текущая страница из JSON
             currentPercentage: duplicateImportedBook.currentPercentage, // Процент из JSON
-            totalHours: duplicateImportedBook.totalHours, // Часы из JSON
+
             inQueue: duplicateImportedBook.inQueue, // Статус очереди из JSON
             franchiseIds: duplicateImportedBook.franchiseIds, // коллекции из JSON
             isPartOfSeries: duplicateImportedBook.isPartOfSeries, // Статус серии из JSON
