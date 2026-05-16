@@ -415,12 +415,13 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
               title={lang === 'ru' ? 'Экспортировать в JSON' : 'Export to JSON'}
             >
               <Upload size={18} />
-              <span className="text-sm">{lang === 'ru' ? 'Экспорт' : 'Export'}</span>
             </button>
             
-            <label className="flex items-center gap-2 px-3 py-2 bg-[#846B90]/60 text-white rounded-lg hover:bg-[#846B90] transition-colors cursor-pointer">
+            <label
+              className="flex items-center gap-2 px-3 py-2 bg-[#846B90]/60 text-white rounded-lg hover:bg-[#846B90] transition-colors cursor-pointer"
+              title="Импорт в формате JSON"
+            >
               <Download size={18} />
-              <span className="text-sm">{lang === 'ru' ? 'Импорт' : 'Import'}</span>
               <input
                 type="file"
                 accept=".json"
