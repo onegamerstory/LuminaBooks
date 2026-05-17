@@ -2,7 +2,8 @@
 import React, { useState } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
 import BookCard from './BookCard';
-import { Search, Filter, Library, Download, Upload, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check } from 'lucide-react';
+import RandomBookModal from './RandomBookModal';
+import { Search, Filter, Library, Download, Upload, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check, Shuffle } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
@@ -214,6 +215,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
     return (saved && ['large', 'table'].includes(saved)) ? saved : 'large';
   });
+  const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
+  const [randomBook, setRandomBook] = useState<Book | null>(null);
   const t = translations[lang];
 
   const addToast = (message: string, type: 'success' | 'error' | 'info' = 'info') => {
@@ -223,6 +226,20 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
 
   const removeToast = (id: string) => {
     setToasts(prev => prev.filter(t => t.id !== id));
+  };
+
+  const handleRandomBook = () => {
+    const eligibleStatuses = [BookStatus.WANT_TO_READ, BookStatus.ABANDONED, BookStatus.POSTPONED];
+    const eligibleBooks = books.filter(book => eligibleStatuses.includes(book.status));
+    
+    if (eligibleBooks.length === 0) {
+      addToast(t.noBooksToRandomize, 'info');
+      return;
+    }
+    
+    const randomIndex = Math.floor(Math.random() * eligibleBooks.length);
+    setRandomBook(eligibleBooks[randomIndex]);
+    setIsRandomModalOpen(true);
   };
 
   // Сохранение режима отображения при изменении
@@ -408,6 +425,15 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
         <div className="flex items-center gap-3">
           <h2 className="text-2xl font-bold text-[#1E2920]">{t.library}</h2>
           <div className="flex gap-2">
+            <button
+              onClick={handleRandomBook}
+              disabled={books.length === 0}
+              className="flex items-center gap-2 px-3 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] disabled:bg-[#D6E1D8] disabled:cursor-not-allowed transition-colors"
+              title={lang === 'ru' ? 'Случайная книга' : 'Random Book'}
+            >
+              <Shuffle size={18} />
+            </button>
+            
             <button
               onClick={handleExport}
               disabled={books.length === 0}
@@ -778,6 +804,14 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
           <p className="text-sm text-[#6b9071]">{t.tryAdding}</p>
         </div>
       )}
+
+      <RandomBookModal
+        isOpen={isRandomModalOpen}
+        book={randomBook}
+        onClose={() => setIsRandomModalOpen(false)}
+        onAddToQueue={onAddToQueue}
+        lang={lang}
+      />
     </div>
   );
 };
