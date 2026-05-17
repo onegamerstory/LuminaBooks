@@ -543,11 +543,14 @@ const App: React.FC = () => {
   };
 
   const handleAddToQueue = (book: Book) => {
-    setBooks(prev => prev.map(b => 
-      b.id === book.id 
-        ? { ...b, inQueue: true }
-        : b
-    ));
+    setBooks(prev => prev.map(b => {
+      if (b.id !== book.id) return b;
+      let updatedBook = { ...b, inQueue: true };
+      if (b.status === BookStatus.ABANDONED || b.status === BookStatus.POSTPONED) {
+        updatedBook = { ...updatedBook, status: BookStatus.WANT_TO_READ };
+      }
+      return updatedBook;
+    }));
   };
 
   const handleImport = (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
