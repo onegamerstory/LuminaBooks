@@ -3,7 +3,7 @@ import React, { useState } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
 import BookCard from './BookCard';
 import RandomBookModal from './RandomBookModal';
-import { Search, Filter, Library, Download, Upload, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check, Shuffle } from 'lucide-react';
+import { Search, Filter, Library, Download, Upload, Grid2x2, List, ChevronDown, Edit2, Trash2, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01, Link, Check, Dices } from 'lucide-react';
 import { translations } from '../App';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../utils/jsonUtils';
 import Toast, { ToastMessage } from './Toast';
@@ -431,7 +431,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({ books, franchises, onEdit, on
               className="flex items-center gap-2 px-3 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] disabled:bg-[#D6E1D8] disabled:cursor-not-allowed transition-colors"
               title={lang === 'ru' ? 'Случайная книга' : 'Random Book'}
             >
-              <Shuffle size={18} />
+              <Dices size={18} />
             </button>
             
             <button
