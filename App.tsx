@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, ViewType, Franchise } from './types';
-import CatalogView from './components/CatalogView';
+import { CatalogView } from './components';
 import FranchiseView from './components/FranchiseView';
 import CalendarView from './components/CalendarView';
 import StatisticsView from './components/StatisticsView';
