@@ -4,6 +4,7 @@ import { Book, BookStatus } from '../types';
 import { Star, Edit2, Trash2, Calendar, User, Link, Library, Check } from 'lucide-react';
 import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
+import { handleCoverError } from '../utils/coverUtils';
 
 interface BookCardProps {
   book: Book;
@@ -39,9 +40,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
           src={book.coverUrl || `https://picsum.photos/seed/${book.title}/400/600`} 
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-          onError={(e) => {
-            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Crect fill="%23e2e8f0" width="400" height="600"/%3E%3C/svg%3E';
-          }}
+          onError={handleCoverError}
         />
         {/* Кнопки в верхнем правом углу */}
         <div className="absolute top-3 right-3 flex gap-2 z-10">

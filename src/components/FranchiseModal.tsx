@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Book, Franchise } from '../types';
 import { X, Search, Plus, Trash2 } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 
 interface FranchiseModalProps {
   isOpen: boolean;
@@ -178,6 +179,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                         src={book.coverUrl}
                         alt={book.title}
                         className="w-8 h-12 object-cover rounded"
+                        onError={handleCoverError}
                       />
                       <div className="min-w-0">
                         <p className="text-sm font-medium text-[#1E2920] truncate">
@@ -237,6 +239,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                           src={book.coverUrl}
                           alt={book.title}
                           className="w-8 h-12 object-cover rounded"
+                          onError={handleCoverError}
                         />
                         <div className="min-w-0">
                           <p className="text-sm font-medium text-[#1E2920] truncate">

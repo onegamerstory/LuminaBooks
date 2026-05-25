@@ -3,6 +3,7 @@ import { Book, BookStatus, ReadingSession } from '../types';
 import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 import Toast, { ToastMessage } from './Toast';
 import { DateInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
@@ -431,9 +432,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                       src={book.coverUrl}
                       alt={book.title}
                       className="w-20 h-28 object-cover rounded-lg shadow-md"
-                      onError={(e) => {
-                        e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"%3E%3Crect fill="%23e2e8f0" width="80" height="112"/%3E%3C/svg%3E';
-                      }}
+                      onError={handleCoverError}
                     />
                     {/* Процент прочтения - всегда показывается */}
                     <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-lg p-2 text-white text-xs text-center">

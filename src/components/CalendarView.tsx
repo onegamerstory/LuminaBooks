@@ -3,6 +3,7 @@ import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
 import { ChevronLeft, ChevronRight, HelpCircle, X, Search, Link } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { getActiveReadingPhases } from '../utils/statusHistoryUtils';
@@ -336,6 +337,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                           src={book.coverUrl} 
                           className="w-full h-full object-cover rounded"
                           alt={book.title}
+                          onError={handleCoverError}
                         />
                         <div className="absolute inset-0 bg-black/80 text-[8px] text-white p-1 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center text-center font-bold rounded">
                           {book.title}
@@ -352,6 +354,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                           src={book.coverUrl} 
                           className="w-full h-full object-cover rounded shadow-md border border-slate-200"
                           alt={book.title}
+                          onError={handleCoverError}
                         />
                         <div className="absolute inset-0 bg-black/80 text-[8px] text-white p-1 opacity-0 group-hover/cover:opacity-100 transition-opacity flex items-center justify-center text-center font-bold">
                           {book.title}
@@ -439,6 +442,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                         src={book.coverUrl} 
                         alt={book.title}
                         className="w-16 h-24 object-cover rounded shadow-md border border-slate-200"
+                        onError={handleCoverError}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1">

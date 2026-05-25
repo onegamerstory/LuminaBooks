@@ -2,6 +2,7 @@ import React from 'react';
 import { Book, BookStatus } from '../types';
 import { X } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 
 interface RandomBookModalProps {
   isOpen: boolean;
@@ -79,6 +80,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
                   src={book.coverUrl}
                   alt={book.title}
                   className="w-32 h-48 object-cover rounded-lg shadow-md"
+                  onError={handleCoverError}
                 />
               ) : (
                 <div className="w-32 h-48 bg-[#D6E1D8] rounded-lg flex items-center justify-center">

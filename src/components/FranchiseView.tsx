@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Book, Franchise } from '../types';
 import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 import FranchiseModal from './FranchiseModal.tsx';
 import Toast, { ToastMessage } from './Toast';
 import ConfirmationModal from './ConfirmationModal';
@@ -46,6 +47,7 @@ const FranchiseCard: React.FC<{
                   src={book.coverUrl}
                   alt={book.title}
                   className="h-40 w-24 object-cover rounded-lg shadow-lg border-2 border-white"
+                  onError={handleCoverError}
                 />
               </div>
             ))}

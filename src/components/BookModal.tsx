@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
 import { X, Star, Link, Clock } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { handleCoverError } from '../utils/coverUtils';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
@@ -202,7 +203,7 @@ const BookModal: React.FC<BookModalProps> = ({
             <div className="w-full sm:w-1/3 flex flex-col gap-2">
                <div className="aspect-[2/3] rounded-xl overflow-hidden bg-[#F0F4F1] border-2 border-dashed border-slate-200 relative group">
                   {formData.coverUrl ? (
-                    <img src={formData.coverUrl} className="w-full h-full object-cover" alt="Preview" />
+                    <img src={formData.coverUrl} className="w-full h-full object-cover" alt="Preview" onError={handleCoverError} />
                   ) : (
                     <div className="w-full h-full flex items-center justify-center text-slate-300">
                       {t.preview}

@@ -9,6 +9,7 @@ import { Book, BookStatus } from '../../types';
 import { getStatusColor } from '../../utils/statusUtils';
 import { Library, Edit2, Trash2, Check } from 'lucide-react';
 import { translations } from '../../utils/translations';
+import { handleCoverError } from '../../utils/coverUtils';
 
 interface BookTableRowProps {
   book: Book;
@@ -36,9 +37,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             src={book.coverUrl} 
             alt={book.title}
             className="w-16 h-24 object-cover rounded-lg"
-            onError={(e) => {
-              e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 96"%3E%3Crect fill="%23e2e8f0" width="64" height="96"/%3E%3C/svg%3E';
-            }}
+            onError={handleCoverError}
           />
         )}
       </div>
