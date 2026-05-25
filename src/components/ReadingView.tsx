@@ -4,6 +4,7 @@ import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookO
 import { createPortal } from 'react-dom';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
+import { getBookPercentage } from '../utils/bookUtils';
 import Toast, { ToastMessage } from './Toast';
 import { DateInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';
@@ -399,7 +400,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   };
 
   const renderBookCard = (book: Book) => (
-    <div key={book.id} className="bg-[#F0F4F1] rounded-xl shadow-md border border-slate-200 p-6">
+    <div key={book.id} className="bg-[#F0F4F1] rounded-xl shadow-md border border-[#C8D6CB] p-6">
       <div className="flex justify-between items-start mb-4 gap-4">
         {book.coverUrl && (
           <div className="flex-shrink-0 relative">
@@ -409,18 +410,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               className="w-20 h-28 object-cover rounded-lg shadow-md"
               onError={handleCoverError}
             />
-            <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-lg p-2 text-white text-xs text-center">
-              <div className="font-semibold text-sm">
-                {book.currentPercentage !== undefined 
-                  ? `${book.currentPercentage}%` 
-                  : book.currentPage && book.totalPages
-                    ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
-                    : book.status === BookStatus.READ
-                      ? '100%'
-                      : '0%'
-                }
-              </div>
-            </div>
           </div>
         )}
         <div className="flex-1">
@@ -439,6 +428,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                 : 'bg-slate-100 text-slate-700'
           }`}>
             {book.status === BookStatus.READING ? (lang === 'ru' ? 'Читаю' : 'Reading') : (lang === 'ru' ? 'Отложено' : 'Postponed')}
+          </div>
+          <div className="mt-2">
+            <div className="flex items-center gap-2">
+              <div className="w-1/2 bg-slate-200 rounded-full h-2">
+                <div className="bg-[#6B9071] h-2 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
+              </div>
+              <span className="text-xs font-semibold text-slate-600 w-8 text-right">{getBookPercentage(book)}%</span>
+            </div>
           </div>
         </div>
         {sessionState?.bookId === book.id ? (

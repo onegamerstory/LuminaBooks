@@ -134,7 +134,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
               onAddToQueue(book);
               onClose();
             }}
-            className="flex-1 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors"
+            className="flex-1 px-4 py-2 bg-[#D6E1D8] hover:bg-[#B8CCBC] text-[#1E2920] font-medium text-sm rounded-lg transition-colors"
           >
             {t.addToQueue}
           </button>

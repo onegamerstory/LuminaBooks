@@ -29,7 +29,7 @@ const FranchiseCard: React.FC<{
   const remainingCount = franchiseBooks.length - displayBooks.length;
 
   return (
-    <div className="bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full">
+    <div className="bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#C8D6CB] flex flex-col h-full">
       {/* Стопка обложек */}
       <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden">
         {displayBooks.length > 0 ? (

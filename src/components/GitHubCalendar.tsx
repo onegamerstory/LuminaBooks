@@ -87,7 +87,7 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
   };
 
   return (
-    <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md ">
+    <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB] ">
       <div className="mb-4">
         <h3 className="text-lg font-semibold text-[#1E2920] mb-2">
           {lang === 'ru' ? 'Активность чтения' : 'Reading Activity'}

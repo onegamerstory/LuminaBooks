@@ -1,6 +1,7 @@
 
 import React from 'react';
 import { Book, BookStatus } from '../types';
+import { getBookPercentage } from '../utils/bookUtils';
 import { Star, Edit2, Trash2, Calendar, User, Link, Library, Check } from 'lucide-react';
 import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
@@ -34,7 +35,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
   };
 
   return (
-    <div className="group bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full">
+    <div className="group bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#C8D6CB] flex flex-col h-full">
       <div className="relative aspect-[2/3] overflow-hidden bg-slate-100">
         <img 
           src={book.coverUrl || `https://picsum.photos/seed/${book.title}/400/600`} 
@@ -53,10 +54,10 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
                 }
               }}
               disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
-              className={`p-2 backdrop-blur-md rounded-lg text-white transition-colors shadow-md ${
-                book.status === BookStatus.WANT_TO_READ && !book.inQueue
-                  ? 'bg-cyan-500/90 hover:bg-cyan-500 cursor-pointer'
-                  : 'bg-slate-400/50 cursor-not-allowed'
+              className={`p-2 backdrop-blur-md rounded-lg transition-colors shadow-md ${
+      book.status === BookStatus.WANT_TO_READ && !book.inQueue
+        ? 'bg-[#D6E1D8] hover:bg-[#B8CCBC] text-[#1E2920] cursor-pointer'
+        : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'
               }`}
               title={lang === 'ru' ? 'В очередь' : 'To Queue'}
             >
@@ -87,18 +88,12 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
         <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
           {getStatusLabel(book.status)}
         </div>
-        {/* Процент прочтения под обложкой */}
-        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black to-transparent rounded-b-2xl p-2 text-white text-xs text-center">
-          <div className="font-semibold text-sm">
-            {book.currentPercentage !== undefined 
-              ? `${book.currentPercentage}%` 
-              : book.currentPage && book.totalPages
-                ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
-                : book.status === BookStatus.READ
-                  ? '100%'
-                  : '0%'
-            }
+        {/* Процент прочтения — прогресс бар */}
+        <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-2">
+          <div className="w-full bg-white/20 rounded-full h-1.5 mb-1">
+            <div className="bg-[#6B9071] h-1.5 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
           </div>
+          <div className="text-white text-xs font-semibold text-center">{getBookPercentage(book)}%</div>
         </div>
       </div>
 

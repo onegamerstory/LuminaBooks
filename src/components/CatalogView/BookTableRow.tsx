@@ -10,6 +10,7 @@ import { getStatusColor } from '../../utils/statusUtils';
 import { Library, Edit2, Trash2, Check } from 'lucide-react';
 import { translations } from '../../utils/translations';
 import { handleCoverError } from '../../utils/coverUtils';
+import { getBookPercentage } from '../../utils/bookUtils';
 
 interface BookTableRowProps {
   book: Book;
@@ -29,7 +30,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
   const t = translations[lang];
 
   return (
-    <div className="bg-[#F0F4F1] rounded-xl shadow-sm border border-slate-100 hover:shadow-md hover:border-slate-200 transition-all duration-200 p-4 flex gap-4 items-start">
+    <div className="bg-[#F0F4F1] rounded-xl shadow-sm border border-[#C8D6CB] hover:shadow-md hover:border-[#B8CCBC] transition-all duration-200 p-4 flex gap-4 items-start">
       {/* Обложка */}
       <div className="flex-shrink-0">
         {book.coverUrl && (
@@ -73,16 +74,12 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             })()}
           </span>
 
-          {/* Процент прочтения */}
-          <div className="px-2.5 py-1 bg-slate-100 rounded-lg text-slate-700 font-medium">
-            {book.currentPercentage !== undefined 
-              ? `${book.currentPercentage}%` 
-              : book.currentPage && book.totalPages
-                ? `${Math.round((book.currentPage / book.totalPages) * 100)}%`
-                : book.status === BookStatus.READ
-                  ? '100%'
-                  : '0%'
-            }
+          {/* Процент прочтения — прогресс бар */}
+          <div className="flex items-center gap-2 min-w-[80px]">
+            <div className="flex-1 bg-slate-200 rounded-full h-2">
+              <div className="bg-[#6B9071] h-2 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
+            </div>
+            <span className="text-xs font-medium text-slate-600 w-8 text-right">{getBookPercentage(book)}%</span>
           </div>
 
           {/* Оценка */}
@@ -119,10 +116,10 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
               }
             }}
             disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
-            className={`p-2 rounded-lg text-white transition-colors font-medium ${
+            className={`p-2 rounded-lg transition-colors font-medium ${
               book.status === BookStatus.WANT_TO_READ && !book.inQueue
-                ? 'bg-cyan-500 hover:bg-cyan-600'
-                : 'bg-slate-400 cursor-not-allowed'
+                ? 'bg-[#D6E1D8] hover:bg-[#B8CCBC] text-[#1E2920]'
+                : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'
             }`}
             title={lang === 'ru' ? 'В очередь' : 'To Queue'}
           >
@@ -135,7 +132,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
         )}
         <button
           onClick={onEdit}
-          className="p-2 bg-[#A1BAA5] text-[#1E2920] rounded-lg hover:bg-[#87A68C] transition-colors font-medium"
+          className="p-2 bg-[#F0F4F1]/90 hover:bg-[#F0F4F1] rounded-lg text-[#1E2920] transition-colors shadow-md"
           title={lang === 'ru' ? 'Редактировать' : 'Edit'}
         >
           <Edit2 size={16} />

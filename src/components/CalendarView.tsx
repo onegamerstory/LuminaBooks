@@ -195,7 +195,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
     : ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
 
   return (
-    <div className="bg-[#F0F4F1] rounded-2xl shadow-md border border-slate-100 overflow-hidden">
+    <div className="bg-[#F0F4F1] rounded-2xl shadow-md border border-[#C8D6CB] overflow-hidden">
       <div className="p-6 border-b flex flex-col gap-4">
         <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
           <div className="flex items-center gap-4">

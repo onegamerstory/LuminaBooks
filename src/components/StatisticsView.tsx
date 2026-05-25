@@ -111,7 +111,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   return (
     <div className="space-y-6">
       {/* Profile Section with Stats */}
-      <div className="bg-gradient-to-r from-[#6B9071] to-[#59785E] rounded-2xl p-8 shadow-lg">
+      <div className="bg-gradient-to-r from-[#6B9071] to-[#59785E] rounded-2xl p-8 shadow-lg border border-[#4A6B50]">
         <div className="flex flex-col items-center">
           {/* Avatar */}
           <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
@@ -168,7 +168,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
       {/* Круговой прогресс и гистограмма */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Donut — прогресс чтения */}
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
           <h3 className="text-lg font-semibold text-[#1E2920] mb-4">{t.readProgress}</h3>
           <div className="flex items-center gap-8">
             <div className="relative flex-shrink-0">
@@ -202,7 +202,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         </div>
 
         {/* Гистограмма — время чтения по месяцам */}
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
           <h3 className="text-lg font-semibold text-[#1E2920] mb-4">{t.readingTimeChart}</h3>
           {monthlyHours.some(m => m.hours > 0) ? (
             <div className="relative">
@@ -260,7 +260,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         <GitHubCalendar books={books} lang={lang} />
 
         {/* Средняя скорость прочтения */}
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
           <div className="flex items-center gap-3 mb-4">
             <Clock className="text-[#6B9071]" size={24} />
             <h3 className="text-lg font-semibold text-[#1E2920]">{t.averageReadingSpeed}</h3>
@@ -306,7 +306,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
           {/* Книги с максимальной оценкой */}
           {maxRatingBooks.length > 0 && (
-            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-amber-500" size={24} fill="currentColor" />
                 <div className="flex-1">
@@ -343,7 +343,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
           {/* Книги с минимальной оценкой */}
           {minRatingBooks.length > 0 && maxRating !== minRating && (
-            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+            <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
               <div className="flex items-center gap-3 mb-4">
                 <Star className="text-slate-400" size={24} />
                 <div className="flex-1">
