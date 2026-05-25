@@ -19,7 +19,7 @@ export default defineConfig(({ mode }) => {
       },
       resolve: {
         alias: {
-          '@': path.resolve(__dirname, '.'),
+          '@': path.resolve(__dirname, 'src'),
         }
       },
       // В production всегда используем относительные пути для Electron
