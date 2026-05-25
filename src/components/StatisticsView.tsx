@@ -81,77 +81,60 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
   return (
     <div className="space-y-6">
-      {/* Profile Section */}
-      {profile && (profile.nickname || profile.photoUrl) && (
-        <div className="bg-gradient-to-r from-[#6B9071] to-[#59785E] rounded-2xl p-8 shadow-lg">
-          <div className="flex items-center gap-6">
-            {/* Profile Photo */}
-            <div className="flex-shrink-0">
-              <div className="w-32 h-32 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
-                {profile.photoUrl ? (
-                  <img 
-                    src={profile.photoUrl} 
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                  />
-                ) : (
-                  <User size={60} className="text-slate-400" />
-                )}
-              </div>
+      {/* Profile Section with Stats */}
+      <div className="bg-gradient-to-r from-[#6B9071] to-[#59785E] rounded-2xl p-8 shadow-lg">
+        <div className="flex flex-col items-center">
+          {/* Avatar */}
+          <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-4 border-white shadow-lg">
+            {profile?.photoUrl ? (
+              <img 
+                src={profile.photoUrl} 
+                alt="Profile"
+                className="w-full h-full object-cover"
+              />
+            ) : (
+              <User size={50} className="text-slate-400" />
+            )}
+          </div>
+
+          {/* Name */}
+          <h2 className="text-2xl font-bold text-white mt-4">
+            {profile?.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
+          </h2>
+          <p className="text-white/70 text-sm mt-1 mb-6">
+            {lang === 'ru' 
+              ? `Прочитано ${readCount} ${readCount === 1 ? 'книга' : (readCount >= 2 && readCount <= 4 ? 'книги' : 'книг')}`
+              : `${readCount} ${readCount === 1 ? 'book' : 'books'} read`
+            }
+          </p>
+
+          {/* 4 stats — без подложек */}
+          <div className="grid grid-cols-4 gap-6 w-full">
+            <div className="text-center">
+              <BookOpen className="text-white/70 mx-auto mb-1" size={18} />
+              <p className="text-xs text-white/50 uppercase tracking-wider">{t.totalBooks}</p>
+              <p className="text-2xl font-bold text-white mt-1">{totalBooks}</p>
             </div>
-
-            {/* Profile Info */}
-            <div className="flex-grow">
-              <h2 className="text-3xl font-bold text-white mb-2">
-                {profile.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
-              </h2>
-              <p className="text-white/80">
-                {lang === 'ru' 
-                  ? `Ты прочитал ${books.filter(b => b.status === BookStatus.READ).length} книг`
-                  : `You've read ${books.filter(b => b.status === BookStatus.READ).length} books`
-                }
-              </p>
+            <div className="text-center">
+              <TrendingUp className="text-white/70 mx-auto mb-1" size={18} />
+              <p className="text-xs text-white/50 uppercase tracking-wider">{t.reading}</p>
+              <p className="text-2xl font-bold text-white mt-1">{readingCount}</p>
+            </div>
+            <div className="text-center">
+              <Award className="text-white/70 mx-auto mb-1" size={18} />
+              <p className="text-xs text-white/50 uppercase tracking-wider">{t.read}</p>
+              <p className="text-2xl font-bold text-white mt-1">{readCount}</p>
+            </div>
+            <div className="text-center">
+              <BookOpen className="text-white/70 mx-auto mb-1" size={18} />
+              <p className="text-xs text-white/50 uppercase tracking-wider">{t.toRead}</p>
+              <p className="text-2xl font-bold text-white mt-1">{toReadCount}</p>
             </div>
           </div>
-        </div>
-      )}
-
-      <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
-
-      {/* Основные метрики */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">{t.totalBooks}</h3>
-            <BookOpen className="text-[#6B9071]" size={20} />
-          </div>
-          <p className="text-3xl font-bold text-[#6B9071]">{totalBooks}</p>
-        </div>
-
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">{t.reading}</h3>
-            <TrendingUp className="text-[#6B8A90]" size={20} />
-          </div>
-          <p className="text-3xl font-bold text-[#6B8A90]">{readingCount}</p>
-        </div>
-
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">{t.read}</h3>
-            <Award className="text-[#906B8A]" size={20} />
-          </div>
-          <p className="text-3xl font-bold text-[#906B8A]">{readCount}</p>
-        </div>
-
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
-          <div className="flex items-center justify-between mb-2">
-            <h3 className="text-sm font-medium text-slate-600">{t.toRead}</h3>
-            <BookOpen className="text-[#B09F31]" size={20} />
-          </div>
-          <p className="text-3xl font-bold text-[#B09F31]">{toReadCount}</p>
         </div>
       </div>
+
+      <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
 
       {/* Календарь активности и Средняя скорость прочтения */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
