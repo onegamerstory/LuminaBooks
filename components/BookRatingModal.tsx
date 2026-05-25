@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react';
 import { X, Star } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 
 interface BookRatingModalProps {
   isOpen: boolean;

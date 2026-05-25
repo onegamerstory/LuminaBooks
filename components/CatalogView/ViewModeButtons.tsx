@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Grid2x2, List } from 'lucide-react';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 
 type ViewMode = 'large' | 'table';
 

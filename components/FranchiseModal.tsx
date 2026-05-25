@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Book, Franchise } from '../types';
 import { X, Search, Plus, Trash2 } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 
 interface FranchiseModalProps {
   isOpen: boolean;

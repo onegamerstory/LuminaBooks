@@ -17,7 +17,7 @@ import EmptyState from './EmptyState';
 import BookTableRow from './BookTableRow';
 import { Search, Dices, Upload, Download } from 'lucide-react';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../../utils/jsonUtils';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 import { getStatusColor } from '../../utils/statusUtils';
 
 type ViewMode = 'large' | 'table';

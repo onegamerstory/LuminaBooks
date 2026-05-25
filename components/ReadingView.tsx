@@ -2,7 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
 import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen } from 'lucide-react';
 import { createPortal } from 'react-dom';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 import Toast, { ToastMessage } from './Toast';
 import { DateInput } from '@mantine/dates';
 import { NumberInput } from '@mantine/core';

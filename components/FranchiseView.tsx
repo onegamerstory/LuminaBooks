@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Book, Franchise } from '../types';
 import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 import FranchiseModal from './FranchiseModal.tsx';
 import Toast, { ToastMessage } from './Toast';
 import ConfirmationModal from './ConfirmationModal';
@@ -195,8 +195,16 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
           </h1>
           <p className="text-sm text-slate-500">
             {lang === 'ru'
-              ? `${franchises.length} коллекций`
-              : `${franchises.length} collections`}
+              ? (() => {
+                  const n = franchises.length;
+                  const lastDigit = n % 10;
+                  const lastTwoDigits = n % 100;
+                  if (lastTwoDigits >= 11 && lastTwoDigits <= 19) return `${n} коллекций`;
+                  if (lastDigit === 1) return `${n} коллекция`;
+                  if (lastDigit >= 2 && lastDigit <= 4) return `${n} коллекции`;
+                  return `${n} коллекций`;
+                })()
+              : `${franchises.length} ${franchises.length === 1 ? 'collection' : 'collections'}`}
           </p>
         </div>
 

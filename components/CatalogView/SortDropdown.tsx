@@ -10,7 +10,7 @@
 
 import React, { useEffect } from 'react';
 import { ChevronDown, TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 
 type TableSortOption = 'rating-desc' | 'rating-asc' | 'title-asc' | 'title-desc' | 'status-asc' | 'status-desc' | 'pages-desc' | 'pages-asc';
 

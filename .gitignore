@@ -26,3 +26,6 @@ release
 *.sln
 *.sw?
 .aider*
+
+CATALOGVIEW_REFACTOR_PLAN.md
+CODE_ANALYSIS_PLAN.md

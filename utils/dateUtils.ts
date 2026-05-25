@@ -20,7 +20,7 @@ export const calculateDaysDifference = (startDate: string, endDate?: string): nu
 // Вычисляет общее количество часов для книги
 // Расчет общего количества часов чтения
 // Правило: общие часы = только часы из сессий чтения
-export const calculateBookTotalHours = (book: { sessions?: Array<{duration: number}>; totalHours?: number }): number => {
+export const calculateBookTotalHours = (book: { sessions?: Array<{duration: number}> }): number => {
   // Часы из сессий, добавленных в приложении
   let sessionHours = 0;
   if (book.sessions && book.sessions.length > 0) {

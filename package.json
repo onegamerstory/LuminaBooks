@@ -1,7 +1,7 @@
 {
   "name": "luminabooks---personal-book-tracker",
   "private": true,
-  "version": "1.7.4",
+  "version": "1.7.5",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -22,14 +22,12 @@
     "dayjs": "^1.11.10",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
-    "react-dom": "^19.2.3",
-    "xlsx": "^0.18.5"
+    "react-dom": "^19.2.3"
   },
   "devDependencies": {
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
-    "@types/xlsx": "^0.0.35",
     "@vitejs/plugin-react": "^5.0.0",
     "concurrently": "^9.2.1",
     "cross-env": "^7.0.3",

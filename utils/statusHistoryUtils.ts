@@ -87,7 +87,7 @@ export const generateStatusHistoryFromDates = (book: Book): StatusChange[] => {
 
   // Есть дата начала - создаем переход WANT_TO_READ → READING
   // Добавляем время начала дня (00:00:00)
-  const startDateTime = new Date(`${book.startDate}T00:00:00Z`).toISOString();
+  const startDateTime = `${book.startDate}T00:00:00.000Z`;
   history.push({
     timestamp: startDateTime,
     previousStatus: BookStatus.WANT_TO_READ,
@@ -97,7 +97,7 @@ export const generateStatusHistoryFromDates = (book: Book): StatusChange[] => {
   // Если есть дата конца - создаем переход READING → READ
   // Добавляем время конца дня (23:59:59)
   if (hasEndDate) {
-    const endDateTime = new Date(`${book.endDate}T23:59:59Z`).toISOString();
+    const endDateTime = `${book.endDate}T23:59:59.000Z`;
     history.push({
       timestamp: endDateTime,
       previousStatus: BookStatus.READING,
@@ -127,7 +127,7 @@ export const regenerateStatusHistoryFromDates = (book: Book): StatusChange[] => 
 
   // Есть дата начала - создаем переход WANT_TO_READ → READING
   // Добавляем время начала дня (00:00:00)
-  const startDateTime = new Date(`${book.startDate}T00:00:00Z`).toISOString();
+  const startDateTime = `${book.startDate}T00:00:00.000Z`;
   history.push({
     timestamp: startDateTime,
     previousStatus: BookStatus.WANT_TO_READ,
@@ -137,7 +137,7 @@ export const regenerateStatusHistoryFromDates = (book: Book): StatusChange[] => 
   // Если есть дата конца - создаем переход READING → READ
   // Добавляем время конца дня (23:59:59)
   if (hasEndDate) {
-    const endDateTime = new Date(`${book.endDate}T23:59:59Z`).toISOString();
+    const endDateTime = `${book.endDate}T23:59:59.000Z`;
     history.push({
       timestamp: endDateTime,
       previousStatus: BookStatus.READING,
@@ -231,7 +231,7 @@ const createStatusHistoryForDirectRead = (
   // Если есть дата начала - создаем переход WANT_TO_READ → READING
   if (hasStartDate) {
     // Добавляем время начала дня (00:00:00)
-    const startDateTime = new Date(`${book.startDate}T00:00:00Z`).toISOString();
+    const startDateTime = `${book.startDate}T00:00:00.000Z`;
     history.push({
       timestamp: startDateTime,
       previousStatus: BookStatus.WANT_TO_READ,
@@ -242,7 +242,7 @@ const createStatusHistoryForDirectRead = (
   // Если есть дата конца - создаем переход READING → READ
   if (hasEndDate) {
     // Добавляем время конца дня (23:59:59)
-    const endDateTime = new Date(`${book.endDate}T23:59:59Z`).toISOString();
+    const endDateTime = `${book.endDate}T23:59:59.000Z`;
     history.push({
       timestamp: endDateTime,
       previousStatus: BookStatus.READING,
@@ -358,7 +358,7 @@ export const getActiveReadingPhases = (
       // Была фаза чтения от startDate до даты первого изменения
       phases.push({
         startDate: book.startDate,
-        endDate: new Date(firstChange.timestamp).toISOString().split('T')[0]
+        endDate: firstChange.timestamp.split('T')[0]
       });
     }
   }
@@ -368,11 +368,11 @@ export const getActiveReadingPhases = (
     if (change.newStatus === BookStatus.READING) {
       // Переход В статус "Читаю"
       // Начало активной фазы - это дата изменения
-      readingStartDate = new Date(change.timestamp).toISOString().split('T')[0];
+      readingStartDate = change.timestamp.split('T')[0];
     } else if (change.previousStatus === BookStatus.READING) {
       // Переход ИЗ статуса "Читаю" В другой статус
       if (readingStartDate) {
-        const endDate = new Date(change.timestamp).toISOString().split('T')[0];
+        const endDate = change.timestamp.split('T')[0];
         phases.push({
           startDate: readingStartDate,
           endDate: endDate
@@ -406,9 +406,7 @@ export const getActiveReadingPhases = (
         let phaseStart = book.startDate;
         for (let j = i - 1; j >= 0; j--) {
           if (book.statusHistory[j].newStatus === BookStatus.READING) {
-            phaseStart = new Date(book.statusHistory[j].timestamp)
-              .toISOString()
-              .split('T')[0];
+            phaseStart = book.statusHistory[j].timestamp.split('T')[0];
             break;
           }
         }

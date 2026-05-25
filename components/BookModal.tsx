@@ -2,7 +2,7 @@
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
 import { X, Star, Link, Clock } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
@@ -43,7 +43,6 @@ const BookModal: React.FC<BookModalProps> = ({
     description: '',
     isPartOfSeries: false,
     franchiseIds: [],
-    totalHours: undefined,
   });
   const [showFranchiseSelect, setShowFranchiseSelect] = useState(false);
   const isEditingExistingBook = !!initialData;
@@ -58,7 +57,7 @@ const BookModal: React.FC<BookModalProps> = ({
         ...initialData,
         isPartOfSeries: franchiseIds.length > 0 || (initialData.isPartOfSeries ?? false),
         franchiseIds: franchiseIds,
-        totalHours: undefined,
+
       });
     } else {
       setFormData({
@@ -73,7 +72,7 @@ const BookModal: React.FC<BookModalProps> = ({
         description: '',
         isPartOfSeries: false,
         franchiseIds: [],
-        totalHours: undefined,
+
       });
     }
   }, [initialData, isOpen]);

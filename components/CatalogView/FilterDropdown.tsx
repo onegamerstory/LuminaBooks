@@ -8,7 +8,7 @@
 import React, { useEffect } from 'react';
 import { Filter } from 'lucide-react';
 import { BookStatus } from '../../types';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 
 interface FilterDropdownProps {
   isOpen: boolean;

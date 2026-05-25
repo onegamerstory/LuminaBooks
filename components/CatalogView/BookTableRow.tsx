@@ -8,7 +8,7 @@ import React from 'react';
 import { Book, BookStatus } from '../../types';
 import { getStatusColor } from '../../utils/statusUtils';
 import { Library, Edit2, Trash2, Check } from 'lucide-react';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 
 interface BookTableRowProps {
   book: Book;

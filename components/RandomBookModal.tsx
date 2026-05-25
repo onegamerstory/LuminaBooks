@@ -1,7 +1,7 @@
 import React from 'react';
 import { Book, BookStatus } from '../types';
 import { X } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 
 interface RandomBookModalProps {
   isOpen: boolean;

@@ -1,8 +1,8 @@
 
-import React, { useState, useMemo, useEffect } from 'react';
-import { Book, BookStatus } from '../types';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
+import { Book, BookStatus, ReadingSession } from '../types';
 import { ChevronLeft, ChevronRight, HelpCircle, X, Search, Link } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 import { DateInput } from '@mantine/dates';
 import dayjs from 'dayjs';
 import { getActiveReadingPhases } from '../utils/statusHistoryUtils';
@@ -67,27 +67,39 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
     return `${y}-${m}-${d}`;
   };
 
-  // Получаем количество часов чтения за день
-  const getDailyHours = (day: Date): number => {
-    const dayStr = toLocalISOString(day);
-    let totalSeconds = 0;
+  // Предвычисляем карту часов по дням для всего месяца
+  const dailyHoursMap = useMemo(() => {
+    const map = new Map<string, number>();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    books.forEach((book: Book) => {
-      if (!book.sessions || book.sessions.length === 0) return;
-      
-      book.sessions.forEach((session: any) => {
-        const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
-        if (sessionDate === dayStr) {
-          totalSeconds += session.duration || 0;
-        }
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+      let totalSeconds = 0;
+
+      books.forEach((book: Book) => {
+        if (!book.sessions || book.sessions.length === 0) return;
+        book.sessions.forEach((session: ReadingSession) => {
+          const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
+          if (sessionDate === dayStr) {
+            totalSeconds += session.duration || 0;
+          }
+        });
       });
-    });
 
-    return Math.round((totalSeconds / 3600) * 10) / 10; // Округляем до 1 десятичного знака
-  };
+      map.set(dayStr, Math.round((totalSeconds / 3600) * 10) / 10);
+    }
 
-  // Получаем количество часов чтения за месяц
-  const getMonthlyHours = (): number => {
+    return map;
+  }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
+
+  const getDailyHours = useCallback((day: Date): number => {
+    return dailyHoursMap.get(toLocalISOString(day)) || 0;
+  }, [dailyHoursMap]);
+
+  // Предвычисляем часы за месяц
+  const monthlyHours = useMemo(() => {
     let totalSeconds = 0;
     const year = currentDate.getFullYear();
     const month = currentDate.getMonth();
@@ -95,8 +107,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
     books.forEach((book: Book) => {
       if (!book.sessions || book.sessions.length === 0) return;
-      
-      book.sessions.forEach((session: any) => {
+      book.sessions.forEach((session: ReadingSession) => {
         const sessionDate = dayjs(session.startTime).format('YYYY-MM');
         if (sessionDate === monthStart) {
           totalSeconds += session.duration || 0;
@@ -104,32 +115,42 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       });
     });
 
-    return Math.round((totalSeconds / 3600) * 10) / 10; // Округляем до 1 десятичного знака
-  };
+    return Math.round((totalSeconds / 3600) * 10) / 10;
+  }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
 
-  const getBooksForDay = (day: Date) => {
-    const dayStr = toLocalISOString(day);
+  // Предвычисляем карту книг по дням
+  const booksByDayMap = useMemo(() => {
+    const map = new Map<string, Book[]>();
+    const year = currentDate.getFullYear();
+    const month = currentDate.getMonth();
+    const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    if (viewMode === 'sessions') {
-      // Режим сессий: показываем книги, у которых были сессии в этот день
-      return books.filter((book: Book) => {
-        if (!book.sessions || book.sessions.length === 0) return false;
-        return book.sessions.some((session: any) => {
-          const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
-          return sessionDate === dayStr;
-        });
+    for (let d = 1; d <= daysInMonth; d++) {
+      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+
+      const dayBooks = books.filter((book: Book) => {
+        if (viewMode === 'sessions') {
+          if (!book.sessions || book.sessions.length === 0) return false;
+          return book.sessions.some((session: ReadingSession) => {
+            return dayjs(session.startTime).format('YYYY-MM-DD') === dayStr;
+          });
+        } else {
+          const activePhases = getActiveReadingPhases(book);
+          return activePhases.some((phase: { startDate: string; endDate: string }) =>
+            dayStr >= phase.startDate && dayStr <= phase.endDate
+          );
+        }
       });
-    } else {
-      // Режим фаз: показываем книги в активных фазах чтения
-      return books.filter((book: Book) => {
-        // Получаем все активные фазы чтения для книги
-        const activePhases = getActiveReadingPhases(book);
 
-        // Проверяем, попадает ли текущий день в какую-либо активную фазу
-        return activePhases.some((phase: any) => dayStr >= phase.startDate && dayStr <= phase.endDate);
-      });
+      map.set(dayStr, dayBooks);
     }
-  };
+
+    return map;
+  }, [books, viewMode, currentDate.getFullYear(), currentDate.getMonth()]);
+
+  const getBooksForDay = useCallback((day: Date): Book[] => {
+    return booksByDayMap.get(toLocalISOString(day)) || [];
+  }, [booksByDayMap]);
 
   // Получаем список книг со статусом "Буду читать"
   const getBooksToStart = () => {
@@ -253,7 +274,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
               {lang === 'ru' ? 'Часов в месяце:' : 'Hours this month:'}
             </span>
             <span className="text-lg font-bold text-[#6B9071]">
-              {getMonthlyHours()}
+              {monthlyHours}
             </span>
             <span className="text-xs text-slate-500">ч</span>
           </div>

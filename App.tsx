@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Book, BookStatus, ViewType, Franchise } from './types';
 import { CatalogView } from './components';
 import FranchiseView from './components/FranchiseView';
@@ -15,158 +15,14 @@ import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
-// @ts-ignore
 import '@mantine/core/styles.css';
-// @ts-ignore
 import '@mantine/dates/styles.css';
+import { translations } from './utils/translations';
 
 const STORAGE_KEY = 'lumina_books_v1';
 const FRANCHISES_STORAGE_KEY = 'lumina_franchises_v1';
 
-export const translations = {
-  en: {
-    catalog: 'Catalog',
-    calendar: 'Calendar',
-    addBook: 'Add Book',
-    library: 'My Library',
-    searchPlaceholder: 'Search title or author...',
-    allStatuses: 'All Statuses',
-    reading: 'Reading',
-    read: 'Read',
-    toRead: 'To Read',
-    abandoned: 'Abandoned',
-    postponed: 'Postponed',
-    editBook: 'Edit Book',
-    addNewBook: 'Add New Book',
-    title: 'Title',
-    author: 'Author',
-    year: 'Year',
-    status: 'Status',
-    rating: 'Rating',
-    description: 'Description',
-    startDate: 'Start Date',
-    endDate: 'End Date',
-    cancel: 'Cancel',
-    updateBook: 'Update Book',
-    addToLibrary: 'Add to Library',
-    noBooks: 'No books found in your library.',
-    tryAdding: 'Try adding a new book to start tracking!',
-    readingCalendar: 'Reading Calendar',
-    deleteConfirm: 'Are you sure you want to delete this book?',
-    inProgress: '(In Progress)',
-    preview: 'Preview',
-    imageUrl: 'Image URL...',
-    selectBookToStart: 'Select book to start reading',
-    noBooksToStart: 'No books to start reading',
-    startReading: 'Start reading',
-    days: 'days',
-    day: 'day',
-    statistics: 'Statistics',
-    totalBooks: 'Total Books',
-    highestRatedBooks: 'Highest Rated Books',
-    lowestRatedBooks: 'Lowest Rated Books',
-    averageReadingSpeed: 'Average Reading Speed',
-    averageReadingSpeedDesc: 'Average hours per book',
-    noBooksWithDates: 'No books with reading sessions',
-    book: 'book',
-    books: 'books',
-    booksPlural: 'books',
-    userProfile: 'User Profile',
-    nickname: 'Nickname',
-    enterNickname: 'Enter your nickname...',
-    profilePhoto: 'Profile Photo',
-    defaultCoverSettings: 'Default Cover Settings',
-    defaultCoverUrl: 'Default Cover URL',
-    enterCoverUrl: 'Enter default cover URL...',
-    save: 'Save',
-    coverUrlSaved: 'Default cover URL saved',
-    coverUrlCleared: 'Default cover URL cleared',
-    profileSaved: 'Profile saved successfully',
-    queue: 'Queue',
-    toQueue: 'To Queue',
-    addToQueue: 'Add to Queue',
-    removeFromQueue: 'Remove from Queue',
-    startReadingButton: 'Start Reading',
-    queueAdded: 'Book added to queue',
-    queueRemoved: 'Book removed from queue',
-    readingStarted: 'Reading started',
-    noQueueBooks: 'No books in queue',
-    random: 'Random',
-    randomBook: 'Random Book',
-    noBooksToRandomize: 'No books available for random selection'
-  },
-  ru: {
-    catalog: 'Каталог',
-    calendar: 'Календарь',
-    addBook: 'Добавить книгу',
-    library: 'Моя библиотека',
-    searchPlaceholder: 'Поиск по названию или автору...',
-    allStatuses: 'Все статусы',
-    reading: 'Читаю',
-    read: 'Прочитано',
-    toRead: 'Буду читать',
-    abandoned: 'Брошено',
-    postponed: 'Отложено',
-    editBook: 'Редактировать',
-    addNewBook: 'Новая книга',
-    title: 'Название',
-    author: 'Автор',
-    year: 'Год',
-    status: 'Статус',
-    rating: 'Оценка',
-    description: 'Описание',
-    startDate: 'Дата начала',
-    endDate: 'Дата окончания',
-    cancel: 'Отмена',
-    updateBook: 'Обновить',
-    addToLibrary: 'Добавить',
-    noBooks: 'В вашей библиотеке пока нет книг.',
-    tryAdding: 'Добавьте свою первую книгу!',
-    readingCalendar: 'Календарь чтения',
-    deleteConfirm: 'Вы уверены, что хотите удалить эту книгу?',
-    inProgress: '(В процессе)',
-    preview: 'Превью',
-    imageUrl: 'Ссылка на обложку...',
-    selectBookToStart: 'Выберите книгу для начала чтения',
-    noBooksToStart: 'Нет книг для начала чтения',
-    startReading: 'Начать читать',
-    days: 'дней',
-    day: 'день',
-    statistics: 'Статистика',
-    totalBooks: 'Всего книг',
-    highestRatedBooks: 'Книги с максимальной оценкой',
-    lowestRatedBooks: 'Книги с минимальной оценкой',
-    averageReadingSpeed: 'Средняя скорость прочтения',
-    averageReadingSpeedDesc: 'Среднее количество часов на книгу',
-    noBooksWithDates: 'Нет книг с историей чтения',
-    book: 'книга',
-    books: 'книг',
-    booksPlural: 'книги',
-    userProfile: 'Профиль пользователя',
-    nickname: 'Никнейм',
-    enterNickname: 'Введите ваш никнейм...',
-    profilePhoto: 'Фотография профиля',
-    defaultCoverSettings: 'Настройки обложки по умолчанию',
-    defaultCoverUrl: 'URL обложки по умолчанию',
-    enterCoverUrl: 'Введите URL обложки по умолчанию...',
-    save: 'Сохранить',
-    coverUrlSaved: 'URL обложки сохранён',
-    coverUrlCleared: 'URL обложки очищен',
-    profileSaved: 'Профиль успешно сохранён',
-    queue: 'Очередь',
-    toQueue: 'В очередь',
-    addToQueue: 'Добавить в очередь',
-    removeFromQueue: 'Убрать из очереди',
-    startReadingButton: 'Начать чтение',
-    queueAdded: 'Книга добавлена в очередь',
-    queueRemoved: 'Книга удалена из очереди',
-    readingStarted: 'Чтение началось',
-    noQueueBooks: 'Нет книг в очереди',
-    random: 'Случайная',
-    randomBook: 'Случайная книга',
-    noBooksToRandomize: 'Нет доступных книг для случайного выбора'
-  }
-};
+export { translations };
 
 const App: React.FC = () => {
   const [books, setBooks] = useState<Book[]>([]);
@@ -365,41 +221,17 @@ const App: React.FC = () => {
     }
   }, []);
 
-  // Периодическая проверка статусов на основе наличия дат
-  // (теперь не зависит от текущей даты, только от наличия дат)
+  // Синхронизация статусов на основе дат при монтировании
   useEffect(() => {
-    // Проверяем статусы сразу при монтировании
-    const checkAndUpdateStatuses = () => {
-      setBooks(prevBooks => {
-        if (prevBooks.length === 0) return prevBooks;
-        
-        // Нормализуем даты перед проверкой
-        const normalizedBooks = prevBooks.map(book => ({
-          ...book,
-          startDate: book.startDate?.trim() || '',
-          endDate: book.endDate?.trim() || '',
-        }));
-        
-        const updated = updateBookStatusBasedOnDates(normalizedBooks);
-        
-        // Обновляем только если есть изменения в статусах
-        const hasChanges = updated.some((book, index) => 
-          book.status !== prevBooks[index]?.status
-        );
-        
-        return hasChanges ? updated : prevBooks;
-      });
-    };
-
-    // Проверяем сразу
-    checkAndUpdateStatuses();
-
-    // Периодически проверяем каждые 5 минут (на случай изменений через localStorage в другой вкладке)
-    const interval = setInterval(checkAndUpdateStatuses, 5 * 60 * 1000);
-
-    return () => {
-      clearInterval(interval);
-    };
+    setBooks(prevBooks => {
+      if (prevBooks.length === 0) return prevBooks;
+      const normalizedBooks = prevBooks.map(book => ({
+        ...book,
+        startDate: book.startDate?.trim() || '',
+        endDate: book.endDate?.trim() || '',
+      }));
+      return updateBookStatusBasedOnDates(normalizedBooks);
+    });
   }, []);
 
   useEffect(() => {
@@ -413,23 +245,6 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('lumina_lang', lang);
   }, [lang]);
-
-  // Обработчик для восстановления фокуса на события клавиатуры в Electron
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      // Если событие не обрабатывается по умолчанию, это может быть сигналом потери фокуса
-      // Пробуем вернуть фокус активному элементу
-      if (document.activeElement && document.activeElement !== document.body) {
-        (document.activeElement as HTMLElement).focus();
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown, true);
-    
-    return () => {
-      window.removeEventListener('keydown', handleKeyDown, true);
-    };
-  }, []);
 
   const handleAddBook = (book: Book) => {
     setBooks(prev => {

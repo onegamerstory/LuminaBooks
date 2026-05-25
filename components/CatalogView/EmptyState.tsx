@@ -6,7 +6,7 @@
 
 import React from 'react';
 import { Library } from 'lucide-react';
-import { translations } from '../../App';
+import { translations } from '../../utils/translations';
 
 interface EmptyStateProps {
   lang: 'en' | 'ru';

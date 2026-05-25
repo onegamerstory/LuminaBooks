@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { X, User } from 'lucide-react';
-import { translations } from '../App';
+import { translations } from '../utils/translations';
 
 interface UserProfileModalProps {
   isOpen: boolean;

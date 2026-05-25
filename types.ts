@@ -40,7 +40,6 @@ export interface Book {
   totalPages?: number; // Всего страниц в книге
   currentPage?: number; // Текущая страница прочитанной книги
   currentPercentage?: number; // Текущий процент прочитанной книги
-  totalHours?: number; // Устаревшее поле. Часы теперь считаются только из сессий чтения. Оставлено для обратной совместимости.
   isPartOfSeries?: boolean; // Является ли книга частью цикла/коллекции
   franchiseIds?: string[]; // IDs коллекции, к которым принадлежит книга
   sessions?: ReadingSession[];

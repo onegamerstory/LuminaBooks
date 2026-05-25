@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus } from '../types';
-import { translations } from '../App';
+import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 import GitHubCalendar from './GitHubCalendar';
 import { 
@@ -68,27 +68,6 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const averageHours = booksWithHours.length > 0 
     ? Math.round((totalHours / booksWithHours.length) * 10) / 10 
     : 0;
-
-  const formatHoursText = (hours: number, lang: 'en' | 'ru'): string => {
-    const roundedHours = Math.round(hours * 10) / 10;
-    if (lang === 'ru') {
-      const lastDigit = Math.floor(roundedHours) % 10;
-      const lastTwoDigits = Math.floor(roundedHours) % 100;
-      
-      if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-        return `${roundedHours} часов`;
-      }
-      if (lastDigit === 1) {
-        return `${roundedHours} час`;
-      }
-      if (lastDigit >= 2 && lastDigit <= 4) {
-        return `${roundedHours} часа`;
-      }
-      return `${roundedHours} часов`;
-    } else {
-      return roundedHours === 1 ? `${roundedHours} hour` : `${roundedHours} hours`;
-    }
-  };
 
   if (totalBooks === 0) {
     return (

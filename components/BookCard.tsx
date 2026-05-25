@@ -2,7 +2,7 @@
 import React from 'react';
 import { Book, BookStatus } from '../types';
 import { Star, Edit2, Trash2, Calendar, User, Link, Library, Check } from 'lucide-react';
-import { translations } from '../App';
+import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 
 interface BookCardProps {
@@ -13,7 +13,7 @@ interface BookCardProps {
   lang: 'en' | 'ru';
 }
 
-const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueue, lang }) => {
+const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, onAddToQueue, lang }) => {
   const t = translations[lang];
   
   const statusColors = {
@@ -32,27 +32,6 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueu
     return t.toRead;
   };
 
-  const formatHoursText = (hours: number, lang: 'en' | 'ru'): string => {
-    const roundedHours = Math.round(hours * 10) / 10;
-    if (lang === 'ru') {
-      const lastDigit = Math.floor(roundedHours) % 10;
-      const lastTwoDigits = Math.floor(roundedHours) % 100;
-      
-      if (lastTwoDigits >= 11 && lastTwoDigits <= 19) {
-        return `${roundedHours} часов`;
-      }
-      if (lastDigit === 1) {
-        return `${roundedHours} час`;
-      }
-      if (lastDigit >= 2 && lastDigit <= 4) {
-        return `${roundedHours} часа`;
-      }
-      return `${roundedHours} часов`;
-    } else {
-      return roundedHours === 1 ? `${roundedHours} hour` : `${roundedHours} hours`;
-    }
-  };
-
   return (
     <div className="group bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-slate-100 flex flex-col h-full">
       <div className="relative aspect-[2/3] overflow-hidden bg-slate-100">
@@ -60,6 +39,9 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueu
           src={book.coverUrl || `https://picsum.photos/seed/${book.title}/400/600`} 
           alt={book.title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+          onError={(e) => {
+            e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 600"%3E%3Crect fill="%23e2e8f0" width="400" height="600"/%3E%3C/svg%3E';
+          }}
         />
         {/* Кнопки в верхнем правом углу */}
         <div className="absolute top-3 right-3 flex gap-2 z-10">
@@ -166,6 +148,6 @@ const BookCard: React.FC<BookCardProps> = ({ book, onEdit, onDelete, onAddToQueu
       </div>
     </div>
   );
-};
+});
 
 export default BookCard;
