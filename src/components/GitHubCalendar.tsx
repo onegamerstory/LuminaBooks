@@ -52,10 +52,10 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
     
     const intensity = count / maxCount;
     
-    if (intensity <= 0.25) return 'bg-emerald-200';
-    if (intensity <= 0.5) return 'bg-emerald-400';
-    if (intensity <= 0.75) return 'bg-emerald-600';
-    return 'bg-emerald-700';
+    if (intensity <= 0.25) return 'bg-[#D6E1D8]';
+    if (intensity <= 0.5) return 'bg-[#B8CCBC]';
+    if (intensity <= 0.75) return 'bg-[#8AAB90]';
+    return 'bg-[#6B9071]';
   };
 
   // Функция для форматирования даты для tooltip
@@ -122,7 +122,7 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
                     return (
                       <div
                         key={key}
-                        className={`w-4 h-4 rounded-sm ${getCellColor(count)} transition-colors hover:ring-2 hover:ring-emerald-500 cursor-pointer`}
+                        className={`w-4 h-4 rounded-sm ${getCellColor(count)} transition-colors hover:ring-2 hover:ring-[#6B9071] cursor-pointer`}
                         title={getMonthTooltip(year, month, count)}
                       />
                     );
@@ -138,12 +138,12 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
       {/* Легенда */}
       <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
         <span>{lang === 'ru' ? 'Меньше' : 'Less'}</span>
-        <div className="flex gap-1">
+          <div className="flex gap-1">
           <div className="w-3 h-3 rounded-sm bg-slate-100"></div>
-          <div className="w-3 h-3 rounded-sm bg-emerald-200"></div>
-          <div className="w-3 h-3 rounded-sm bg-emerald-400"></div>
-          <div className="w-3 h-3 rounded-sm bg-emerald-600"></div>
-          <div className="w-3 h-3 rounded-sm bg-emerald-700"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#D6E1D8]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#B8CCBC]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#8AAB90]"></div>
+          <div className="w-3 h-3 rounded-sm bg-[#6B9071]"></div>
         </div>
         <span>{lang === 'ru' ? 'Больше' : 'More'}</span>
       </div>

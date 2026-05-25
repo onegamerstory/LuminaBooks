@@ -89,7 +89,10 @@ export const translations = {
     noQueueBooks: 'No books in queue',
     random: 'Random',
     randomBook: 'Random Book',
-    noBooksToRandomize: 'No books available for random selection'
+    noBooksToRandomize: 'No books available for random selection',
+    readProgress: 'Read Progress',
+    readingTimeChart: 'Reading Time',
+    booksReadOf: 'of'
   },
   ru: {
     catalog: 'Каталог',
@@ -160,6 +163,9 @@ export const translations = {
     noQueueBooks: 'Нет книг в очереди',
     random: 'Случайная',
     randomBook: 'Случайная книга',
-    noBooksToRandomize: 'Нет доступных книг для случайного выбора'
+    noBooksToRandomize: 'Нет доступных книг для случайного выбора',
+    readProgress: 'Прогресс чтения',
+    readingTimeChart: 'Время чтения',
+    booksReadOf: 'из'
   }
 };

@@ -69,6 +69,35 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
     ? Math.round((totalHours / booksWithHours.length) * 10) / 10 
     : 0;
 
+  // Donut chart: процент прочитанных книг
+  const percentage = totalBooks > 0 ? Math.round((readCount / totalBooks) * 100) : 0;
+  const radius = 66;
+  const circumference = 2 * Math.PI * radius;
+  const offset = circumference - (percentage / 100) * circumference;
+
+  // Гистограмма: часы чтения по месяцам (последние 6 месяцев)
+  const monthNames = lang === 'ru'
+    ? ['Янв', 'Фев', 'Мар', 'Апр', 'Май', 'Июн', 'Июл', 'Авг', 'Сен', 'Окт', 'Ноя', 'Дек']
+    : ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+  const now = new Date();
+  const monthlyHours = Array.from({ length: 6 }, (_, i) => {
+    const d = new Date(now.getFullYear(), now.getMonth() - (5 - i), 1);
+    let seconds = 0;
+    books.forEach(book => {
+      book.sessions?.forEach(s => {
+        const sd = new Date(s.startTime);
+        if (sd.getMonth() === d.getMonth() && sd.getFullYear() === d.getFullYear()) {
+          seconds += s.duration || 0;
+        }
+      });
+    });
+    return {
+      shortLabel: monthNames[d.getMonth()],
+      hours: Math.round((seconds / 3600) * 10) / 10,
+    };
+  });
+  const maxMonthlyHours = Math.max(...monthlyHours.map(m => m.hours), 1);
+
   if (totalBooks === 0) {
     return (
       <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
@@ -135,6 +164,95 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
       </div>
 
       <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
+
+      {/* Круговой прогресс и гистограмма */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Donut — прогресс чтения */}
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+          <h3 className="text-lg font-semibold text-[#1E2920] mb-4">{t.readProgress}</h3>
+          <div className="flex items-center gap-8">
+            <div className="relative flex-shrink-0">
+              <svg width={160} height={160} viewBox="0 0 160 160">
+                <circle cx="80" cy="80" r="66" fill="none" stroke="#D6E1D8" strokeWidth={14} />
+                <circle
+                  cx="80" cy="80" r="66"
+                  fill="none" stroke="#6B9071" strokeWidth={14}
+                  strokeDasharray={circumference}
+                  strokeDashoffset={offset}
+                  strokeLinecap="round"
+                  transform="rotate(-90 80 80)"
+                  className="transition-all duration-500"
+                />
+                <text
+                  x="80" y="80"
+                  textAnchor="middle" dominantBaseline="central"
+                  fill="#6B9071" fontSize="32" fontWeight="bold" fontFamily="sans-serif"
+                >
+                  {percentage}%
+                </text>
+              </svg>
+            </div>
+            <div>
+              <p className="text-3xl font-bold text-[#1E2920]">{readCount} <span className="text-lg font-normal text-slate-500">{t.booksReadOf}</span> {totalBooks}</p>
+              <p className="text-sm text-slate-500 mt-1">
+                {lang === 'ru' ? 'прочитанных книг' : 'books read'}
+              </p>
+            </div>
+          </div>
+        </div>
+
+        {/* Гистограмма — время чтения по месяцам */}
+        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md">
+          <h3 className="text-lg font-semibold text-[#1E2920] mb-4">{t.readingTimeChart}</h3>
+          {monthlyHours.some(m => m.hours > 0) ? (
+            <div className="relative">
+              <svg width="100%" height="190" viewBox="0 0 420 190" className="overflow-visible">
+                {/* Y-axis gridlines */}
+                {[0, 1, 2].map(i => {
+                  const y = 160 - (i / 2) * 135;
+                  return (
+                    <g key={i}>
+                      <line x1="45" y1={y} x2="400" y2={y} stroke="#D6E1D8" strokeWidth="1" />
+                      <text x="40" y={y + 4} textAnchor="end" fill="#94a3b8" fontSize="11" fontFamily="sans-serif">
+                        {Math.round((maxMonthlyHours / 2) * i)}
+                      </text>
+                    </g>
+                  );
+                })}
+                {/* Bars */}
+                {monthlyHours.map((m, i) => {
+                  const barHeight = maxMonthlyHours > 0 ? (m.hours / maxMonthlyHours) * 135 : 0;
+                  const x = 50 + i * 58;
+                  const y = 160 - barHeight;
+                  return (
+                    <g key={i}>
+                      <rect
+                        x={x} y={y} width={40} height={barHeight}
+                        rx={4} ry={4}
+                        fill="#6B9071"
+                        className="transition-all duration-500"
+                      />
+                      <text
+                        x={x + 20} y={177}
+                        textAnchor="middle" fill="#94a3b8" fontSize="11" fontFamily="sans-serif"
+                      >
+                        {m.shortLabel}
+                      </text>
+                    </g>
+                  );
+                })}
+                {/* Baseline */}
+                <line x1="45" y1="160" x2="400" y2="160" stroke="#D6E1D8" strokeWidth="2" />
+              </svg>
+            </div>
+          ) : (
+            <div className="flex items-center gap-2 text-slate-400 py-8 justify-center">
+              <Clock size={18} />
+              <p className="text-sm">{t.noBooksWithDates}</p>
+            </div>
+          )}
+        </div>
+      </div>
 
       {/* Календарь активности и Средняя скорость прочтения */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
