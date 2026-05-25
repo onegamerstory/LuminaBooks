@@ -647,7 +647,6 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   return (
     <div className="space-y-6">
       <Toast messages={toasts} onRemove={removeToast} />
-      <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Чтение' : 'Reading'}</h2>
 
       {/* Пустое состояние */}
       {currentlyReading.length === 0 && queueBooks.length === 0 && postponedBooks.length === 0 && (
@@ -658,14 +657,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
         </div>
       )}
 
-      {/* 1. Сейчас читаю */}
-      {currentlyReading.length > 0 && (
-        <div className="space-y-4">
-          {currentlyReading.map(book => renderBookCard(book))}
-        </div>
-      )}
-
-      {/* 2. Очередь — карусель */}
+      {/* 1. Очередь — карусель */}
       {queueBooks.length > 0 && (
         <div className="space-y-6">
           <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Очередь' : 'Queue'}</h3>
@@ -749,6 +741,14 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               <ChevronRight size={20} className="text-[#1E2920]" />
             </button>
           </div>
+        </div>
+      )}
+
+      {/* 2. Сейчас читаю */}
+      {currentlyReading.length > 0 && (
+        <div className="space-y-4">
+          <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Читаю' : 'Reading'}</h3>
+          {currentlyReading.map(book => renderBookCard(book))}
         </div>
       )}
 

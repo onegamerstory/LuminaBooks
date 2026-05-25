@@ -693,10 +693,10 @@ const App: React.FC = () => {
         <BookRatingModal
           isOpen={true}
           onClose={() => setBookToRateId(null)}
-          onSubmit={(rating) => {
+          onSubmit={(rating, review) => {
             setBooks(prevBooks => prevBooks.map(b => 
               b.id === bookToRateId 
-                ? { ...b, rating }
+                ? { ...b, rating, ...(review ? { description: review } : {}) }
                 : b
             ));
             setBookToRateId(null);

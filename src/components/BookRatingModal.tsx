@@ -5,7 +5,7 @@ import { translations } from '../utils/translations';
 interface BookRatingModalProps {
   isOpen: boolean;
   onClose: () => void;
-  onSubmit: (rating: number) => void;
+  onSubmit: (rating: number, review: string) => void;
   onSkip?: () => void;
   bookTitle: string;
   lang: 'en' | 'ru';
@@ -15,6 +15,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
   const t = translations[lang];
   const [rating, setRating] = useState<number>(0);
   const [hoveredRating, setHoveredRating] = useState<number>(0);
+  const [review, setReview] = useState<string>('');
   const starRefs = useRef<(HTMLButtonElement | null)[]>([]);
 
   if (!isOpen) return null;
@@ -42,13 +43,15 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
 
   const handleSubmit = () => {
     if (rating > 0) {
-      onSubmit(rating);
+      onSubmit(rating, review.trim());
       setRating(0);
+      setReview('');
     }
   };
 
   const handleSkip = () => {
     setRating(0);
+    setReview('');
     if (onSkip) {
       onSkip();
     } else {
@@ -131,6 +134,18 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
               {(hoveredRating || rating).toFixed(1)}
             </div>
             <p className="text-sm text-slate-400 mt-2">/ 10</p>
+          </div>
+
+          <div className="w-full">
+            <label className="block text-sm font-medium text-slate-600 mb-2">
+              {lang === 'ru' ? 'Ваш отзыв (опционально)' : 'Your review (optional)'}
+            </label>
+            <textarea
+              value={review}
+              onChange={(e) => setReview(e.target.value)}
+              placeholder={lang === 'ru' ? 'Напишите, что вы думаете об этой книге...' : 'Share your thoughts about this book...'}
+              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-24 text-sm"
+            />
           </div>
 
           <div className="flex gap-3 w-full pt-4">
