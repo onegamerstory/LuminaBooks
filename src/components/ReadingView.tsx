@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
@@ -44,6 +44,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   const [expandedBookId, setExpandedBookId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const pagesInputRef = useRef<HTMLInputElement>(null);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const readingBooks = books
     .filter(b => b.status === BookStatus.READING || b.status === BookStatus.POSTPONED)
@@ -672,48 +673,52 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
         </div>
       )}
 
-      {/* Раздел очереди */}
+      {/* Раздел очереди — карусель */}
       {queueBooks.length > 0 && (
-        <div className="space-y-4">
+        <div className="space-y-6">
           <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Очередь' : 'Queue'}</h3>
-          <div className="space-y-3">
-            {queueBooks.map(book => (
-              <div key={book.id} className="bg-cyan-50 rounded-xl shadow-md border border-cyan-200 p-6">
-                <div className="flex justify-between items-start mb-4 gap-4">
-                  {book.coverUrl && (
-                    <div className="flex-shrink-0 relative">
+          <div className="relative group">
+            {/* Стрелка влево */}
+            <button
+              onClick={() => carouselRef.current?.scrollBy({ left: -320, behavior: 'smooth' })}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+            >
+              <ChevronLeft size={20} className="text-[#1E2920]" />
+            </button>
+
+            {/* Карусель */}
+            <div
+              ref={carouselRef}
+              className="flex gap-5 overflow-x-auto scroll-smooth pb-2 px-14"
+              style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
+            >
+              {queueBooks.map(book => (
+                <div key={book.id} className="flex-shrink-0 w-36">
+                  {/* Обложка */}
+                  <div className="aspect-[2/3] rounded-xl overflow-hidden bg-slate-100 shadow-md mb-3 relative group/cover">
+                    {book.coverUrl ? (
                       <img
                         src={book.coverUrl}
                         alt={book.title}
-                        className="w-20 h-28 object-cover rounded-lg shadow-md"
-                        onError={(e) => {
-                          e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 112"%3E%3Crect fill="%23e2e8f0" width="80" height="112"/%3E%3C/svg%3E';
-                        }}
+                        className="w-full h-full object-cover"
+                        onError={handleCoverError}
                       />
-                    </div>
-                  )}
-                  <div className="flex-1">
-                    <div className="flex items-center gap-1">
-                      <h4 className="text-lg font-semibold text-[#1E2920]">{book.title}</h4>
-                      {book.isPartOfSeries && (
-                        <Link size={18} className="text-[#6B9071] flex-shrink-0" />
-                      )}
-                    </div>
-                    <p className="text-sm text-slate-600">{book.author} • {book.year}</p>
-                    {book.description && (
-                      <p className="text-sm text-slate-600 mt-2 line-clamp-2">{book.description}</p>
+                    ) : (
+                      <div className="w-full h-full flex flex-col items-center justify-center text-slate-400 text-xs p-3 text-center">
+                        <span className="font-semibold text-sm line-clamp-2">{book.title}</span>
+                        <span className="mt-1">{book.author}</span>
+                      </div>
                     )}
+                    {/* Подсказка при наведении */}
+                    <div className="absolute inset-0 bg-black/70 flex flex-col items-center justify-center p-2 text-center opacity-0 group-hover/cover:opacity-100 transition-opacity">
+                      <span className="text-white text-sm font-bold line-clamp-2">{book.title}</span>
+                      <span className="text-white/80 text-xs mt-1 line-clamp-1">{book.author}</span>
+                    </div>
                   </div>
-                  <div className="flex gap-2 flex-col">
+                  {/* Кнопки */}
+                  <div className="flex gap-2">
                     <button
                       onClick={() => {
-                        const updatedBook: Book = {
-                          ...book,
-                          status: BookStatus.READING,
-                          startDate: dayjs().format('YYYY-MM-DD'),
-                          inQueue: false
-                        };
-                        // Очищаем историю дат и записываем новый статус
                         const bookWithHistory = recordStatusChange(book, BookStatus.READING);
                         const finalBook = {
                           ...bookWithHistory,
@@ -723,9 +728,9 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                         onUpdateBook(finalBook);
                         addToast(lang === 'ru' ? 'Начато чтение' : 'Reading started', 'success');
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors text-sm font-medium whitespace-nowrap"
+                      className="flex-1 flex items-center justify-center gap-1 px-2 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors text-xs font-medium"
                     >
-                      <Play size={16} />
+                      <Play size={14} />
                       <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
                     </button>
                     <button
@@ -734,15 +739,23 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                         onUpdateBook(updatedBook);
                         addToast(lang === 'ru' ? 'Книга удалена из очереди' : 'Book removed from queue', 'success');
                       }}
-                      className="flex items-center gap-2 px-4 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors text-sm font-medium whitespace-nowrap"
+                      className="px-3 py-2 bg-slate-200 text-slate-600 rounded-lg hover:bg-slate-300 transition-colors"
+                      title={lang === 'ru' ? 'Убрать' : 'Remove'}
                     >
-                      <Trash2 size={16} />
-                      <span>{lang === 'ru' ? 'Убрать' : 'Remove'}</span>
+                      <Trash2 size={14} />
                     </button>
                   </div>
                 </div>
-              </div>
-            ))}
+              ))}
+            </div>
+
+            {/* Стрелка вправо */}
+            <button
+              onClick={() => carouselRef.current?.scrollBy({ left: 320, behavior: 'smooth' })}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+            >
+              <ChevronRight size={20} className="text-[#1E2920]" />
+            </button>
           </div>
         </div>
       )}
