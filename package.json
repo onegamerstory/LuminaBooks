@@ -15,7 +15,6 @@
     "build:app": "tsc && vite build --mode production"
   },
   "dependencies": {
-    "@google/genai": "^1.35.0",
     "@mantine/core": "^7.5.0",
     "@mantine/dates": "^7.5.0",
     "@mantine/hooks": "^7.5.0",
