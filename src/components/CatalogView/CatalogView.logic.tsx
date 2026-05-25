@@ -33,6 +33,7 @@ interface CatalogViewProps {
   onEdit: (book: Book) => void;
   onDelete: (id: string) => void;
   onAddToQueue: (book: Book) => void;
+  onStartReading: (book: Book) => void;
   onImport: (books: Book[], userProfile?: UserProfile, franchises?: Franchise[]) => void;
   lang: 'en' | 'ru';
 }
@@ -43,6 +44,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
   onEdit, 
   onDelete, 
   onAddToQueue, 
+  onStartReading, 
   onImport, 
   lang 
 }) => {
@@ -403,6 +405,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
         book={randomBook}
         onClose={() => setIsRandomModalOpen(false)}
         onAddToQueue={onAddToQueue}
+        onStartReading={onStartReading}
         lang={lang}
       />
     </div>

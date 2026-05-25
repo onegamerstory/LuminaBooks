@@ -368,6 +368,18 @@ const App: React.FC = () => {
     }));
   };
 
+  const handleStartReadingBook = (book: Book) => {
+    setBooks(prev => prev.map(b => {
+      if (b.id !== book.id) return b;
+      return {
+        ...b,
+        status: BookStatus.READING,
+        startDate: new Date().toISOString().split('T')[0],
+        inQueue: false,
+      };
+    }));
+  };
+
   const handleImport = (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
     // Если в импорте есть информация о пользователе, обновляем его в localStorage
     if (userProfile) {
@@ -622,6 +634,7 @@ const App: React.FC = () => {
             onEdit={handleEdit} 
             onDelete={handleDelete}
             onAddToQueue={handleAddToQueue}
+            onStartReading={handleStartReadingBook}
             onImport={handleImport}
             lang={lang}
           />

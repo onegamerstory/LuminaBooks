@@ -1,6 +1,6 @@
 import React from 'react';
 import { Book, BookStatus } from '../types';
-import { X } from 'lucide-react';
+import { X, Play } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
 
@@ -9,6 +9,7 @@ interface RandomBookModalProps {
   book: Book | null;
   onClose: () => void;
   onAddToQueue: (book: Book) => void;
+  onStartReading: (book: Book) => void;
   lang: 'en' | 'ru';
 }
 
@@ -52,6 +53,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
   book,
   onClose,
   onAddToQueue,
+  onStartReading,
   lang,
 }) => {
   const t = translations[lang];
@@ -60,7 +62,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-md w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
         <div className="flex items-start justify-between p-4 border-b border-slate-100">
           <h2 className="text-lg font-bold text-[#1E2920]">{t.randomBook}</h2>
           <button
@@ -118,10 +120,20 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
           </button>
           <button
             onClick={() => {
+              onStartReading(book);
+              onClose();
+            }}
+            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[#6B9071] hover:bg-[#5A7A60] text-white font-medium text-sm rounded-lg transition-colors"
+          >
+            <Play size={16} />
+            <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
+          </button>
+          <button
+            onClick={() => {
               onAddToQueue(book);
               onClose();
             }}
-            className="flex-1 px-4 py-2 bg-[#6B9071] hover:bg-[#5A7A60] text-white font-medium text-sm rounded-lg transition-colors"
+            className="flex-1 px-4 py-2 bg-slate-200 hover:bg-slate-300 text-slate-700 font-medium text-sm rounded-lg transition-colors"
           >
             {t.addToQueue}
           </button>
