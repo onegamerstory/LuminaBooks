@@ -1,4 +1,5 @@
 import React from 'react';
+import { createPortal } from 'react-dom';
 import { Book, BookStatus } from '../types';
 import { X, Play } from 'lucide-react';
 import { translations } from '../utils/translations';
@@ -60,8 +61,8 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
 
   if (!isOpen || !book) return null;
 
-  return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
+  return createPortal(
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
       <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
         <div className="flex items-start justify-between p-4 border-b border-slate-100">
           <h2 className="text-lg font-bold text-[#1E2920]">{t.randomBook}</h2>
@@ -139,7 +140,8 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
           </button>
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 
