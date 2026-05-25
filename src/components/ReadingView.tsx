@@ -665,7 +665,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             {/* Стрелка влево */}
             <button
               onClick={() => carouselRef.current?.scrollBy({ left: -320, behavior: 'smooth' })}
-              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute left-0 top-[38%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-100 hover:bg-white"
             >
               <ChevronLeft size={20} className="text-[#1E2920]" />
             </button>
@@ -736,7 +736,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             {/* Стрелка вправо */}
             <button
               onClick={() => carouselRef.current?.scrollBy({ left: 320, behavior: 'smooth' })}
-              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity hover:bg-white"
+              className="absolute right-0 top-[38%] -translate-y-1/2 z-10 w-10 h-10 rounded-full bg-white/90 shadow-md flex items-center justify-center opacity-100 hover:bg-white"
             >
               <ChevronRight size={20} className="text-[#1E2920]" />
             </button>
