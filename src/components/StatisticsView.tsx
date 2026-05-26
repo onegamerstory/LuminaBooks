@@ -9,7 +9,6 @@ import {
   TrendingUp, 
   Star, 
   Clock, 
-  Library,
   Award,
   AlertCircle,
   User,
@@ -98,16 +97,6 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   });
   const maxMonthlyHours = Math.max(...monthlyHours.map(m => m.hours), 1);
 
-  if (totalBooks === 0) {
-    return (
-      <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-slate-100">
-        <Library size={48} className="mb-4 opacity-20" />
-        <p className="text-lg">{t.noBooks}</p>
-        <p className="text-sm">{t.tryAdding}</p>
-      </div>
-    );
-  }
-
   return (
     <div className="space-y-6">
       {/* Profile Section with Stats */}
@@ -163,6 +152,8 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         </div>
       </div>
 
+      {totalBooks > 0 && (
+        <>
       <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
 
       {/* Круговой прогресс и гистограмма */}
@@ -378,6 +369,8 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             </div>
           )}
         </div>
+      )}
+        </>
       )}
     </div>
   );
