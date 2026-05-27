@@ -11,14 +11,13 @@ import BookCard from './../BookCard';
 import Toast, { ToastMessage } from './../Toast';
 import RandomBookModal from './../RandomBookModal';
 import FilterDropdown from './FilterDropdown';
-import SortDropdown from './SortDropdown';
+import FilterPanel from './FilterPanel';
 import ViewModeButtons from './ViewModeButtons';
 import EmptyState from './EmptyState';
 import BookTableRow from './BookTableRow';
 import { Search, Dices, Upload, Download } from 'lucide-react';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../../utils/jsonUtils';
 import { translations } from '../../utils/translations';
-import { getStatusColor } from '../../utils/statusUtils';
 
 type ViewMode = 'large' | 'table';
 type TableSortOption = 'rating-desc' | 'rating-asc' | 'title-asc' | 'title-desc' | 'status-asc' | 'status-desc' | 'pages-desc' | 'pages-asc';
@@ -80,7 +79,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
       return 'rating-desc';
     }
   });
-  const [isTableSortOpen, setIsTableSortOpen] = useState(false);
+
   const [viewMode, setViewModeState] = useState<ViewMode>(() => {
     const saved = localStorage.getItem(VIEWMODE_STORAGE_KEY) as ViewMode | null;
     return (saved && ['large', 'table'].includes(saved)) ? saved : 'large';
@@ -147,7 +146,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
 
   // Filtering logic
   const filteredBooks = books.filter(book => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
+    const matchesSearch = searchTerm === '' || book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
                           book.author.toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = selectedStatuses.has('All') || selectedStatuses.has(book.status);
     return matchesSearch && matchesStatus;
@@ -297,50 +296,52 @@ const CatalogView: React.FC<CatalogViewProps> = ({
             />
           </div>
           
-          {/* Filter dropdown */}
-          <FilterDropdown
-            isOpen={isFilterOpen}
-            onToggle={() => setIsFilterOpen(!isFilterOpen)}
-            selectedStatuses={selectedStatuses}
-            onToggleStatus={(status: BookStatus | 'All') => {
-              const newStatuses = new Set(selectedStatuses);
-              
-              if (status === 'All') {
-                if (newStatuses.has('All')) {
-                  newStatuses.clear();
-                  newStatuses.add('All');
+          {/* Filter dropdown (grid view only) */}
+          {viewMode !== 'table' && (
+            <FilterDropdown
+              isOpen={isFilterOpen}
+              onToggle={() => setIsFilterOpen(!isFilterOpen)}
+              selectedStatuses={selectedStatuses}
+              onToggleStatus={(status: BookStatus | 'All') => {
+                const newStatuses = new Set(selectedStatuses);
+                
+                if (status === 'All') {
+                  if (newStatuses.has('All')) {
+                    newStatuses.clear();
+                    newStatuses.add('All');
+                  } else {
+                    newStatuses.clear();
+                    newStatuses.add('All');
+                  }
                 } else {
-                  newStatuses.clear();
-                  newStatuses.add('All');
+                  // Remove 'All' if selecting specific status
+                  newStatuses.delete('All');
+                  
+                  if (newStatuses.has(status)) {
+                    newStatuses.delete(status);
+                  } else {
+                    newStatuses.add(status);
+                  }
+                  
+                  // If all 5 statuses selected, switch to 'All'
+                  const TOTAL_STATUSES = 5;
+                  if (newStatuses.size === TOTAL_STATUSES) {
+                    newStatuses.clear();
+                    newStatuses.add('All');
+                  }
+                  
+                  // If nothing selected, select 'All'
+                  if (newStatuses.size === 0) {
+                    newStatuses.add('All');
+                  }
                 }
-              } else {
-                // Remove 'All' if selecting specific status
-                newStatuses.delete('All');
                 
-                if (newStatuses.has(status)) {
-                  newStatuses.delete(status);
-                } else {
-                  newStatuses.add(status);
-                }
-                
-                // If all 5 statuses selected, switch to 'All'
-                const TOTAL_STATUSES = 5;
-                if (newStatuses.size === TOTAL_STATUSES) {
-                  newStatuses.clear();
-                  newStatuses.add('All');
-                }
-                
-                // If nothing selected, select 'All'
-                if (newStatuses.size === 0) {
-                  newStatuses.add('All');
-                }
-              }
-              
-              setSelectedStatuses(newStatuses);
-              saveFilterStatuses(newStatuses);
-            }}
-            lang={lang}
-          />
+                setSelectedStatuses(newStatuses);
+                saveFilterStatuses(newStatuses);
+              }}
+              lang={lang}
+            />
+          )}
 
           {/* View mode buttons */}
           <ViewModeButtons
@@ -349,16 +350,6 @@ const CatalogView: React.FC<CatalogViewProps> = ({
             lang={lang}
           />
 
-          {/* Sort dropdown (table view only) */}
-          {viewMode === 'table' && (
-            <SortDropdown
-              isOpen={isTableSortOpen}
-              onToggle={() => setIsTableSortOpen(!isTableSortOpen)}
-              currentOption={tableSortOption}
-              onChange={handleTableSortChange}
-              lang={lang}
-            />
-          )}
         </div>
       </div>
 
@@ -381,17 +372,55 @@ const CatalogView: React.FC<CatalogViewProps> = ({
           )}
 
           {viewMode === 'table' && (
-            <div className="space-y-3">
-              {getTableSortedBooks(filteredBooks).map(book => (
-                <BookTableRow
-                  key={book.id}
-                  book={book}
-                  onEdit={() => onEdit(book)}
-                  onDelete={() => onDelete(book.id)}
-                  onAddToQueue={() => onAddToQueue(book)}
-                  lang={lang}
-                />
-              ))}
+            <div className="flex gap-6">
+              <FilterPanel
+                books={books}
+                selectedStatuses={selectedStatuses}
+                onToggleStatus={(status: BookStatus | 'All') => {
+                  const newStatuses = new Set(selectedStatuses);
+                  
+                  if (status === 'All') {
+                    newStatuses.clear();
+                    newStatuses.add('All');
+                  } else {
+                    newStatuses.delete('All');
+                    
+                    if (newStatuses.has(status)) {
+                      newStatuses.delete(status);
+                    } else {
+                      newStatuses.add(status);
+                    }
+                    
+                    const TOTAL_STATUSES = 5;
+                    if (newStatuses.size === TOTAL_STATUSES) {
+                      newStatuses.clear();
+                      newStatuses.add('All');
+                    }
+                    
+                    if (newStatuses.size === 0) {
+                      newStatuses.add('All');
+                    }
+                  }
+                  
+                  setSelectedStatuses(newStatuses);
+                  saveFilterStatuses(newStatuses);
+                }}
+                currentSortOption={tableSortOption}
+                onSortChange={handleTableSortChange}
+                lang={lang}
+              />
+              <div className="flex-1 space-y-3 min-w-0">
+                {getTableSortedBooks(filteredBooks).map(book => (
+                  <BookTableRow
+                    key={book.id}
+                    book={book}
+                    onEdit={() => onEdit(book)}
+                    onDelete={() => onDelete(book.id)}
+                    onAddToQueue={() => onAddToQueue(book)}
+                    lang={lang}
+                  />
+                ))}
+              </div>
             </div>
           )}
         </>

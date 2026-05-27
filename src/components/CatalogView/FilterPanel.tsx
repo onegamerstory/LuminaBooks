@@ -1,0 +1,188 @@
+import React from 'react';
+import { TrendingDown, TrendingUp, ArrowDownAZ, ArrowUpAZ, ArrowDown01, ArrowUp01 } from 'lucide-react';
+import { BookStatus, Book } from '../../types';
+import { translations } from '../../utils/translations';
+import { getStatusColor } from '../../utils/statusUtils';
+
+type TableSortOption = 'rating-desc' | 'rating-asc' | 'title-asc' | 'title-desc' | 'status-asc' | 'status-desc' | 'pages-desc' | 'pages-asc';
+
+const STATUS_LIST: BookStatus[] = [
+  BookStatus.READING,
+  BookStatus.READ,
+  BookStatus.WANT_TO_READ,
+  BookStatus.POSTPONED,
+  BookStatus.ABANDONED,
+];
+
+const statusLabels: Record<BookStatus, keyof typeof translations.en> = {
+  [BookStatus.READING]: 'reading',
+  [BookStatus.READ]: 'read',
+  [BookStatus.WANT_TO_READ]: 'toRead',
+  [BookStatus.POSTPONED]: 'postponed',
+  [BookStatus.ABANDONED]: 'abandoned',
+};
+
+interface SortField {
+  key: string;
+  label: string;
+  ascOption: TableSortOption;
+  descOption: TableSortOption;
+  ascIcon: React.ReactNode;
+  descIcon: React.ReactNode;
+}
+
+interface FilterPanelProps {
+  books: Book[];
+  selectedStatuses: Set<BookStatus | 'All'>;
+  onToggleStatus: (status: BookStatus | 'All') => void;
+  currentSortOption: TableSortOption;
+  onSortChange: (option: TableSortOption) => void;
+  lang: 'en' | 'ru';
+}
+
+const FilterPanel: React.FC<FilterPanelProps> = ({
+  books,
+  selectedStatuses,
+  onToggleStatus,
+  currentSortOption,
+  onSortChange,
+  lang,
+}) => {
+  const t = translations[lang];
+  const isAllSelected = selectedStatuses.has('All');
+
+  const getStatusCount = (status: BookStatus): number => {
+    return books.filter(b => b.status === status).length;
+  };
+
+  const sortFields: SortField[] = [
+    {
+      key: 'rating',
+      label: lang === 'ru' ? 'Рейтинг' : 'Rating',
+      ascOption: 'rating-asc',
+      descOption: 'rating-desc',
+      ascIcon: <TrendingUp size={15} />,
+      descIcon: <TrendingDown size={15} />,
+    },
+    {
+      key: 'title',
+      label: lang === 'ru' ? 'Название' : 'Name',
+      ascOption: 'title-asc',
+      descOption: 'title-desc',
+      ascIcon: <ArrowDownAZ size={15} />,
+      descIcon: <ArrowUpAZ size={15} />,
+    },
+    {
+      key: 'status',
+      label: lang === 'ru' ? 'Статус' : 'Status',
+      ascOption: 'status-asc',
+      descOption: 'status-desc',
+      ascIcon: <ArrowDownAZ size={15} />,
+      descIcon: <ArrowUpAZ size={15} />,
+    },
+    {
+      key: 'pages',
+      label: lang === 'ru' ? 'Страницы' : 'Pages',
+      ascOption: 'pages-asc',
+      descOption: 'pages-desc',
+      ascIcon: <ArrowUp01 size={15} />,
+      descIcon: <ArrowDown01 size={15} />,
+    },
+  ];
+
+  return (
+    <div className="w-60 shrink-0 space-y-6 bg-[#F0F4F1] border border-[#C8D6CB] rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+      {/* Sort section */}
+      <div>
+        <h3 className="text-sm font-semibold text-[#1E2920] uppercase tracking-wide mb-3">
+          {lang === 'ru' ? 'Сортировка' : 'Sort'}
+        </h3>
+        <div className="space-y-1">
+          {sortFields.map(field => {
+            const isAsc = currentSortOption === field.ascOption;
+            const isDesc = currentSortOption === field.descOption;
+            return (
+              <div
+                key={field.key}
+                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] transition-colors"
+              >
+                <span className="text-sm text-[#1E2920]">{field.label}</span>
+                <div className="flex gap-1">
+                  <button
+                    onClick={() => onSortChange(field.ascOption)}
+                    className={`p-1.5 rounded transition-colors ${
+                      isAsc
+                        ? 'bg-[#6b9071] text-white'
+                        : 'text-slate-600 hover:bg-[#B8CCBC]'
+                    }`}
+                    title={lang === 'ru' ? 'По возрастанию' : 'Ascending'}
+                  >
+                    {field.ascIcon}
+                  </button>
+                  <button
+                    onClick={() => onSortChange(field.descOption)}
+                    className={`p-1.5 rounded transition-colors ${
+                      isDesc
+                        ? 'bg-[#6b9071] text-white'
+                        : 'text-slate-600 hover:bg-[#B8CCBC]'
+                    }`}
+                    title={lang === 'ru' ? 'По убыванию' : 'Descending'}
+                  >
+                    {field.descIcon}
+                  </button>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+
+      {/* Status filter section */}
+      <div>
+        <h3 className="text-sm font-semibold text-[#1E2920] uppercase tracking-wide mb-3">
+          {t.status}
+        </h3>
+        <div className="space-y-1">
+          <label className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] cursor-pointer transition-colors">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                checked={isAllSelected}
+                onChange={() => onToggleStatus('All')}
+                className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[#6B9071]"
+              />
+              <span className="text-sm text-[#1E2920] font-medium">{t.allStatuses}</span>
+            </div>
+            <span className="text-xs text-slate-500">{books.length}</span>
+          </label>
+
+          {STATUS_LIST.map(status => {
+            const count = getStatusCount(status);
+            const isChecked = selectedStatuses.has(status) && !isAllSelected;
+            return (
+              <label
+                key={status}
+                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] cursor-pointer transition-colors"
+              >
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    checked={isChecked}
+                    onChange={() => onToggleStatus(status)}
+                    className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[#6B9071]"
+                  />
+                  <span className={`text-sm ${getStatusColor(status)}`}>
+                    {t[statusLabels[status]]}
+                  </span>
+                </div>
+                <span className="text-xs text-slate-500">{count}</span>
+              </label>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default FilterPanel;

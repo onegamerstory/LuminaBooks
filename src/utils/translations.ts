@@ -93,7 +93,9 @@ export const translations = {
     noBooksToRandomize: 'No books available for random selection',
     readProgress: 'Read Progress',
     readingTimeChart: 'Reading Time',
-    booksReadOf: 'of'
+    booksReadOf: 'of',
+    filters: 'Filters',
+    anyRating: 'Any Rating'
   },
   ru: {
     catalog: 'Каталог',
@@ -168,6 +170,8 @@ export const translations = {
     noBooksToRandomize: 'Нет доступных книг для случайного выбора',
     readProgress: 'Прогресс чтения',
     readingTimeChart: 'Время чтения',
-    booksReadOf: 'из'
+    booksReadOf: 'из',
+    filters: 'Фильтры',
+    anyRating: 'Любая оценка'
   }
 };
