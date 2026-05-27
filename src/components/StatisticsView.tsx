@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus } from '../types';
 import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
@@ -12,7 +12,9 @@ import {
   Award,
   AlertCircle,
   User,
-  Link
+  Link,
+  Hourglass,
+  ListTodo
 } from 'lucide-react';
 
 interface StatisticsViewProps {
@@ -97,6 +99,34 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   });
   const maxMonthlyHours = Math.max(...monthlyHours.map(m => m.hours), 1);
 
+  // Достижения
+  const totalReadSeconds = books.reduce((sum, book) =>
+    sum + (book.sessions?.reduce((s, session) => s + (session.duration || 0), 0) || 0), 0);
+  const totalReadHours = totalReadSeconds / 3600;
+
+  const activeMonths = books.reduce((set, book) => {
+    book.sessions?.forEach(s => {
+      const d = new Date(s.startTime);
+      if (!isNaN(d.getTime())) set.add(`${d.getFullYear()}-${d.getMonth()}`);
+    });
+    return set;
+  }, new Set<string>());
+
+  const hasSeries = readBooks.some(b => b.franchiseIds && b.franchiseIds.length > 0);
+
+  const achievementsList = [
+    { id: '1', title: { ru: 'Начало пути', en: 'First Steps' }, desc: { ru: 'Прочитайте свою первую книгу', en: 'Read your first book' }, unlocked: readCount >= 1 },
+    { id: '2', title: { ru: 'Книжный червь', en: 'Bookworm' }, desc: { ru: 'Прочитайте 5 книг', en: 'Read 5 books' }, unlocked: readCount >= 5 },
+    { id: '3', title: { ru: 'Заядлый читатель', en: 'Avid Reader' }, desc: { ru: 'Прочитайте 15 книг', en: 'Read 15 books' }, unlocked: readCount >= 15 },
+    { id: '4', title: { ru: 'Библиофил', en: 'Bibliophile' }, desc: { ru: 'Прочитайте 30 книг', en: 'Read 30 books' }, unlocked: readCount >= 30 },
+    { id: '5', title: { ru: 'Книжный маньяк', en: 'Book Maniac' }, desc: { ru: 'Прочитайте 50 книг', en: 'Read 50 books' }, unlocked: readCount >= 50 },
+    { id: '6', title: { ru: '100 часов', en: '100 Hours' }, desc: { ru: 'Проведите 100 часов за чтением', en: 'Spend 100 hours reading' }, unlocked: totalReadHours >= 100 },
+    { id: '7', title: { ru: 'Книжный странник', en: 'Book Wanderer' }, desc: { ru: 'Проведите 500 часов за чтением', en: 'Spend 500 hours reading' }, unlocked: totalReadHours >= 500 },
+    { id: '8', title: { ru: 'Ценитель', en: 'Connoisseur' }, desc: { ru: 'Поставьте книге оценку 5', en: 'Rate a book 5 stars' }, unlocked: maxRating === 5 },
+    { id: '9', title: { ru: 'Коллекционер', en: 'Collector' }, desc: { ru: 'Начните читать книги из цикла', en: 'Start reading books from a series' }, unlocked: hasSeries },
+    { id: '10', title: { ru: 'Постоянный читатель', en: 'Consistent Reader' }, desc: { ru: 'Читайте книги в течение 6 разных месяцев', en: 'Read books in 6 different months' }, unlocked: activeMonths.size >= 6 },
+  ];
+
   return (
     <div className="space-y-6">
       {/* Profile Section with Stats */}
@@ -119,15 +149,9 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
           <h2 className="text-2xl font-bold text-white mt-4">
             {profile?.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
           </h2>
-          <p className="text-white/70 text-sm mt-1 mb-6">
-            {lang === 'ru' 
-              ? `Прочитано ${readCount} ${readCount === 1 ? 'книга' : (readCount >= 2 && readCount <= 4 ? 'книги' : 'книг')}`
-              : `${readCount} ${readCount === 1 ? 'book' : 'books'} read`
-            }
-          </p>
 
-          {/* 4 stats — без подложек */}
-          <div className="grid grid-cols-4 gap-6 w-full">
+          {/* 5 stats — без подложек */}
+          <div className="grid grid-cols-5 gap-6 w-full mt-6">
             <div className="text-center">
               <BookOpen className="text-white/70 mx-auto mb-1" size={18} />
               <p className="text-xs text-white/50 uppercase tracking-wider">{t.totalBooks}</p>
@@ -144,7 +168,12 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
               <p className="text-2xl font-bold text-white mt-1">{readCount}</p>
             </div>
             <div className="text-center">
-              <BookOpen className="text-white/70 mx-auto mb-1" size={18} />
+              <Hourglass className="text-white/70 mx-auto mb-1" size={18} />
+              <p className="text-xs text-white/50 uppercase tracking-wider">{t.totalHours}</p>
+              <p className="text-2xl font-bold text-white mt-1">{Math.round(totalReadHours)}</p>
+            </div>
+            <div className="text-center">
+              <ListTodo className="text-white/70 mx-auto mb-1" size={18} />
               <p className="text-xs text-white/50 uppercase tracking-wider">{t.toRead}</p>
               <p className="text-2xl font-bold text-white mt-1">{toReadCount}</p>
             </div>
@@ -157,7 +186,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
       <h2 className="text-2xl font-bold text-[#1E2920]">{lang === 'ru' ? 'Статистика' : 'Statistics'}</h2>
 
       {/* Круговой прогресс и гистограмма */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr] gap-6">
         {/* Donut — прогресс чтения */}
         <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
           <h3 className="text-lg font-semibold text-[#1E2920] mb-4">{t.readProgress}</h3>
@@ -245,19 +274,67 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         </div>
       </div>
 
-      {/* Календарь активности и Средняя скорость прочтения */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Календарь активности */}
-        <GitHubCalendar books={books} lang={lang} />
+      {/* Календарь активности — на всю ширину */}
+      <GitHubCalendar books={books} lang={lang} />
+
+      {/* Достижения + Средняя скорость прочтения */}
+      <div className="grid grid-cols-1 lg:grid-cols-[2fr_1fr] gap-6 min-w-0 min-h-[260px]">
+        {/* Достижения */}
+        <div className="h-full bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB] relative min-w-0">
+          <h3 className="text-lg font-semibold text-[#1E2920] mb-4">
+            {lang === 'ru' ? 'Достижения' : 'Achievements'}
+          </h3>
+
+          <div className="relative min-w-0 pt-8">
+            <button
+              onClick={() => {
+                const el = document.getElementById('ach-scroll');
+                if (el) el.scrollBy({ left: -300, behavior: 'smooth' });
+              }}
+              className="absolute left-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow text-[#4A6B50] transition-colors -ml-3"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="15 18 9 12 15 6"/></svg>
+            </button>
+
+            <div id="ach-scroll" className="overflow-hidden">
+              <div className="flex gap-4 min-w-0">
+                {achievementsList.map(ach => (
+                  <div
+                    key={ach.id}
+                    className="flex flex-col items-center flex-shrink-0 w-[140px]"
+                  >
+                    <div className={`w-16 h-16 rounded-full mb-2 ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`} />
+                    <h4 className={`text-sm font-semibold text-center mb-1 leading-tight ${ach.unlocked ? 'text-[#1E2920]' : 'text-slate-400'}`}>
+                      {ach.title[lang]}
+                    </h4>
+                    <p className={`text-xs text-center leading-tight ${ach.unlocked ? 'text-slate-500' : 'text-slate-300'}`}>
+                      {ach.desc[lang]}
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            <button
+              onClick={() => {
+                const el = document.getElementById('ach-scroll');
+                if (el) el.scrollBy({ left: 300, behavior: 'smooth' });
+              }}
+              className="absolute right-0 top-1/2 -translate-y-1/2 z-10 w-7 h-7 flex items-center justify-center rounded-full bg-white/80 hover:bg-white shadow text-[#4A6B50] transition-colors -mr-3"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><polyline points="9 18 15 12 9 6"/></svg>
+            </button>
+          </div>
+        </div>
 
         {/* Средняя скорость прочтения */}
-        <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
+        <div className="h-full bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
           <div className="flex items-center gap-3 mb-4">
             <Clock className="text-[#6B9071]" size={24} />
             <h3 className="text-lg font-semibold text-[#1E2920]">{t.averageReadingSpeed}</h3>
           </div>
           {booksWithHours.length > 0 ? (
-            <div>
+            <div className="pt-8">
               <p className="text-3xl font-bold text-[#6B9071] mb-2">
                 {formatHoursText(averageHours, lang)}
               </p>
@@ -284,7 +361,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
               </p>
             </div>
           ) : (
-            <div className="flex items-center gap-2 text-slate-400">
+            <div className="flex items-center gap-2 text-slate-400 pt-8">
               <AlertCircle size={18} />
               <p className="text-sm">{t.noBooksWithDates}</p>
             </div>
