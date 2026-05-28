@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, Franchise } from '../types';
-import { X, Star, Link, Clock } from 'lucide-react';
+import { X, Star, Link, Clock, Search, Loader2 } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
 import { DateInput } from '@mantine/dates';
@@ -9,6 +9,7 @@ import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
 import FranchiseSelectModal from './FranchiseSelectModal.tsx';
 import { calculateBookTotalHours } from '../utils/dateUtils';
+import { searchBookOnOpenLibrary } from '../utils/openLibraryApi';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -46,6 +47,8 @@ const BookModal: React.FC<BookModalProps> = ({
     franchiseIds: [],
   });
   const [showFranchiseSelect, setShowFranchiseSelect] = useState(false);
+  const [isSearching, setIsSearching] = useState(false);
+  const [searchMessage, setSearchMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
   const isEditingExistingBook = !!initialData;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingEditModal, setShowRatingEditModal] = useState(false);
@@ -183,6 +186,36 @@ const BookModal: React.FC<BookModalProps> = ({
     setShowFranchiseSelect(false);
   };
 
+  const handleSearchBook = async () => {
+    if (!formData.title?.trim()) return;
+
+    setIsSearching(true);
+    setSearchMessage(null);
+
+    try {
+      const result = await searchBookOnOpenLibrary(formData.title, formData.author);
+
+      if (result) {
+        setFormData(prev => ({
+          ...prev,
+          title: result.title,
+          author: result.author,
+          year: String(result.year),
+          coverUrl: result.coverUrl,
+          totalPages: result.totalPages ?? undefined,
+        }));
+        setSearchMessage({ text: t.bookInfoFilled, type: 'success' });
+      } else {
+        setSearchMessage({ text: t.bookNotFound, type: 'error' });
+      }
+    } catch {
+      setSearchMessage({ text: lang === 'ru' ? 'Ошибка запроса' : 'Request error', type: 'error' });
+    } finally {
+      setIsSearching(false);
+      setTimeout(() => setSearchMessage(null), 3000);
+    }
+  };
+
   if (!isOpen) return null;
 
   return (
@@ -256,7 +289,7 @@ const BookModal: React.FC<BookModalProps> = ({
                       placeholder="e.g. The Great Gatsby"
                     />
                   </div>
-                  <div className="flex items-center justify-end h-full pt-6">
+                  <div className="flex items-center justify-end h-full pt-6 gap-2">
                     <button
                       type="button"
                       onClick={() => setShowFranchiseSelect(true)}
@@ -274,8 +307,30 @@ const BookModal: React.FC<BookModalProps> = ({
                         </span>
                       )}
                     </button>
+                    <button
+                      type="button"
+                      onClick={handleSearchBook}
+                      disabled={isSearching || !formData.title?.trim()}
+                      className={`p-2 rounded-lg transition-all ${
+                        formData.title?.trim()
+                          ? 'bg-[#6B9071] text-white hover:bg-[#5A7A60]'
+                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                      } ${isSearching ? 'opacity-60 cursor-wait' : ''}`}
+                      title={t.findBook}
+                    >
+                      {isSearching ? (
+                        <Loader2 size={18} className="animate-spin" />
+                      ) : (
+                        <Search size={18} />
+                      )}
+                    </button>
                   </div>
                 </div>
+                {searchMessage && (
+                  <p className={`text-xs mt-1.5 ${searchMessage.type === 'error' ? 'text-red-600' : 'text-emerald-600'}`}>
+                    {searchMessage.text}
+                  </p>
+                )}
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

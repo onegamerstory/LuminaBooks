@@ -95,7 +95,10 @@ export const translations = {
     readingTimeChart: 'Reading Time',
     booksReadOf: 'of',
     filters: 'Filters',
-    anyRating: 'Any Rating'
+    anyRating: 'Any Rating',
+    findBook: 'Find Book',
+    bookNotFound: 'Book not found',
+    bookInfoFilled: 'Book info filled'
   },
   ru: {
     catalog: 'Каталог',
@@ -172,6 +175,9 @@ export const translations = {
     readingTimeChart: 'Время чтения',
     booksReadOf: 'из',
     filters: 'Фильтры',
-    anyRating: 'Любая оценка'
+    anyRating: 'Любая оценка',
+    findBook: 'Найти книгу',
+    bookNotFound: 'Книга не найдена',
+    bookInfoFilled: 'Информация о книге заполнена'
   }
 };

@@ -16,6 +16,16 @@ import {
   Hourglass,
   ListTodo
 } from 'lucide-react';
+import achievement1Png from '../assets/achivements/1.png';
+import achievement2Png from '../assets/achivements/2.png';
+import achievement3Png from '../assets/achivements/3.png';
+import achievement4Png from '../assets/achivements/4.png';
+import achievement5Png from '../assets/achivements/5.png';
+import achievement6Png from '../assets/achivements/6.png';
+import achievement7Png from '../assets/achivements/7.png';
+import achievement8Png from '../assets/achivements/8.png';
+import achievement9Png from '../assets/achivements/9.png';
+import achievement10Png from '../assets/achivements/10.png';
 
 interface StatisticsViewProps {
   books: Book[];
@@ -122,7 +132,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
     { id: '5', title: { ru: 'Книжный маньяк', en: 'Book Maniac' }, desc: { ru: 'Прочитайте 50 книг', en: 'Read 50 books' }, unlocked: readCount >= 50 },
     { id: '6', title: { ru: '100 часов', en: '100 Hours' }, desc: { ru: 'Проведите 100 часов за чтением', en: 'Spend 100 hours reading' }, unlocked: totalReadHours >= 100 },
     { id: '7', title: { ru: 'Книжный странник', en: 'Book Wanderer' }, desc: { ru: 'Проведите 500 часов за чтением', en: 'Spend 500 hours reading' }, unlocked: totalReadHours >= 500 },
-    { id: '8', title: { ru: 'Ценитель', en: 'Connoisseur' }, desc: { ru: 'Поставьте книге оценку 5', en: 'Rate a book 5 stars' }, unlocked: maxRating === 5 },
+    { id: '8', title: { ru: 'Ценитель', en: 'Connoisseur' }, desc: { ru: 'Поставьте книге оценку 10', en: 'Rate a book 10 stars' }, unlocked: maxRating === 10 },
     { id: '9', title: { ru: 'Коллекционер', en: 'Collector' }, desc: { ru: 'Начните читать книги из цикла', en: 'Start reading books from a series' }, unlocked: hasSeries },
     { id: '10', title: { ru: 'Постоянный читатель', en: 'Consistent Reader' }, desc: { ru: 'Читайте книги в течение 6 разных месяцев', en: 'Read books in 6 different months' }, unlocked: activeMonths.size >= 6 },
   ];
@@ -285,7 +295,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
             {lang === 'ru' ? 'Достижения' : 'Achievements'}
           </h3>
 
-          <div className="relative min-w-0 pt-8">
+          <div className="relative min-w-0 pt-4">
             <button
               onClick={() => {
                 const el = document.getElementById('ach-scroll');
@@ -298,12 +308,22 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 
             <div id="ach-scroll" className="overflow-hidden">
               <div className="flex gap-4 min-w-0">
-                {achievementsList.map(ach => (
+                {[...achievementsList].sort((a, b) => (b.unlocked ? 1 : 0) - (a.unlocked ? 1 : 0)).map(ach => (
                   <div
                     key={ach.id}
-                    className="flex flex-col items-center flex-shrink-0 w-[140px]"
+                    className="flex flex-col items-center flex-shrink-0 w-[160px]"
                   >
-                    <div className={`w-16 h-16 rounded-full mb-2 ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`} />
+                    {(() => {
+                      const images = { '1': achievement1Png, '2': achievement2Png, '3': achievement3Png, '4': achievement4Png, '5': achievement5Png, '6': achievement6Png, '7': achievement7Png, '8': achievement8Png, '9': achievement9Png, '10': achievement10Png } as Record<string, string | undefined>;
+                      const imgSrc = images[ach.id];
+                      return imgSrc ? (
+                        <div className={`w-20 h-20 rounded-full mb-3 overflow-hidden ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`}>
+                          <img src={imgSrc} alt={ach.title[lang]} className={`w-full h-full object-cover ${ach.unlocked ? '' : 'opacity-40 grayscale'}`} />
+                        </div>
+                      ) : (
+                        <div className={`w-20 h-20 rounded-full mb-3 ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`} />
+                      );
+                    })()}
                     <h4 className={`text-sm font-semibold text-center mb-1 leading-tight ${ach.unlocked ? 'text-[#1E2920]' : 'text-slate-400'}`}>
                       {ach.title[lang]}
                     </h4>
