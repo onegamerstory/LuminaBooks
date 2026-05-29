@@ -11,7 +11,7 @@
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:3000 && cross-env ELECTRON=true electron .\"",
     "electron:build": "npm run build:electron && npm run build:app && electron-builder",
     "electron:pack": "npm run build:electron && npm run build:app && electron-builder --dir",
-    "build:electron": "tsc -p electron/tsconfig.json",
+    "build:electron": "tsc -p electron/tsconfig.json && copy /Y electron\\preload.cjs dist-electron\\preload.cjs",
     "build:app": "tsc && vite build --mode production"
   },
   "dependencies": {
