@@ -99,7 +99,13 @@ export const translations = {
     anyRating: 'Any Rating',
     findBook: 'Find Book',
     bookNotFound: 'Book not found',
-    bookInfoFilled: 'Book info filled'
+    bookInfoFilled: 'Book info filled',
+    statisticsFor: 'Statistics for',
+    hoursRead: 'Hours read',
+    booksRead: 'Books read',
+    longestStreak: 'Longest streak',
+    daysRead: 'Days read',
+    today: 'Today'
   },
   ru: {
     catalog: 'Каталог',
@@ -180,6 +186,12 @@ export const translations = {
     anyRating: 'Любая оценка',
     findBook: 'Найти книгу',
     bookNotFound: 'Книга не найдена',
-    bookInfoFilled: 'Информация о книге заполнена'
+    bookInfoFilled: 'Информация о книге заполнена',
+    statisticsFor: 'Статистика за',
+    hoursRead: 'Часов прочитано',
+    booksRead: 'Книг прочитано',
+    longestStreak: 'Самая длинная серия',
+    daysRead: 'Дней чтения',
+    today: 'Сегодня'
   }
 };
