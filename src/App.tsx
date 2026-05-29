@@ -524,7 +524,7 @@ const App: React.FC = () => {
 
   return (
     <MantineProvider>
-      <div className="min-h-screen bg-[#F0F4F1] flex flex-col">
+      <div className="min-h-screen bg-white flex flex-col">
       <header className={`bg-[#F0F4F1] border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
