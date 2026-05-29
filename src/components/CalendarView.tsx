@@ -384,10 +384,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
           }}
         >
           <div 
-            className="bg-[#F0F4F1] rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl"
+            className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
+            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
               <h2 className="text-xl font-bold font-serif text-[#1E2920]">
                 {t.selectBookToStart}
               </h2>
@@ -417,7 +417,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                   placeholder={lang === 'ru' ? 'Поиск по названию/автору...' : 'Search by title/author...'}
                   value={bookSearchTerm}
                   onChange={(e) => setBookSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-[#FFFFFF] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b9071] text-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b9071] text-sm"
                   autoFocus
                 />
               </div>

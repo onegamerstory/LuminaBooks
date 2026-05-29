@@ -47,8 +47,8 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-        <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
+      <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
           <h2 className="text-lg font-bold text-[#1E2920]">
             {lang === 'ru' ? 'Выбрать коллекции' : 'Select Collections'}
           </h2>
@@ -121,7 +121,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
                   value={newFranchiseName}
                   onChange={(e) => setNewFranchiseName(e.target.value)}
                   placeholder={lang === 'ru' ? 'Введите название...' : 'Enter name...'}
-                  className="w-full px-4 py-2 bg-white border border-slate-200 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                  className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
                   autoFocus
                 />
                 <button
@@ -141,7 +141,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-[#BCCDBE] text-slate-600 rounded-lg hover:bg-[#87A68C] transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
             >
               {lang === 'ru' ? 'Отмена' : 'Cancel'}
             </button>

@@ -51,6 +51,7 @@ export interface Franchise {
   id: string;
   name: string;
   description?: string;
+  coverUrl?: string;
   bookIds: string[]; // IDs книг в этой коллекции
   createdAt: string; // ISO timestamp
   updatedAt: string; // ISO timestamp

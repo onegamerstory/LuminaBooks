@@ -463,7 +463,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
               )}
               <button
                 onClick={cancelSession}
-                className="flex items-center gap-2 px-4 py-2 bg-slate-300 text-slate-700 rounded-lg hover:bg-slate-400 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
               >
                 <RotateCcw size={18} />
                 <span className="text-sm">{lang === 'ru' ? 'Отмена' : 'Cancel'}</span>
@@ -767,7 +767,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-[#F0F4F1] rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-semibold text-[#6B9071] mb-4">
               {lang === 'ru' ? 'Завершить сессию' : 'End Session'}
             </h3>
@@ -795,7 +795,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={sessionData.endPage || ''}
                     onChange={(e) => setSessionData({ ...sessionData, endPage: e.target.value })}
                     placeholder={lang === 'ru' ? 'Номер страницы' : 'Page number'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                    className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -818,7 +818,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={sessionData.percentageRead || ''}
                     onChange={(e) => setSessionData({ ...sessionData, percentageRead: e.target.value })}
                     placeholder={lang === 'ru' ? 'Процент от 0 до 100' : 'Percentage 0-100'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                    className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -827,7 +827,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             <div className="flex gap-3">
               <button
                 onClick={handleCloseModal}
-                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Отмена' : 'Cancel'}
               </button>
@@ -855,7 +855,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-[#F0F4F1] rounded-xl shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-white rounded-xl shadow-lg p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-[#1E2920] mb-4">
               {lang === 'ru' ? 'Добавить сессию вручную' : 'Add Manual Session'}
             </h3>
@@ -939,7 +939,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={manualSessionData.endPage || ''}
                     onChange={(e) => setManualSessionData({ ...manualSessionData, endPage: e.target.value })}
                     placeholder={lang === 'ru' ? 'Номер страницы' : 'Page number'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                    className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
                 <div>
@@ -953,7 +953,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                     value={manualSessionData.endPercentage || ''}
                     onChange={(e) => setManualSessionData({ ...manualSessionData, endPercentage: e.target.value })}
                     placeholder={lang === 'ru' ? 'От 0 до 100' : '0-100'}
-                    className="w-full px-3 py-2 border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                    className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                   />
                 </div>
               </div>
@@ -968,7 +968,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   setManualSessionBookId(null);
                   setManualSessionData({});
                 }}
-                className="flex-1 px-4 py-2 bg-slate-200 text-slate-700 rounded-lg hover:bg-slate-300 transition-colors font-medium"
+                className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Отмена' : 'Cancel'}
               </button>

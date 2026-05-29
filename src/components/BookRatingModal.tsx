@@ -102,7 +102,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-xl shadow-2xl animate-in zoom-in duration-200">
+      <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl animate-in zoom-in duration-200">
         <div className="flex items-center justify-between px-6 py-4 border-b">
           <h2 className="text-xl font-bold font-serif text-[#1E2920]">
             {lang === 'ru' ? 'Оцените книгу' : 'Rate the Book'}
@@ -144,7 +144,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
               value={review}
               onChange={(e) => setReview(e.target.value)}
               placeholder={lang === 'ru' ? 'Напишите, что вы думаете об этой книге...' : 'Share your thoughts about this book...'}
-              className="w-full px-4 py-3 bg-white border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-24 text-sm"
+              className="w-full px-4 py-3 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-24 text-sm"
             />
           </div>
 
@@ -152,7 +152,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
             {onSkip && (
               <button
                 onClick={handleSkip}
-                className="flex-1 px-4 py-2.5 bg-[#BCCDBE] border border-slate-200 text-slate-600 rounded-xl hover:bg-[#87A68C] transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Пропустить' : 'Skip'}
               </button>
@@ -160,7 +160,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
             <button
               onClick={handleSubmit}
               disabled={rating === 0}
-              className={`${onSkip ? 'flex-1' : 'w-full'} px-4 py-2.5 bg-[#6B9071] text-white rounded-xl hover:bg-[#5A7A60] disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium shadow-lg shadow-[#6B9071]/20`}
+              className={`${onSkip ? 'flex-1' : 'w-full'} px-4 py-2.5 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium shadow-lg shadow-[#6B9071]/20`}
             >
               {lang === 'ru' ? 'Готово' : 'Done'}
             </button>

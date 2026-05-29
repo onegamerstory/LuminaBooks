@@ -757,7 +757,7 @@ const App: React.FC = () => {
           <div className="flex items-center gap-2">
             <button
               onClick={toggleLang}
-              className="p-2 hover:bg-[#D6E1D8] rounded-xl text-slate-600 flex items-center gap-2 transition-colors"
+              className="p-2 hover:bg-[#D6E1D8] rounded-lg text-slate-600 flex items-center gap-2 transition-colors"
               title="Switch Language"
             >
               <Languages size={18} />
@@ -766,7 +766,7 @@ const App: React.FC = () => {
 
             <button
               onClick={() => setIsProfileOpen(true)}
-              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-xl text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
               title={lang === 'ru' ? 'Профиль пользователя' : 'User profile'}
             >
               <Settings size={18} />
@@ -777,7 +777,7 @@ const App: React.FC = () => {
                 setEditingBook(undefined);
                 setIsModalOpen(true);
               }}
-              className="flex items-center gap-2 bg-[#6B9071] hover:bg-[#59785E] text-white px-4 py-2 rounded-xl text-sm font-semibold transition-colors shadow-lg shadow-[#59785E]/50"
+              className="flex items-center gap-2 bg-[#6B9071] hover:bg-[#59785E] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-[#59785E]/50"
             >
               <Plus size={18} />
               <span className="hidden sm:inline">{t.addBook}</span>

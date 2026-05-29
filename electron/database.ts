@@ -29,6 +29,7 @@ export interface Franchise {
   id: string;
   name: string;
   description?: string;
+  coverUrl?: string;
   bookIds: string[];
   createdAt: string;
   updatedAt: string;
@@ -72,6 +73,7 @@ export function initDatabase(): void {
       id TEXT PRIMARY KEY,
       name TEXT NOT NULL,
       description TEXT DEFAULT '',
+      coverUrl TEXT DEFAULT '',
       bookIds TEXT DEFAULT '[]',
       createdAt TEXT,
       updatedAt TEXT
@@ -84,6 +86,13 @@ export function initDatabase(): void {
       defaultCoverUrl TEXT DEFAULT ''
     );
   `);
+
+  // Migration: add coverUrl column to franchises if missing (upgrade from older schema)
+  try {
+    db.exec(`ALTER TABLE franchises ADD COLUMN coverUrl TEXT DEFAULT ''`);
+  } catch {
+    // Column already exists
+  }
 
   db.prepare(`INSERT OR IGNORE INTO user_profile (id, nickname, photoUrl, defaultCoverUrl) VALUES (1, '', '', '')`).run();
 }
@@ -135,8 +144,8 @@ export function getAllFranchises(): Franchise[] {
 
 export function addFranchise(f: Franchise): Franchise {
   const stmt = db.prepare(`
-    INSERT INTO franchises (id, name, description, bookIds, createdAt, updatedAt)
-    VALUES (:id, :name, :description, :bookIds, :createdAt, :updatedAt)
+    INSERT INTO franchises (id, name, description, coverUrl, bookIds, createdAt, updatedAt)
+    VALUES (:id, :name, :description, :coverUrl, :bookIds, :createdAt, :updatedAt)
   `);
   stmt.run(franchiseToRow(f));
   return f;
@@ -144,8 +153,8 @@ export function addFranchise(f: Franchise): Franchise {
 
 export function updateFranchise(f: Franchise): Franchise {
   const stmt = db.prepare(`
-    INSERT OR REPLACE INTO franchises (id, name, description, bookIds, createdAt, updatedAt)
-    VALUES (:id, :name, :description, :bookIds, :createdAt, :updatedAt)
+    INSERT OR REPLACE INTO franchises (id, name, description, coverUrl, bookIds, createdAt, updatedAt)
+    VALUES (:id, :name, :description, :coverUrl, :bookIds, :createdAt, :updatedAt)
   `);
   stmt.run(franchiseToRow(f));
   return f;
@@ -183,8 +192,8 @@ export function migrateFromLocalStorage(data: { books: Book[], franchises: Franc
   `);
 
   const franchiseStmt = db.prepare(`
-    INSERT OR REPLACE INTO franchises (id, name, description, bookIds, createdAt, updatedAt)
-    VALUES (:id, :name, :description, :bookIds, :createdAt, :updatedAt)
+    INSERT OR REPLACE INTO franchises (id, name, description, coverUrl, bookIds, createdAt, updatedAt)
+    VALUES (:id, :name, :description, :coverUrl, :bookIds, :createdAt, :updatedAt)
   `);
 
   const transaction = db.transaction(() => {
@@ -243,6 +252,7 @@ function rowToFranchise(row: any): Franchise {
     id: row.id,
     name: row.name,
     description: row.description || undefined,
+    coverUrl: row.coverUrl || undefined,
     bookIds: safeJsonParse(row.bookIds, []),
     createdAt: row.createdAt || '',
     updatedAt: row.updatedAt || '',
@@ -254,6 +264,7 @@ function franchiseToRow(f: Franchise): any {
     id: f.id,
     name: f.name,
     description: f.description ?? '',
+    coverUrl: f.coverUrl ?? '',
     bookIds: JSON.stringify(f.bookIds ?? []),
     createdAt: f.createdAt || new Date().toISOString(),
     updatedAt: f.updatedAt || new Date().toISOString(),

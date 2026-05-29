@@ -135,7 +135,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
         )}
 
         {book.description && (
-          <p className="text-slate-500 text-xs line-clamp-2 italic pt-2 border-t border-slate-50">
+          <p className="text-slate-500 text-xs line-clamp-2 italic pt-2 border-t border-slate-300">
             "{book.description}"
           </p>
         )}

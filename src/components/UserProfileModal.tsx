@@ -94,8 +94,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-        <div className="border-b px-6 py-4 flex items-center justify-between sticky top-0 bg-[#F0F4F1]">
+      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="border-b px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
           <h2 className="text-xl font-bold font-serif text-[#1E2920]">
             {t.userProfile}
           </h2>
@@ -164,7 +164,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               placeholder={t.enterNickname}
               value={profile.nickname}
               onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
-              className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+              className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
             />
           </div>
 
@@ -178,7 +178,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               placeholder={t.enterCoverUrl}
               value={profile.defaultCoverUrl}
               onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
-              className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+              className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
             />
             
             {profile.defaultCoverUrl && (
@@ -198,7 +198,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
         </div>
 
         {/* Action Buttons */}
-        <div className="px-6 pb-6 pt-4 bg-[#F0F4F1]">
+        <div className="px-6 pb-6 pt-4 bg-white">
           <div className="flex gap-3">
             <button
               onClick={handleSave}

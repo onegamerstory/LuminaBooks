@@ -1,6 +1,6 @@
-import React, { useState, useEffect } from 'react';
-import { Book, Franchise } from '../types';
-import { X, Search, Plus, Trash2 } from 'lucide-react';
+import React, { useState, useEffect, useMemo } from 'react';
+import { Book, BookStatus, Franchise } from '../types';
+import { X, Search, Plus, Trash2, ChevronUp, ChevronDown, Check } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
 
@@ -13,6 +13,33 @@ interface FranchiseModalProps {
   lang: 'en' | 'ru';
 }
 
+const STATUS_LIST: (BookStatus | 'All')[] = [
+  'All',
+  BookStatus.READING,
+  BookStatus.READ,
+  BookStatus.WANT_TO_READ,
+  BookStatus.ABANDONED,
+  BookStatus.POSTPONED,
+];
+
+const statusColors: Record<string, string> = {
+  [BookStatus.READING]: 'bg-blue-100 text-blue-700',
+  [BookStatus.READ]: 'bg-emerald-100 text-emerald-700',
+  [BookStatus.WANT_TO_READ]: 'bg-amber-100 text-amber-700',
+  [BookStatus.ABANDONED]: 'bg-red-100 text-red-700',
+  [BookStatus.POSTPONED]: 'bg-orange-100 text-orange-700',
+};
+
+function getStatusLabel(t: Record<string, string>, status: BookStatus): string {
+  switch (status) {
+    case BookStatus.READING: return t.reading;
+    case BookStatus.READ: return t.read;
+    case BookStatus.WANT_TO_READ: return t.toRead;
+    case BookStatus.ABANDONED: return t.abandoned;
+    case BookStatus.POSTPONED: return t.postponed;
+  }
+}
+
 const FranchiseModal: React.FC<FranchiseModalProps> = ({
   isOpen,
   onClose,
@@ -22,51 +49,68 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
   lang,
 }) => {
   const t = translations[lang];
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-  });
+  const [name, setName] = useState('');
+  const [description, setDescription] = useState('');
+  const [coverUrl, setCoverUrl] = useState('');
   const [selectedBookIds, setSelectedBookIds] = useState<string[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
+  const [statusFilter, setStatusFilter] = useState<BookStatus | 'All'>('All');
   const [error, setError] = useState('');
 
   useEffect(() => {
     if (initialData) {
-      setFormData({
-        name: initialData.name,
-        description: initialData.description || '',
-      });
+      setName(initialData.name);
+      setDescription(initialData.description || '');
+      setCoverUrl(initialData.coverUrl || '');
       setSelectedBookIds(initialData.bookIds);
     } else {
-      setFormData({
-        name: '',
-        description: '',
-      });
+      setName('');
+      setDescription('');
+      setCoverUrl('');
       setSelectedBookIds([]);
     }
+    setSearchTerm('');
+    setStatusFilter('All');
     setError('');
   }, [initialData, isOpen]);
 
+  const selectedBooks = useMemo(
+    () => {
+      const bookMap = new Map(books.map(b => [b.id, b]));
+      return selectedBookIds.map(id => bookMap.get(id)).filter((b): b is Book => !!b);
+    },
+    [books, selectedBookIds]
+  );
+
+  const availableBooks = useMemo(
+    () => books.filter(book => {
+      const matchesSearch = searchTerm === '' ||
+        book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        book.author.toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'All' || book.status === statusFilter;
+      return matchesSearch && matchesStatus;
+    }),
+    [books, searchTerm, statusFilter]
+  );
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
-    if (!formData.name.trim()) {
+    if (!name.trim()) {
       setError(lang === 'ru' ? 'Введите название коллекции' : 'Enter collection name');
       return;
     }
-
     setError('');
 
     const newFranchise: Franchise = {
       id: initialData?.id || crypto.randomUUID(),
-      name: formData.name,
-      description: formData.description || undefined,
+      name: name.trim(),
+      description: description.trim() || undefined,
+      coverUrl: coverUrl.trim() || undefined,
       bookIds: selectedBookIds,
       createdAt: initialData?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
 
-    // Обновляем книги: добавляем коллекцию к их franchiseIds и устанавливаем isPartOfSeries
     const updatedBooks = books.map((book) => {
       if (selectedBookIds.includes(book.id)) {
         return {
@@ -78,12 +122,11 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
           ],
         };
       } else if (initialData && initialData.bookIds.includes(book.id)) {
-        // Удаляем коллекцию из книг, которые были раньше, но сейчас не выбраны
         const remainingFranchiseIds = (book.franchiseIds || []).filter((id) => id !== initialData.id);
         return {
           ...book,
           franchiseIds: remainingFranchiseIds,
-          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше коллекцию
+          isPartOfSeries: remainingFranchiseIds.length > 0,
         };
       }
       return book;
@@ -93,202 +136,311 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
     onClose();
   };
 
-  const filteredBooks = books.filter(
-    (book) =>
-      (book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        book.author.toLowerCase().includes(searchTerm.toLowerCase())) &&
-      !selectedBookIds.includes(book.id)
-  );
+  const moveBookUp = (index: number) => {
+    if (index === 0) return;
+    const newIds = [...selectedBookIds];
+    [newIds[index - 1], newIds[index]] = [newIds[index], newIds[index - 1]];
+    setSelectedBookIds(newIds);
+  };
 
-  const selectedBooks = books.filter((book) => selectedBookIds.includes(book.id));
+  const moveBookDown = (index: number) => {
+    if (index === selectedBookIds.length - 1) return;
+    const newIds = [...selectedBookIds];
+    [newIds[index], newIds[index + 1]] = [newIds[index + 1], newIds[index]];
+    setSelectedBookIds(newIds);
+  };
+
+  const toggleBook = (bookId: string) => {
+    if (selectedBookIds.includes(bookId)) {
+      setSelectedBookIds(selectedBookIds.filter(id => id !== bookId));
+    } else {
+      setSelectedBookIds([...selectedBookIds, bookId]);
+    }
+  };
 
   if (!isOpen) return null;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-4xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-        <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
+      <div className="bg-white rounded-2xl w-full max-w-5xl max-h-[90vh] shadow-2xl animate-in zoom-in duration-200 flex flex-col">
+        {/* Header */}
+        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10 rounded-t-2xl">
           <h2 className="text-xl font-bold font-serif text-[#1E2920]">
             {initialData
-              ? lang === 'ru'
-                ? 'Редактировать коллекцию'
-                : 'Edit Collection'
-              : lang === 'ru'
-              ? 'Новая коллекция'
-              : 'New Collection'}
+              ? lang === 'ru' ? 'Редактировать коллекцию' : 'Edit Collection'
+              : lang === 'ru' ? 'Новая коллекция' : 'New Collection'}
           </h2>
-          <button
-            onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400"
-          >
+          <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
             <X size={20} />
           </button>
         </div>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-6">
-          {error && (
-            <div className="p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium flex items-center gap-2">
-              <span>⚠️</span>
-              <span>{error}</span>
+        {error && (
+          <div className="mx-6 mt-4 p-3 bg-red-50 border border-red-200 rounded-lg text-red-700 text-sm font-medium flex items-center gap-2">
+            <span>⚠️</span><span>{error}</span>
+          </div>
+        )}
+
+        <form onSubmit={handleSubmit} className="flex flex-1 overflow-hidden">
+          {/* Left Panel - Collection Info */}
+          <div className="w-1/2 border-r border-slate-200 p-6 overflow-y-auto flex flex-col gap-5 bg-white">
+            <div>
+              <h3 className="text-lg font-bold font-serif text-[#1E2920] mb-4">
+                {lang === 'ru' ? 'Информация о коллекции' : 'Collection Info'}
+              </h3>
             </div>
-          )}
-          
-          {/* Название и описание */}
-          <div className="space-y-4">
+
+            {/* Name */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
                 {lang === 'ru' ? 'Название' : 'Name'}
               </label>
               <input
                 type="text"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                value={name}
+                onChange={(e) => setName(e.target.value)}
                 placeholder={lang === 'ru' ? 'e.g. Гарри Поттер' : 'e.g. Harry Potter'}
-                className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
+                className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
                 required
               />
             </div>
 
+            {/* Description */}
             <div>
               <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
                 {lang === 'ru' ? 'Описание' : 'Description'}
               </label>
               <textarea
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                value={description}
+                onChange={(e) => setDescription(e.target.value)}
                 placeholder={lang === 'ru' ? 'Опишите эту коллекцию...' : 'Describe this collection...'}
-                className="w-full px-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-20"
+                className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-20"
               />
             </div>
-          </div>
 
-          {/* Выбранные книги */}
-          {selectedBooks.length > 0 && (
+            {/* Cover */}
             <div>
-              <label className="block text-xs font-semibold text-slate-500 uppercase mb-3">
+              <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">
+                {lang === 'ru' ? 'Обложка' : 'Cover'}
+              </label>
+              <div className="flex gap-4 items-start">
+                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-[#6B9071] bg-slate-100 flex-shrink-0">
+                  <img
+                    src={coverUrl || undefined}
+                    alt=""
+                    className="w-full h-full object-cover"
+                    onError={handleCoverError}
+                  />
+                </div>
+                <div className="flex-1">
+                  <input
+                    type="text"
+                    value={coverUrl}
+                    onChange={(e) => setCoverUrl(e.target.value)}
+                    placeholder={lang === 'ru' ? 'Ссылка на обложку...' : 'Cover image URL...'}
+                    className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none text-sm"
+                  />
+                  <p className="text-xs text-slate-400 mt-1">
+                    {lang === 'ru' ? 'Формат 1:1 для превью' : '1:1 aspect ratio recommended'}
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            {/* Books in collection */}
+            <div className="flex-1 flex flex-col min-h-0">
+              <label className="block text-xs font-semibold text-slate-500 uppercase mb-2">
                 {lang === 'ru' ? 'Книги в коллекции' : 'Books in collection'} ({selectedBooks.length})
               </label>
-              <div className="space-y-2 max-h-40 overflow-y-auto bg-slate-50 rounded-lg p-3">
-                {selectedBooks.map((book) => (
-                  <div
-                    key={book.id}
-                    className="flex items-center justify-between gap-2 p-2 bg-white rounded border border-slate-200"
-                  >
-                    <div className="flex items-center gap-2 min-w-0">
+              {selectedBooks.length > 0 ? (
+                <div className="flex-1 overflow-y-auto space-y-1.5 bg-white rounded-lg p-2 border border-slate-200">
+                  {selectedBooks.map((book, index) => (
+                    <div
+                      key={book.id}
+                      className="flex items-center gap-2 p-2 bg-white rounded-lg border border-slate-100"
+                    >
                       <img
                         src={book.coverUrl}
                         alt={book.title}
-                        className="w-8 h-12 object-cover rounded"
+                        className="w-8 h-12 object-cover rounded flex-shrink-0"
                         onError={handleCoverError}
                       />
-                      <div className="min-w-0">
-                        <p className="text-sm font-medium text-[#1E2920] truncate">
-                          {book.title}
-                        </p>
-                        <p className="text-xs text-slate-500 truncate">{book.author}</p>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-[#1E2920] truncate">{book.title}</p>
                       </div>
+                      <div className="flex items-center gap-0.5 flex-shrink-0">
+                        <button
+                          type="button"
+                          onClick={() => moveBookUp(index)}
+                          disabled={index === 0}
+                          className="p-0.5 text-slate-400 hover:text-[#6B9071] disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronUp size={16} />
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => moveBookDown(index)}
+                          disabled={index === selectedBooks.length - 1}
+                          className="p-0.5 text-slate-400 hover:text-[#6B9071] disabled:opacity-30 disabled:cursor-not-allowed"
+                        >
+                          <ChevronDown size={16} />
+                        </button>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={() => setSelectedBookIds(selectedBookIds.filter((id) => id !== book.id))}
+                        className="p-1 text-red-500 hover:bg-red-50 rounded transition-colors flex-shrink-0"
+                      >
+                        <Trash2 size={14} />
+                      </button>
                     </div>
-                    <button
-                      type="button"
-                      onClick={() =>
-                        setSelectedBookIds(selectedBookIds.filter((id) => id !== book.id))
-                      }
-                      className="p-1 text-red-600 hover:bg-red-50 rounded transition-colors"
-                    >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {/* Поиск и добавление книг */}
-          <div>
-            <label className="block text-xs font-semibold text-slate-500 uppercase mb-3">
-              {lang === 'ru' ? 'Добавить книги' : 'Add Books'}
-            </label>
-            <div className="space-y-3">
-              <div className="relative">
-                <Search
-                  size={18}
-                  className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400"
-                />
-                <input
-                  type="text"
-                  placeholder={
-                    lang === 'ru' ? 'Поиск по названию или автору...' : 'Search by title or author...'
-                  }
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="w-full pl-10 pr-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
-                />
-              </div>
-
-              <div className="max-h-48 overflow-y-auto space-y-2 bg-slate-50 rounded-lg p-3">
-                {filteredBooks.length > 0 ? (
-                  filteredBooks.map((book) => (
-                    <button
-                      key={book.id}
-                      type="button"
-                      onClick={() => setSelectedBookIds([...selectedBookIds, book.id])}
-                      className="w-full flex items-center justify-between gap-3 p-2 hover:bg-white rounded border border-transparent hover:border-slate-200 transition-all text-left"
-                    >
-                      <div className="flex items-center gap-2 min-w-0">
-                        <img
-                          src={book.coverUrl}
-                          alt={book.title}
-                          className="w-8 h-12 object-cover rounded"
-                          onError={handleCoverError}
-                        />
-                        <div className="min-w-0">
-                          <p className="text-sm font-medium text-[#1E2920] truncate">
-                            {book.title}
-                          </p>
-                          <p className="text-xs text-slate-500 truncate">{book.author}</p>
-                        </div>
-                      </div>
-                      <Plus size={18} className="text-[#6B9071] flex-shrink-0" />
-                    </button>
-                  ))
-                ) : (
-                  <p className="text-sm text-slate-500 text-center py-4">
-                    {searchTerm
-                      ? lang === 'ru'
-                        ? 'Книги не найдены'
-                        : 'No books found'
-                      : lang === 'ru'
-                      ? 'Все книги добавлены'
-                      : 'All books added'}
+                  ))}
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center bg-white rounded-lg border border-dashed border-slate-300 p-4">
+                  <p className="text-sm text-slate-400">
+                    {lang === 'ru' ? 'Нет книг в коллекции' : 'No books in collection'}
                   </p>
-                )}
-              </div>
+                </div>
+              )}
             </div>
           </div>
 
-          {/* Кнопки действия */}
-          <div className="pt-4 border-t flex justify-end gap-3">
-            <button
-              type="button"
-              onClick={onClose}
-              className="px-6 py-2 bg-[#BCCDBE] border border-slate-200 text-slate-600 rounded-xl hover:bg-[#87A68C] transition-colors"
-            >
-              {lang === 'ru' ? 'Отмена' : 'Cancel'}
-            </button>
-            <button
-              type="submit"
-              className="px-8 py-2 bg-[#6B9071] text-white font-semibold rounded-xl hover:bg-[#5A7A60] shadow-lg shadow-[#6B9071]/20 transition-all active:scale-95"
-            >
-              {initialData
-                ? lang === 'ru'
-                  ? 'Обновить'
-                  : 'Update'
-                : lang === 'ru'
-                ? 'Создать'
-                : 'Create'}
-            </button>
+          {/* Right Panel - Add Books */}
+          <div className="w-1/2 p-6 overflow-y-auto flex flex-col gap-4 bg-white">
+            <div>
+              <h3 className="text-lg font-bold font-serif text-[#1E2920] mb-4">
+                {lang === 'ru' ? 'Добавить книги в коллекцию' : 'Add Books to Collection'}
+              </h3>
+            </div>
+
+            {/* Search */}
+            <div className="relative">
+              <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+              <input
+                type="text"
+                placeholder={lang === 'ru' ? 'Поиск по названию или автору...' : 'Search by title or author...'}
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full pl-10 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+              />
+            </div>
+
+            {/* Status filters */}
+            <div className="flex flex-wrap gap-1.5">
+              {STATUS_LIST.map((status) => {
+                const isAll = status === 'All';
+                const isActive = statusFilter === status;
+                return (
+                  <button
+                    key={status}
+                    type="button"
+                    onClick={() => setStatusFilter(status)}
+                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                      isActive
+                        ? isAll
+                          ? 'bg-[#6B9071] text-white'
+                          : `${statusColors[status]} ring-2 ring-[#6B9071]`
+                        : isAll
+                          ? 'bg-slate-200 text-slate-600 hover:bg-slate-300'
+                          : 'bg-white text-slate-600 border border-slate-200 hover:bg-slate-100'
+                    }`}
+                  >
+                    {isAll
+                      ? lang === 'ru' ? 'Все' : 'All'
+                      : getStatusLabel(t, status as BookStatus)}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Books table */}
+            <div className="flex-1 flex flex-col min-h-0">
+              {availableBooks.length > 0 ? (
+                <div className="flex-1 overflow-y-auto border border-slate-200 rounded-xl bg-white">
+                  <table className="w-full">
+                    <thead>
+                      <tr className="text-xs text-slate-500 uppercase border-b bg-white">
+                        <th className="text-left py-2 px-3 w-12"></th>
+                        <th className="text-left py-2 px-2">{lang === 'ru' ? 'Название' : 'Title'}</th>
+                        <th className="text-left py-2 px-2 w-28">{lang === 'ru' ? 'Статус' : 'Status'}</th>
+                        <th className="text-center py-2 px-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {availableBooks.map((book) => {
+                        const isAdded = selectedBookIds.includes(book.id);
+                        return (
+                          <tr key={book.id} className="border-b border-slate-100 last:border-b-0 hover:bg-slate-50">
+                            <td className="py-2 px-3">
+                              <img
+                                src={book.coverUrl}
+                                alt={book.title}
+                                className="w-8 h-12 object-cover rounded"
+                                onError={handleCoverError}
+                              />
+                            </td>
+                            <td className="py-2 px-2">
+                              <p className="text-sm font-medium text-[#1E2920] truncate max-w-[200px]">
+                                {book.title}
+                              </p>
+                            </td>
+                            <td className="py-2 px-2">
+                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[book.status]}`}>
+                                {getStatusLabel(t, book.status)}
+                              </span>
+                            </td>
+                            <td className="py-2 px-2 text-center">
+                              <button
+                                type="button"
+                                onClick={() => toggleBook(book.id)}
+                                className={`p-1.5 rounded-lg transition-all ${
+                                  isAdded
+                                    ? 'bg-[#6B9071] text-white hover:bg-[#5A7A60]'
+                                    : 'bg-[#6B9071]/10 text-[#6B9071] hover:bg-[#6B9071]/20'
+                                }`}
+                              >
+                                {isAdded ? <Check size={18} /> : <Plus size={18} />}
+                              </button>
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+              ) : (
+                <div className="flex-1 flex items-center justify-center bg-white rounded-xl border border-dashed border-slate-300">
+                  <p className="text-sm text-slate-400">
+                    {searchTerm || statusFilter !== 'All'
+                      ? lang === 'ru' ? 'Книги не найдены' : 'No books found'
+                      : lang === 'ru' ? 'В библиотеке нет книг' : 'No books in library'}
+                  </p>
+                </div>
+              )}
+            </div>
           </div>
         </form>
+
+        {/* Footer */}
+        <div className="sticky bottom-0 bg-white border-t px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+          <button
+            type="button"
+            onClick={onClose}
+            className="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+          >
+            {lang === 'ru' ? 'Отмена' : 'Cancel'}
+          </button>
+          <button
+            type="submit"
+            onClick={handleSubmit}
+            className="px-8 py-2 bg-[#6B9071] text-white font-semibold rounded-lg hover:bg-[#5A7A60] shadow-lg shadow-[#6B9071]/20 transition-all active:scale-95"
+          >
+            {initialData
+              ? lang === 'ru' ? 'Обновить' : 'Update'
+              : lang === 'ru' ? 'Создать' : 'Create'}
+          </button>
+        </div>
       </div>
     </div>
   );

@@ -132,7 +132,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
         )}
         <button
           onClick={onEdit}
-          className="p-2 bg-[#F0F4F1]/90 hover:bg-[#F0F4F1] rounded-lg text-[#1E2920] transition-colors shadow-md"
+          className="p-2 bg-white border border-slate-300 rounded-lg text-[#1E2920] hover:bg-slate-100 transition-colors"
           title={lang === 'ru' ? 'Редактировать' : 'Edit'}
         >
           <Edit2 size={16} />

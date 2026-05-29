@@ -30,9 +30,16 @@ const FranchiseCard: React.FC<{
 
   return (
     <div className="bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#C8D6CB] flex flex-col h-full">
-      {/* Стопка обложек */}
+      {/* Обложка коллекции или стопка обложек книг */}
       <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden">
-        {displayBooks.length > 0 ? (
+        {franchise.coverUrl ? (
+          <img
+            src={franchise.coverUrl}
+            alt={franchise.name}
+            className="w-full h-full object-cover"
+            onError={handleCoverError}
+          />
+        ) : displayBooks.length > 0 ? (
           <div className="relative w-full h-full flex items-center justify-center">
             {displayBooks.map((book, idx) => (
               <div
@@ -71,7 +78,7 @@ const FranchiseCard: React.FC<{
         </h3>
 
         {franchise.description && (
-          <p className="text-slate-500 text-xs line-clamp-2 italic mb-3 border-t border-slate-50 pt-2">
+          <p className="text-slate-500 text-xs line-clamp-2 italic mb-3 border-t border-slate-300 pt-2">
             {franchise.description}
           </p>
         )}
@@ -84,7 +91,7 @@ const FranchiseCard: React.FC<{
         <div className="flex gap-2">
           <button
             onClick={onEdit}
-            className="flex-1 p-2 bg-[#A1BAA5] text-[#1E2920] rounded-lg hover:bg-[#87A68C] transition-colors font-medium text-sm"
+            className="flex-1 p-2 bg-white border border-slate-300 text-[#1E2920] rounded-lg hover:bg-slate-100 transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Редактировать' : 'Edit'}
           >
             <Edit2 size={16} className="inline mr-1" />
@@ -212,7 +219,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-xl hover:bg-[#5A7A60] transition-colors font-semibold shadow-lg shadow-[#6B9071]/20 whitespace-nowrap"
+          className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] transition-colors font-semibold shadow-lg shadow-[#6B9071]/20 whitespace-nowrap"
         >
           <Plus size={20} />
           <span className="hidden sm:inline">
@@ -231,7 +238,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
           }
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-[#F0F4F1] border border-slate-200 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none"
+          className="w-full pl-10 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
         />
       </div>
 
