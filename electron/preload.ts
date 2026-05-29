@@ -1,4 +1,4 @@
-import { contextBridge } from 'electron';
+import { contextBridge, ipcRenderer } from 'electron';
 
 // Expose protected methods that allow the renderer process to use
 // the ipcRenderer without exposing the entire object
@@ -8,6 +8,24 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isMac: process.platform === 'darwin',
   isWindows: process.platform === 'win32',
   isLinux: process.platform === 'linux',
+
+  // Database operations via IPC
+  db: {
+    getAllBooks: () => ipcRenderer.invoke('db:getAllBooks'),
+    addBook: (book: any) => ipcRenderer.invoke('db:addBook', book),
+    updateBook: (book: any) => ipcRenderer.invoke('db:updateBook', book),
+    deleteBook: (id: string) => ipcRenderer.invoke('db:deleteBook', id),
+
+    getAllFranchises: () => ipcRenderer.invoke('db:getAllFranchises'),
+    addFranchise: (franchise: any) => ipcRenderer.invoke('db:addFranchise', franchise),
+    updateFranchise: (franchise: any) => ipcRenderer.invoke('db:updateFranchise', franchise),
+    deleteFranchise: (id: string) => ipcRenderer.invoke('db:deleteFranchise', id),
+
+    getUserProfile: () => ipcRenderer.invoke('db:getUserProfile'),
+    setUserProfile: (profile: any) => ipcRenderer.invoke('db:setUserProfile', profile),
+
+    migrate: () => ipcRenderer.invoke('db:migrate'),
+  },
 });
 
 // Обработчик для восстановления фокуса при потере клавиатурных событий

@@ -1,5 +1,5 @@
-import React from 'react';
-import { X, AlertTriangle } from 'lucide-react';
+import React, { useState } from 'react';
+import { X, AlertTriangle, Loader2 } from 'lucide-react';
 
 interface ConfirmationModalProps {
   isOpen: boolean;
@@ -7,7 +7,7 @@ interface ConfirmationModalProps {
   message: string;
   confirmText: string;
   cancelText: string;
-  onConfirm: () => void;
+  onConfirm: () => void | Promise<void>;
   onCancel: () => void;
   isDangerous?: boolean;
 }
@@ -22,7 +22,18 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   onCancel,
   isDangerous = false,
 }) => {
+  const [loading, setLoading] = useState(false);
+
   if (!isOpen) return null;
+
+  const handleConfirm = async () => {
+    setLoading(true);
+    try {
+      await onConfirm();
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
@@ -53,18 +64,21 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
         <div className="flex gap-3 p-6 border-t border-slate-100 bg-slate-50">
           <button
             onClick={onCancel}
-            className="flex-1 px-4 py-2 text-slate-700 hover:text-slate-900 font-medium text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            disabled={loading}
+            className="flex-1 px-4 py-2 text-slate-700 hover:text-slate-900 font-medium text-sm rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
           >
             {cancelText}
           </button>
           <button
-            onClick={onConfirm}
-            className={`flex-1 px-4 py-2 font-medium text-sm rounded-lg transition-colors text-white ${
+            onClick={handleConfirm}
+            disabled={loading}
+            className={`flex-1 px-4 py-2 font-medium text-sm rounded-lg transition-colors text-white inline-flex items-center justify-center gap-2 ${
               isDangerous
-                ? 'bg-red-600 hover:bg-red-700'
-                : 'bg-[#6B9071] hover:bg-[#5A7A60]'
+                ? 'bg-red-600 hover:bg-red-700 disabled:bg-red-400'
+                : 'bg-[#6B9071] hover:bg-[#5A7A60] disabled:bg-[#8FB89A]'
             }`}
           >
+            {loading && <Loader2 size={16} className="animate-spin" />}
             {confirmText}
           </button>
         </div>

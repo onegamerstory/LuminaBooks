@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Book, BookStatus, ViewType, Franchise } from './types';
 import { CatalogView } from './components';
 import FranchiseView from './components/FranchiseView';
@@ -12,15 +12,12 @@ import UserProfileModal from './components/UserProfileModal';
 import Toast, { ToastMessage } from './components/Toast';
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
-import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, enrichAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
+import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
 import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { translations } from './utils/translations';
-
-const STORAGE_KEY = 'lumina_books_v1';
-const FRANCHISES_STORAGE_KEY = 'lumina_franchises_v1';
 
 export { translations };
 
@@ -41,7 +38,7 @@ const App: React.FC = () => {
     message: string;
     confirmText: string;
     cancelText: string;
-    onConfirm: () => void;
+    onConfirm: () => void | Promise<void>;
     isDangerous?: boolean;
   }>({
     isOpen: false,
@@ -66,7 +63,7 @@ const App: React.FC = () => {
   const showConfirmation = (
     title: string,
     message: string,
-    onConfirm: () => void,
+    onConfirm: () => void | Promise<void>,
     isDangerous: boolean = false
   ) => {
     setConfirmationModal({
@@ -160,93 +157,137 @@ const App: React.FC = () => {
     });
   };
 
+  // Загрузка данных из SQLite (Electron) или localStorage (браузер)
   useEffect(() => {
-    const saved = localStorage.getItem(STORAGE_KEY);
-    if (saved) {
+    const loadData = async () => {
       try {
-        const loadedBooks = JSON.parse(saved);
-        // Нормализуем даты: пустые строки, null, undefined → пустая строка
-        const normalizedBooks = loadedBooks.map((book: Book) => ({
-          ...book,
-          startDate: book.startDate?.trim() || '',
-          endDate: book.endDate?.trim() || '',
-        }));
-        // Мигрируем старые форматы статусов
-        let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
-        // Обновляем статусы при загрузке книг на основе наличия дат
-        let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
-        // Синхронизируем статусы из истории (приоритет у истории)
-        updatedBooks = syncStatusFromHistory(updatedBooks);
-        setBooks(updatedBooks);
-      } catch (e) {
-        console.error("Failed to load books", e);
-      }
-    }
+        if (window.electronAPI?.db) {
+          // === Режим Electron: SQLite ===
 
-    // Load franchises
-    const savedFranchises = localStorage.getItem(FRANCHISES_STORAGE_KEY);
-    if (savedFranchises) {
-      try {
-        const loadedFranchises = JSON.parse(savedFranchises);
-        setFranchises(loadedFranchises);
-      } catch (e) {
-        console.error("Failed to load franchises", e);
-      }
-    }
+          // Миграция из localStorage в SQLite (однократно)
+          const legacyBooks = localStorage.getItem('lumina_books_v1');
+          const legacyFranchises = localStorage.getItem('lumina_franchises_v1');
+          const needMigrate = (legacyBooks || legacyFranchises) && !localStorage.getItem('lumina_migrated');
 
-    const savedLang = localStorage.getItem('lumina_lang');
-    if (savedLang === 'en' || savedLang === 'ru') {
-      setLang(savedLang);
-    }
-    
-    // Load default cover URL from profile or legacy storage
-    const profileSaved = localStorage.getItem('lumina_user_profile');
-    if (profileSaved) {
-      try {
-        const profile = JSON.parse(profileSaved);
-        setDefaultCoverUrl(profile.defaultCoverUrl || '');
-      } catch (e) {
-        // Fallback to legacy storage
-        const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
-        if (savedDefaultCoverUrl) {
-          setDefaultCoverUrl(savedDefaultCoverUrl);
+          if (needMigrate) {
+            const result = await window.electronAPI.db.migrate();
+            localStorage.setItem('lumina_migrated', 'true');
+            localStorage.removeItem('lumina_books_v1');
+            localStorage.removeItem('lumina_franchises_v1');
+            console.log(`Migrated ${result.books} books and ${result.franchises} franchises to SQLite`);
+          }
+
+          // Загружаем книги
+          const loadedBooks = await window.electronAPI.db.getAllBooks();
+          if (loadedBooks && loadedBooks.length > 0) {
+            const normalizedBooks = loadedBooks.map((book: Book) => ({
+              ...book,
+              startDate: book.startDate?.trim() || '',
+              endDate: book.endDate?.trim() || '',
+            }));
+            let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
+            let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+            updatedBooks = syncStatusFromHistory(updatedBooks);
+            setBooks(updatedBooks);
+          }
+
+          // Загружаем коллекции
+          const loadedFranchises = await window.electronAPI.db.getAllFranchises();
+          if (loadedFranchises && loadedFranchises.length > 0) {
+            setFranchises(loadedFranchises);
+          }
+
+          // Загружаем профиль
+          const profile = await window.electronAPI.db.getUserProfile();
+          if (profile) {
+            localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
+            if (profile.defaultCoverUrl) {
+              setDefaultCoverUrl(profile.defaultCoverUrl);
+            }
+          }
+        } else {
+          // === Режим браузера: localStorage (fallback) ===
+          const saved = localStorage.getItem('lumina_books_v1');
+          if (saved) {
+            try {
+              const loadedBooks = JSON.parse(saved);
+              const normalizedBooks = loadedBooks.map((book: Book) => ({
+                ...book,
+                startDate: book.startDate?.trim() || '',
+                endDate: book.endDate?.trim() || '',
+              }));
+              let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
+              let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+              updatedBooks = syncStatusFromHistory(updatedBooks);
+              setBooks(updatedBooks);
+            } catch (e) {
+              console.error("Failed to load books from localStorage", e);
+            }
+          }
+
+          const savedFranchises = localStorage.getItem('lumina_franchises_v1');
+          if (savedFranchises) {
+            try {
+              setFranchises(JSON.parse(savedFranchises));
+            } catch (e) {
+              console.error("Failed to load franchises from localStorage", e);
+            }
+          }
+
+          const profileSaved = localStorage.getItem('lumina_user_profile');
+          if (profileSaved) {
+            try {
+              const profile = JSON.parse(profileSaved);
+              setDefaultCoverUrl(profile.defaultCoverUrl || '');
+            } catch (e) {
+              const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+              if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
+            }
+          } else {
+            const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+            if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
+          }
         }
+      } catch (e) {
+        console.error("Failed to load data", e);
       }
-    } else {
-      // Load legacy default cover URL if it exists
-      const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
-      if (savedDefaultCoverUrl) {
-        setDefaultCoverUrl(savedDefaultCoverUrl);
+
+      // Настройки из localStorage (всегда)
+      const savedLang = localStorage.getItem('lumina_lang');
+      if (savedLang === 'en' || savedLang === 'ru') {
+        setLang(savedLang);
       }
-    }
+
+      if (!defaultCoverUrl) {
+        const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+        if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
+      }
+    };
+
+    loadData();
   }, []);
 
-  // Синхронизация статусов на основе дат при монтировании
-  useEffect(() => {
-    setBooks(prevBooks => {
-      if (prevBooks.length === 0) return prevBooks;
-      const normalizedBooks = prevBooks.map(book => ({
-        ...book,
-        startDate: book.startDate?.trim() || '',
-        endDate: book.endDate?.trim() || '',
-      }));
-      return updateBookStatusBasedOnDates(normalizedBooks);
-    });
-  }, []);
-
-  useEffect(() => {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(books));
-  }, [books]);
-
-  useEffect(() => {
-    localStorage.setItem(FRANCHISES_STORAGE_KEY, JSON.stringify(franchises));
-  }, [franchises]);
-
+  // Сохраняем настройки в localStorage
   useEffect(() => {
     localStorage.setItem('lumina_lang', lang);
   }, [lang]);
 
-  const handleAddBook = (book: Book) => {
+  // Браузерный fallback: сохраняем книги/коллекции в localStorage
+  useEffect(() => {
+    if (!window.electronAPI?.db) {
+      localStorage.setItem('lumina_books_v1', JSON.stringify(books));
+    }
+  }, [books]);
+
+  useEffect(() => {
+    if (!window.electronAPI?.db) {
+      localStorage.setItem('lumina_franchises_v1', JSON.stringify(franchises));
+    }
+  }, [franchises]);
+
+  const handleAddBook = async (book: Book) => {
+    let resultBook: Book | undefined;
+
     setBooks(prev => {
       // Нормализуем даты: пустые строки, null, undefined → пустая строка
       let normalizedBook: Book = {
@@ -263,7 +304,6 @@ const App: React.FC = () => {
           editingBook.endDate !== normalizedBook.endDate;
 
         // ВАЖНО: Если даты изменились, регенерируем историю статусов из новых дат
-        // Это гарантирует, что календарь будет показывать фазы согласно новым датам
         if (datesChanged) {
           const newStatusHistory = regenerateStatusHistoryFromDates(normalizedBook);
           if (newStatusHistory.length > 0) {
@@ -278,7 +318,7 @@ const App: React.FC = () => {
         const oldStatus = editingBook.status;
         const newStatus = normalizedBook.status;
 
-        // Сначала обновляем статусы на основе дат (это создаст историю из дат если нужно)
+        // Сначала обновляем статусы на основе дат
         const booksWithUpdatedDates = updateBookStatusBasedOnDates(prev.map(b => 
           b.id === normalizedBook.id ? { ...normalizedBook, status: oldStatus } : b
         ));
@@ -286,50 +326,74 @@ const App: React.FC = () => {
         // Находим обновленную книгу
         const dateUpdatedBook = booksWithUpdatedDates.find(b => b.id === normalizedBook.id)!;
         
-        // Если пользователь явно изменил статус вручную (отличается от того, что установили даты)
-        // и это не было учтено в updateBookStatusBasedOnDates, записываем в историю
+        // Если пользователь явно изменил статус вручную
         if (oldStatus !== newStatus && dateUpdatedBook.status !== newStatus) {
           normalizedBook = recordStatusChange({ ...dateUpdatedBook, status: oldStatus }, newStatus);
           updatedBooks = prev.map(b => b.id === normalizedBook.id ? normalizedBook : b);
         } else {
-          // Используем книгу с обновленными датами
           updatedBooks = booksWithUpdatedDates;
         }
+
+        resultBook = updatedBooks.find(b => b.id === normalizedBook.id);
       } else {
         updatedBooks = [...prev, normalizedBook];
-        // Для новых книг сразу применяем логику на основе дат
         updatedBooks = updateBookStatusBasedOnDates(updatedBooks);
+        resultBook = updatedBooks.find(b => b.id === normalizedBook.id);
       }
 
       return updatedBooks;
     });
 
+    // Сохраняем книгу в SQLite
+    if (resultBook && window.electronAPI?.db) {
+      if (editingBook) {
+        await window.electronAPI.db.updateBook(resultBook);
+      } else {
+        await window.electronAPI.db.addBook(resultBook);
+      }
+    }
+
     // Update franchises based on book's new franchiseIds
-    setFranchises(prev =>
-      prev.map(franchise => {
+    setFranchises(prev => {
+      let updated = prev.map(franchise => {
         const shouldIncludeBook = book.franchiseIds?.includes(franchise.id) ?? false;
         const currentlyIncludesBook = franchise.bookIds.includes(book.id);
 
         if (shouldIncludeBook && !currentlyIncludesBook) {
-          // Add book to franchise
           return {
             ...franchise,
             bookIds: [...franchise.bookIds, book.id],
             updatedAt: new Date().toISOString(),
           };
         } else if (!shouldIncludeBook && currentlyIncludesBook) {
-          // Remove book from franchise
           return {
             ...franchise,
-            bookIds: franchise.bookIds.filter(bid => bid !== book.id),
+            bookIds: franchise.bookIds.filter((bid: string) => bid !== book.id),
             updatedAt: new Date().toISOString(),
           };
         }
-
-        // No change needed
         return franchise;
-      })
-    );
+      });
+      return updated;
+    });
+
+    // Сохраняем измененные коллекции в SQLite
+    if (window.electronAPI?.db && resultBook) {
+      const allFranchises = await window.electronAPI.db.getAllFranchises();
+      // Частичное обновление: изменяем только те, что были затронуты
+      for (const f of allFranchises) {
+        const shouldInclude = book.franchiseIds?.includes(f.id) ?? false;
+        const currentlyIncludes = f.bookIds.includes(book.id);
+        if (shouldInclude !== currentlyIncludes) {
+          const updatedF = {
+            ...f,
+            bookIds: shouldInclude ? [...f.bookIds, book.id] : f.bookIds.filter((id: string) => id !== book.id),
+            updatedAt: new Date().toISOString(),
+          };
+          await window.electronAPI.db.updateFranchise(updatedF);
+        }
+      }
+    }
 
     setIsModalOpen(false);
     setEditingBook(undefined);
@@ -341,11 +405,13 @@ const App: React.FC = () => {
   };
 
   const handleDelete = (id: string) => {
-    const bookToDelete = books.find(b => b.id === id);
     showConfirmation(
       lang === 'ru' ? 'Удалить книгу' : 'Delete Book',
       t.deleteConfirm,
-      () => {
+      async () => {
+        if (window.electronAPI?.db) {
+          await window.electronAPI.db.deleteBook(id);
+        }
         setBooks(prev => prev.filter(b => b.id !== id));
         addToast(
           lang === 'ru' ? 'Книга удалена' : 'Book deleted',
@@ -357,91 +423,108 @@ const App: React.FC = () => {
     );
   };
 
-  const handleAddToQueue = (book: Book) => {
+  const handleAddToQueue = async (book: Book) => {
+    let savedBook: Book | undefined;
     setBooks(prev => prev.map(b => {
       if (b.id !== book.id) return b;
       let updatedBook = { ...b, inQueue: true };
       if (b.status === BookStatus.ABANDONED || b.status === BookStatus.POSTPONED) {
         updatedBook = { ...updatedBook, status: BookStatus.WANT_TO_READ };
       }
+      savedBook = updatedBook;
       return updatedBook;
     }));
+    if (savedBook && window.electronAPI?.db) {
+      await window.electronAPI.db.updateBook(savedBook);
+    }
   };
 
-  const handleStartReadingBook = (book: Book) => {
+  const handleStartReadingBook = async (book: Book) => {
+    let savedBook: Book | undefined;
     setBooks(prev => prev.map(b => {
       if (b.id !== book.id) return b;
-      return {
+      const updatedBook = {
         ...b,
         status: BookStatus.READING,
         startDate: new Date().toISOString().split('T')[0],
         inQueue: false,
       };
+      savedBook = updatedBook;
+      return updatedBook;
     }));
+    if (savedBook && window.electronAPI?.db) {
+      await window.electronAPI.db.updateBook(savedBook);
+    }
   };
 
-  const handleImport = (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
-    // Если в импорте есть информация о пользователе, обновляем его в localStorage
-    if (userProfile) {
+  const handleImport = async (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
+    // Если в импорте есть информация о пользователе, обновляем
+    if (userProfile && window.electronAPI?.db) {
+      await window.electronAPI.db.setUserProfile(userProfile);
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
     }
 
     // Обновляем коллекции если они есть в импортированных данных
     if (importedFranchises && importedFranchises.length > 0) {
       setFranchises(prev => {
-        // Сначала обновляем существующие коллекции
         let updated = prev.map(existingFranchise => {
           const importedFranchise = importedFranchises.find(f => f.id === existingFranchise.id);
           if (importedFranchise) {
             return {
               ...importedFranchise,
-              createdAt: existingFranchise.createdAt, // Сохраняем оригинальную дату создания
+              createdAt: existingFranchise.createdAt,
             };
           }
           return existingFranchise;
         });
 
-        // Затем добавляем новые коллекции
         const existingIds = new Set(updated.map(f => f.id));
         const newFranchises = importedFranchises.filter(f => !existingIds.has(f.id));
-
         return [...updated, ...newFranchises];
       });
+
+      // Сохраняем коллекции в SQLite
+      if (window.electronAPI?.db) {
+        const allExistingFranchises = await window.electronAPI.db.getAllFranchises();
+        for (const f of importedFranchises) {
+          const existing = allExistingFranchises.find(ef => ef.id === f.id);
+          if (existing) {
+            await window.electronAPI.db.updateFranchise({ ...f, createdAt: existing.createdAt });
+          } else {
+            await window.electronAPI.db.addFranchise(f);
+          }
+        }
+      }
     }
 
+    let finalBooks: Book[] = [];
     setBooks(prev => {
-      // Мигрируем импортированные книги на всякий случай
       const migratedImportedBooks = migrateAllBooksStatusHistory(importedBooks);
 
       const updatedBooks = prev.map(existingBook => {
-        // Проверяем, есть ли в импортированных книгах такая же комбинация название + автор
         const duplicateImportedBook = migratedImportedBooks.find(
           importedBook => 
             importedBook.title.toLowerCase().trim() === existingBook.title.toLowerCase().trim() &&
             importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
         );
 
-        // Если найдена дубликат - заменяем локальные данные на импортированные
-        // Приоритет отдается JSON файлу
         if (duplicateImportedBook) {
           return {
             ...duplicateImportedBook,
-            id: existingBook.id, // Сохраняем оригинальный ID, все остальное берем из JSON
-            sessions: duplicateImportedBook.sessions, // Сессии из JSON (авторитетный источник)
-            statusHistory: duplicateImportedBook.statusHistory, // История статусов из JSON (авторитетный источник)
-            currentPage: duplicateImportedBook.currentPage, // Текущая страница из JSON
-            currentPercentage: duplicateImportedBook.currentPercentage, // Процент из JSON
-
-            inQueue: duplicateImportedBook.inQueue, // Статус очереди из JSON
-            franchiseIds: duplicateImportedBook.franchiseIds, // коллекции из JSON
-            isPartOfSeries: duplicateImportedBook.isPartOfSeries, // Статус серии из JSON
+            id: existingBook.id,
+            sessions: duplicateImportedBook.sessions,
+            statusHistory: duplicateImportedBook.statusHistory,
+            currentPage: duplicateImportedBook.currentPage,
+            currentPercentage: duplicateImportedBook.currentPercentage,
+            inQueue: duplicateImportedBook.inQueue,
+            franchiseIds: duplicateImportedBook.franchiseIds,
+            isPartOfSeries: duplicateImportedBook.isPartOfSeries,
           };
         }
 
         return existingBook;
       });
 
-      // Добавляем новые книги, которые не являются дубликатами
       const existingTitlesAuthors = new Set(
         updatedBooks.map(b => `${b.title.toLowerCase().trim()}_${b.author.toLowerCase().trim()}`)
       );
@@ -454,69 +537,105 @@ const App: React.FC = () => {
       );
 
       const combinedBooks = [...updatedBooks, ...newBooks];
-      // Сначала обновляем статусы по датам, потом синхронизируем из истории
-      let finalBooks = updateBookStatusBasedOnDates(combinedBooks);
-      finalBooks = syncStatusFromHistory(finalBooks);
-      return finalBooks;
+      let final = updateBookStatusBasedOnDates(combinedBooks);
+      final = syncStatusFromHistory(final);
+      finalBooks = final;
+      return final;
     });
+
+    // Сохраняем все книги в SQLite
+    if (window.electronAPI?.db && finalBooks.length > 0) {
+      for (const book of finalBooks) {
+        await window.electronAPI.db.updateBook(book);
+      }
+    }
   };
 
-  const handleUpdateBook = (updatedBook: Book) => {
+  const handleUpdateBook = async (updatedBook: Book) => {
     setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
     
+    if (window.electronAPI?.db) {
+      await window.electronAPI.db.updateBook(updatedBook);
+    }
+
     // Проверяем если книга достигла 100% прогресса и у нее нет оценки
     if ((updatedBook.status === BookStatus.READ || updatedBook.currentPercentage === 100) && updatedBook.rating === 0) {
       setBookToRateId(updatedBook.id);
     }
   };
 
-  const handleStartReading = (bookId: string, startDate: string) => {
+  const handleStartReading = async (bookId: string, startDate: string) => {
+    let savedBook: Book | undefined;
     setBooks(prev => {
       const updatedBooks = prev.map(book => {
         if (book.id === bookId) {
-          // Обновляем дату начала, дата окончания остается без изменений
           const updatedBook: Book = {
             ...book,
             startDate: startDate,
-            endDate: book.endDate || '', // Сохраняем существующую дату окончания или пустую строку
+            endDate: book.endDate || '',
           };
+          savedBook = updatedBook;
           return updatedBook;
         }
         return book;
       });
-      // Обновляем статусы на основе дат (автоматически изменит статус на "Читаю")
       return updateBookStatusBasedOnDates(updatedBooks);
     });
+    if (savedBook && window.electronAPI?.db) {
+      await window.electronAPI.db.updateBook(savedBook);
+    }
   };
 
   const toggleLang = () => setLang(prev => prev === 'en' ? 'ru' : 'en');
 
   // Handlers for franchises
-  const handleAddFranchise = (franchise: Franchise) => {
+  const handleAddFranchise = async (franchise: Franchise) => {
     setFranchises(prev => [...prev, franchise]);
+    if (window.electronAPI?.db) {
+      await window.electronAPI.db.addFranchise(franchise);
+    }
   };
 
-  const handleUpdateFranchise = (updatedFranchise: Franchise) => {
+  const handleUpdateFranchise = async (updatedFranchise: Franchise) => {
     setFranchises(prev => prev.map(f => f.id === updatedFranchise.id ? updatedFranchise : f));
+    if (window.electronAPI?.db) {
+      await window.electronAPI.db.updateFranchise(updatedFranchise);
+    }
   };
 
-  const handleDeleteFranchise = (id: string) => {
+  const handleDeleteFranchise = async (id: string) => {
     setFranchises(prev => prev.filter(f => f.id !== id));
+    if (window.electronAPI?.db) {
+      await window.electronAPI.db.deleteFranchise(id);
+    }
     // Remove franchise from books and update isPartOfSeries flag
-    setBooks(prev => 
-      prev.map(b => {
-        const remainingFranchiseIds = (b.franchiseIds || []).filter(fid => fid !== id);
+    let updatedBooks: Book[] = [];
+    setBooks(prev => {
+      updatedBooks = prev.map(b => {
+        const remainingFranchiseIds = (b.franchiseIds || []).filter((fid: string) => fid !== id);
         return {
           ...b,
           franchiseIds: remainingFranchiseIds,
-          isPartOfSeries: remainingFranchiseIds.length > 0, // Флаг false если нет больше коллекцию
+          isPartOfSeries: remainingFranchiseIds.length > 0,
         };
-      })
-    );
+      });
+      return updatedBooks;
+    });
+    // Save updated books to SQLite
+    if (window.electronAPI?.db) {
+      for (const book of updatedBooks) {
+        await window.electronAPI.db.updateBook(book);
+      }
+    }
   };
 
-  const handleBooksUpdated = (updatedBooks: Book[]) => {
+  const handleBooksUpdated = async (updatedBooks: Book[]) => {
     setBooks(updatedBooks);
+    if (window.electronAPI?.db) {
+      for (const book of updatedBooks) {
+        await window.electronAPI.db.updateBook(book);
+      }
+    }
   };
 
   // Определяем платформу для применения macOS стилей
@@ -715,8 +834,8 @@ const App: React.FC = () => {
         message={confirmationModal.message}
         confirmText={confirmationModal.confirmText}
         cancelText={confirmationModal.cancelText}
-        onConfirm={() => {
-          confirmationModal.onConfirm();
+        onConfirm={async () => {
+          await confirmationModal.onConfirm();
           closeConfirmation();
         }}
         onCancel={closeConfirmation}

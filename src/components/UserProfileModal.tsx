@@ -68,8 +68,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
     fileInputRef.current?.click();
   };
 
-  const handleSave = () => {
+  const handleSave = async () => {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
+    if (window.electronAPI?.db) {
+      await window.electronAPI.db.setUserProfile(profile);
+    }
     onClose();
   };
 

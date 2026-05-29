@@ -1,7 +1,8 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage } from 'electron';
+import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
+import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, migrateFromLocalStorage } from './database.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
@@ -42,6 +43,10 @@ if (!gotTheLock) {
 
   // Этот метод будет вызван когда Electron закончит инициализацию
   app.whenReady().then(() => {
+    // Инициализируем БД
+    initDatabase();
+    registerIpcHandlers();
+    
     Menu.setApplicationMenu(null);
     
     // Создаем окно
@@ -75,6 +80,62 @@ if (!gotTheLock) {
       tray.destroy();
       tray = null;
     }
+  });
+}
+
+function registerIpcHandlers() {
+  ipcMain.handle('db:getAllBooks', () => {
+    return getAllBooks();
+  });
+
+  ipcMain.handle('db:addBook', (_event, book) => {
+    return addBook(book);
+  });
+
+  ipcMain.handle('db:updateBook', (_event, book) => {
+    return updateBook(book);
+  });
+
+  ipcMain.handle('db:deleteBook', (_event, id) => {
+    deleteBook(id);
+  });
+
+  ipcMain.handle('db:getAllFranchises', () => {
+    return getAllFranchises();
+  });
+
+  ipcMain.handle('db:addFranchise', (_event, franchise) => {
+    return addFranchise(franchise);
+  });
+
+  ipcMain.handle('db:updateFranchise', (_event, franchise) => {
+    return updateFranchise(franchise);
+  });
+
+  ipcMain.handle('db:deleteFranchise', (_event, id) => {
+    deleteFranchise(id);
+  });
+
+  ipcMain.handle('db:getUserProfile', () => {
+    return getUserProfile();
+  });
+
+  ipcMain.handle('db:setUserProfile', (_event, profile) => {
+    setUserProfile(profile);
+  });
+
+  ipcMain.handle('db:migrate', async (event) => {
+    const localStorageData = await event.sender.executeJavaScript(`
+      (function() {
+        const books = localStorage.getItem('lumina_books_v1');
+        const franchises = localStorage.getItem('lumina_franchises_v1');
+        return {
+          books: books ? JSON.parse(books) : [],
+          franchises: franchises ? JSON.parse(franchises) : [],
+        };
+      })()
+    `);
+    return migrateFromLocalStorage(localStorageData);
   });
 }
 

@@ -43,15 +43,30 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
-    // Load user profile from localStorage
-    const saved = localStorage.getItem('lumina_user_profile');
-    if (saved) {
+    // Load user profile from SQLite via IPC, fallback to localStorage
+    const loadProfile = async () => {
       try {
-        setProfile(JSON.parse(saved));
+        if (window.electronAPI?.db) {
+          const savedProfile = await window.electronAPI.db.getUserProfile();
+          if (savedProfile && (savedProfile.nickname || savedProfile.photoUrl)) {
+            setProfile(savedProfile);
+            return;
+          }
+        }
       } catch (e) {
-        console.error("Failed to load profile", e);
+        console.error("Failed to load profile from SQLite", e);
       }
-    }
+      // Fallback to localStorage
+      const saved = localStorage.getItem('lumina_user_profile');
+      if (saved) {
+        try {
+          setProfile(JSON.parse(saved));
+        } catch (e) {
+          console.error("Failed to load profile", e);
+        }
+      }
+    };
+    loadProfile();
   }, []);
 
   // Общее количество книг
