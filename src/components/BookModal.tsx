@@ -221,7 +221,7 @@ const BookModal: React.FC<BookModalProps> = ({
   return (
     <>
       <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div className="bg-[#F0F4F1] rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
+        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
           <div className="sticky top-0 bg-[#F0F4F1] border-b px-6 py-4 flex items-center justify-between z-10">
             <h2 className="text-xl font-bold font-serif text-[#1E2920]">
               {initialData ? t.editBook : t.addNewBook}
@@ -231,7 +231,7 @@ const BookModal: React.FC<BookModalProps> = ({
             </button>
           </div>
 
-          <form onSubmit={handleSubmit} className="p-6 space-y-6">
+          <form id="book-form" onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="w-full sm:w-1/3 flex flex-col gap-2">
                <div className="aspect-[2/3] rounded-xl overflow-hidden bg-[#F0F4F1] border-2 border-dashed border-slate-200 relative group">
@@ -419,7 +419,8 @@ const BookModal: React.FC<BookModalProps> = ({
             </div>
           </div>
 
-          <div className="pt-4 border-t flex justify-end gap-3">
+        </form>
+          <div className="bg-[#F0F4F1] px-6 py-4 border-t flex justify-end gap-3">
             <button 
               type="button" 
               onClick={onClose}
@@ -429,12 +430,12 @@ const BookModal: React.FC<BookModalProps> = ({
             </button>
             <button 
               type="submit"
+              form="book-form"
               className="px-8 py-2 bg-[#6B9071] text-white font-semibold rounded-xl hover:bg-[#5A7A60] shadow-lg shadow-[#6B9071]/20 transition-all active:scale-95"
             >
               {initialData ? t.updateBook : t.addToLibrary}
             </button>
           </div>
-        </form>
         </div>
       </div>
 
