@@ -805,7 +805,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
                   {lang === 'ru' ? 'Процент, на котором закончили (опционально)' : 'Current Percentage (optional)'}
                 </label>
                 <div className="flex flex-col gap-2">
-                  {books.find(b => b.id === sessionState.bookId)?.currentPercentage !== undefined && (
+                  {books.find(b => b.id === sessionState.bookId)?.currentPercentage != null && (
                     <p className="text-xs text-slate-500">
                       {lang === 'ru' ? 'Текущий процент: ' : 'Previous percentage: '}
                       <span className="font-semibold text-slate-700">{books.find(b => b.id === sessionState.bookId)?.currentPercentage || 0}%</span>

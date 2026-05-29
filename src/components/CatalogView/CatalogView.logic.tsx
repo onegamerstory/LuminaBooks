@@ -354,76 +354,72 @@ const CatalogView: React.FC<CatalogViewProps> = ({
       </div>
 
       {/* Content area */}
-      {filteredBooks.length > 0 ? (
-        <>
-          {viewMode === 'large' && (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-              {sortedBooks.map(book => (
-                <BookCard 
-                  key={book.id} 
-                  book={book} 
-                  onEdit={() => onEdit(book)} 
-                  onDelete={() => onDelete(book.id)}
-                  onAddToQueue={() => onAddToQueue(book)}
-                  lang={lang}
-                />
-              ))}
-            </div>
-          )}
-
-          {viewMode === 'table' && (
-            <div className="flex gap-6">
-              <FilterPanel
-                books={books}
-                selectedStatuses={selectedStatuses}
-                onToggleStatus={(status: BookStatus | 'All') => {
-                  const newStatuses = new Set(selectedStatuses);
-                  
-                  if (status === 'All') {
-                    newStatuses.clear();
-                    newStatuses.add('All');
-                  } else {
-                    newStatuses.delete('All');
-                    
-                    if (newStatuses.has(status)) {
-                      newStatuses.delete(status);
-                    } else {
-                      newStatuses.add(status);
-                    }
-                    
-                    const TOTAL_STATUSES = 5;
-                    if (newStatuses.size === TOTAL_STATUSES) {
-                      newStatuses.clear();
-                      newStatuses.add('All');
-                    }
-                    
-                    if (newStatuses.size === 0) {
-                      newStatuses.add('All');
-                    }
-                  }
-                  
-                  setSelectedStatuses(newStatuses);
-                  saveFilterStatuses(newStatuses);
-                }}
-                currentSortOption={tableSortOption}
-                onSortChange={handleTableSortChange}
+      {viewMode === 'table' ? (
+        <div className="flex gap-6">
+          <FilterPanel
+            books={books}
+            selectedStatuses={selectedStatuses}
+            onToggleStatus={(status: BookStatus | 'All') => {
+              const newStatuses = new Set(selectedStatuses);
+              
+              if (status === 'All') {
+                newStatuses.clear();
+                newStatuses.add('All');
+              } else {
+                newStatuses.delete('All');
+                
+                if (newStatuses.has(status)) {
+                  newStatuses.delete(status);
+                } else {
+                  newStatuses.add(status);
+                }
+                
+                const TOTAL_STATUSES = 5;
+                if (newStatuses.size === TOTAL_STATUSES) {
+                  newStatuses.clear();
+                  newStatuses.add('All');
+                }
+                
+                if (newStatuses.size === 0) {
+                  newStatuses.add('All');
+                }
+              }
+              
+              setSelectedStatuses(newStatuses);
+              saveFilterStatuses(newStatuses);
+            }}
+            currentSortOption={tableSortOption}
+            onSortChange={handleTableSortChange}
+            lang={lang}
+          />
+          <div className="flex-1 space-y-3 min-w-0">
+            {filteredBooks.length > 0 ? getTableSortedBooks(filteredBooks).map(book => (
+              <BookTableRow
+                key={book.id}
+                book={book}
+                onEdit={() => onEdit(book)}
+                onDelete={() => onDelete(book.id)}
+                onAddToQueue={() => onAddToQueue(book)}
                 lang={lang}
               />
-              <div className="flex-1 space-y-3 min-w-0">
-                {getTableSortedBooks(filteredBooks).map(book => (
-                  <BookTableRow
-                    key={book.id}
-                    book={book}
-                    onEdit={() => onEdit(book)}
-                    onDelete={() => onDelete(book.id)}
-                    onAddToQueue={() => onAddToQueue(book)}
-                    lang={lang}
-                  />
-                ))}
-              </div>
-            </div>
-          )}
-        </>
+            )) : (
+              <EmptyState lang={lang} />
+            )}
+          </div>
+        </div>
+      ) : filteredBooks.length > 0 ? (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+          {sortedBooks.map(book => (
+            <BookCard 
+              key={book.id} 
+              book={book} 
+              onEdit={() => onEdit(book)} 
+              onDelete={() => onDelete(book.id)}
+              onAddToQueue={() => onAddToQueue(book)}
+              lang={lang}
+            />
+          ))}
+        </div>
       ) : (
         <EmptyState lang={lang} />
       )}
