@@ -4,11 +4,11 @@ import { Book, BookStatus } from '../types';
 import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 import GitHubCalendar from './GitHubCalendar';
-import { 
-  BookOpen, 
-  TrendingUp, 
-  Star, 
-  Clock, 
+import {
+  BookOpen,
+  TrendingUp,
+  Star,
+  Clock,
   Award,
   AlertCircle,
   User,
@@ -16,6 +16,7 @@ import {
   Hourglass,
   ListTodo
 } from 'lucide-react';
+import { ALL_ACHIEVEMENTS, getUnlockedAchievementIds } from '../utils/achievements';
 import achievement1Png from '../assets/achivements/1.png';
 import achievement2Png from '../assets/achivements/2.png';
 import achievement3Png from '../assets/achivements/3.png';
@@ -128,29 +129,11 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
   const totalReadSeconds = books.reduce((sum, book) =>
     sum + (book.sessions?.reduce((s, session) => s + (session.duration || 0), 0) || 0), 0);
   const totalReadHours = totalReadSeconds / 3600;
-
-  const activeMonths = books.reduce((set, book) => {
-    book.sessions?.forEach(s => {
-      const d = new Date(s.startTime);
-      if (!isNaN(d.getTime())) set.add(`${d.getFullYear()}-${d.getMonth()}`);
-    });
-    return set;
-  }, new Set<string>());
-
-  const hasSeries = readBooks.some(b => b.franchiseIds && b.franchiseIds.length > 0);
-
-  const achievementsList = [
-    { id: '1', title: { ru: 'Начало пути', en: 'First Steps' }, desc: { ru: 'Прочитайте свою первую книгу', en: 'Read your first book' }, unlocked: readCount >= 1 },
-    { id: '2', title: { ru: 'Книжный червь', en: 'Bookworm' }, desc: { ru: 'Прочитайте 5 книг', en: 'Read 5 books' }, unlocked: readCount >= 5 },
-    { id: '3', title: { ru: 'Заядлый читатель', en: 'Avid Reader' }, desc: { ru: 'Прочитайте 15 книг', en: 'Read 15 books' }, unlocked: readCount >= 15 },
-    { id: '4', title: { ru: 'Библиофил', en: 'Bibliophile' }, desc: { ru: 'Прочитайте 30 книг', en: 'Read 30 books' }, unlocked: readCount >= 30 },
-    { id: '5', title: { ru: 'Книжный маньяк', en: 'Book Maniac' }, desc: { ru: 'Прочитайте 50 книг', en: 'Read 50 books' }, unlocked: readCount >= 50 },
-    { id: '6', title: { ru: '100 часов', en: '100 Hours' }, desc: { ru: 'Проведите 100 часов за чтением', en: 'Spend 100 hours reading' }, unlocked: totalReadHours >= 100 },
-    { id: '7', title: { ru: 'Книжный странник', en: 'Book Wanderer' }, desc: { ru: 'Проведите 500 часов за чтением', en: 'Spend 500 hours reading' }, unlocked: totalReadHours >= 500 },
-    { id: '8', title: { ru: 'Ценитель', en: 'Connoisseur' }, desc: { ru: 'Поставьте книге оценку 10', en: 'Rate a book 10 stars' }, unlocked: maxRating === 10 },
-    { id: '9', title: { ru: 'Коллекционер', en: 'Collector' }, desc: { ru: 'Начните читать книги из цикла', en: 'Start reading books from a series' }, unlocked: hasSeries },
-    { id: '10', title: { ru: 'Постоянный читатель', en: 'Consistent Reader' }, desc: { ru: 'Читайте книги в течение 6 разных месяцев', en: 'Read books in 6 different months' }, unlocked: activeMonths.size >= 6 },
-  ];
+  const unlockedIds = new Set(getUnlockedAchievementIds(books));
+  const achievementsList = ALL_ACHIEVEMENTS.map(ach => ({
+    ...ach,
+    unlocked: unlockedIds.has(ach.id),
+  }));
 
   return (
     <div className="space-y-6">

@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ViewType, Franchise } from './types';
 import { CatalogView } from './components';
 import FranchiseView from './components/FranchiseView';
@@ -10,6 +10,8 @@ import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
 import UserProfileModal from './components/UserProfileModal';
 import Toast, { ToastMessage } from './components/Toast';
+import AchievementNotification from './components/AchievementNotification';
+import { getUnlockedAchievementIds, ALL_ACHIEVEMENTS, AchievementNotificationItem } from './utils/achievements';
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
@@ -32,6 +34,8 @@ const App: React.FC = () => {
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
+  const [achievementQueue, setAchievementQueue] = useState<AchievementNotificationItem[]>([]);
+  const achievementQueueRef = useRef<AchievementNotificationItem[]>([]);
   const [confirmationModal, setConfirmationModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -284,6 +288,45 @@ const App: React.FC = () => {
       localStorage.setItem('lumina_franchises_v1', JSON.stringify(franchises));
     }
   }, [franchises]);
+
+  // Проверка достижений
+  useEffect(() => {
+    const savedNotified = new Set<string>(
+      JSON.parse(localStorage.getItem('lumina_achievements_unlocked') || '[]')
+    );
+
+    const unlockedIds = getUnlockedAchievementIds(books);
+    const alreadyQueuedIds = new Set(achievementQueueRef.current.map(item => item.achievementId));
+    const newIds = unlockedIds.filter(id => !savedNotified.has(id) && !alreadyQueuedIds.has(id));
+
+    if (newIds.length > 0) {
+      const items: AchievementNotificationItem[] = newIds.map((id, i) => {
+        const def = ALL_ACHIEVEMENTS.find(a => a.id === id)!;
+        return {
+          id: `${id}_${Date.now()}_${i}`,
+          achievementId: id,
+          title: def.title[lang],
+          desc: def.desc[lang],
+        };
+      });
+      setAchievementQueue(prev => {
+        const updated = [...prev, ...items];
+        achievementQueueRef.current = updated;
+        return updated;
+      });
+
+      const updatedNotified = new Set([...savedNotified, ...newIds]);
+      localStorage.setItem('lumina_achievements_unlocked', JSON.stringify([...updatedNotified]));
+    }
+  }, [books, lang]);
+
+  const handleDismissAchievement = (id: string) => {
+    setAchievementQueue(prev => {
+      const updated = prev.filter(item => item.id !== id);
+      achievementQueueRef.current = updated;
+      return updated;
+    });
+  };
 
   const handleAddBook = async (book: Book) => {
     let resultBook: Book | undefined;
@@ -825,6 +868,12 @@ const App: React.FC = () => {
           lang={lang}
         />
       )}
+
+      <AchievementNotification
+        queue={achievementQueue}
+        onDismiss={handleDismissAchievement}
+        lang={lang}
+      />
 
       <Toast messages={toasts} onRemove={removeToast} />
 

@@ -403,7 +403,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
                 lang={lang}
               />
             )) : (
-              <EmptyState lang={lang} />
+              <EmptyState lang={lang} hasBooks={books.length > 0} />
             )}
           </div>
         </div>
@@ -421,7 +421,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
           ))}
         </div>
       ) : (
-        <EmptyState lang={lang} />
+        <EmptyState lang={lang} hasBooks={books.length > 0} />
       )}
 
       {/* Random book modal */}
