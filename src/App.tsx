@@ -15,11 +15,12 @@ import { getUnlockedAchievementIds, ALL_ACHIEVEMENTS, AchievementNotificationIte
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
-import { BookOpen, Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
+import { Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { translations } from './utils/translations';
+import appIcon from '../resources/icon.png';
 
 export { translations };
 
@@ -689,9 +690,7 @@ const App: React.FC = () => {
       <header className={`bg-[#F0F4F1] border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <div className="w-10 h-10 bg-[#6B9071] rounded-lg flex items-center justify-center text-white">
-              <BookOpen size={24} />
-            </div>
+            <img src={appIcon} alt="LuminaBooks" className="w-10 h-10" />
             <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
           </div>
 
