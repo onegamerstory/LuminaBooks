@@ -108,7 +108,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
           </button>
         </div>
 
-        <div className="p-6 space-y-6">
+        <div className="bg-white p-6 space-y-6">
           {/* Profile Photo Section */}
           <div className="text-center">
             <label className="block text-sm font-semibold text-slate-700 mb-3">
@@ -164,7 +164,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               placeholder={t.enterNickname}
               value={profile.nickname}
               onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+              className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
             />
           </div>
 
@@ -178,7 +178,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               placeholder={t.enterCoverUrl}
               value={profile.defaultCoverUrl}
               onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+              className="w-full px-3 py-2 bg-[#F0F4F1] border border-slate-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
             />
             
             {profile.defaultCoverUrl && (
@@ -195,9 +195,11 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               </div>
             )}
           </div>
+        </div>
 
-          {/* Action Buttons */}
-          <div className="flex gap-3 pt-4 border-t">
+        {/* Action Buttons */}
+        <div className="px-6 pb-6 pt-4 bg-[#F0F4F1]">
+          <div className="flex gap-3">
             <button
               onClick={handleSave}
               className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
