@@ -540,58 +540,57 @@ const App: React.FC = () => {
       }
     }
 
-    let finalBooks: Book[] = [];
-    setBooks(prev => {
-      const migratedImportedBooks = migrateAllBooksStatusHistory(importedBooks);
+    // Вычисляем финальный список книг ДО вызова setBooks (React 18+ батчит setState)
+    const migratedImportedBooks = migrateAllBooksStatusHistory(importedBooks);
 
-      const updatedBooks = prev.map(existingBook => {
-        const duplicateImportedBook = migratedImportedBooks.find(
-          importedBook => 
-            importedBook.title.toLowerCase().trim() === existingBook.title.toLowerCase().trim() &&
-            importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
-        );
-
-        if (duplicateImportedBook) {
-          return {
-            ...duplicateImportedBook,
-            id: existingBook.id,
-            sessions: duplicateImportedBook.sessions,
-            statusHistory: duplicateImportedBook.statusHistory,
-            currentPage: duplicateImportedBook.currentPage,
-            currentPercentage: duplicateImportedBook.currentPercentage,
-            inQueue: duplicateImportedBook.inQueue,
-            franchiseIds: duplicateImportedBook.franchiseIds,
-            isPartOfSeries: duplicateImportedBook.isPartOfSeries,
-          };
-        }
-
-        return existingBook;
-      });
-
-      const existingTitlesAuthors = new Set(
-        updatedBooks.map(b => `${b.title.toLowerCase().trim()}_${b.author.toLowerCase().trim()}`)
+    const updatedBooks = books.map(existingBook => {
+      const duplicateImportedBook = migratedImportedBooks.find(
+        importedBook =>
+          importedBook.title.toLowerCase().trim() === existingBook.title.toLowerCase().trim() &&
+          importedBook.author.toLowerCase().trim() === existingBook.author.toLowerCase().trim()
       );
 
-      const newBooks = migratedImportedBooks.filter(
-        importedBook => 
-          !existingTitlesAuthors.has(
-            `${importedBook.title.toLowerCase().trim()}_${importedBook.author.toLowerCase().trim()}`
-          )
-      );
+      if (duplicateImportedBook) {
+        return {
+          ...duplicateImportedBook,
+          id: existingBook.id,
+          sessions: duplicateImportedBook.sessions,
+          statusHistory: duplicateImportedBook.statusHistory,
+          currentPage: duplicateImportedBook.currentPage,
+          currentPercentage: duplicateImportedBook.currentPercentage,
+          inQueue: duplicateImportedBook.inQueue,
+          franchiseIds: duplicateImportedBook.franchiseIds,
+          isPartOfSeries: duplicateImportedBook.isPartOfSeries,
+        };
+      }
 
-      const combinedBooks = [...updatedBooks, ...newBooks];
-      let final = updateBookStatusBasedOnDates(combinedBooks);
-      final = syncStatusFromHistory(final);
-      finalBooks = final;
-      return final;
+      return existingBook;
     });
 
-    // Сохраняем все книги в SQLite
-    if (window.electronAPI?.db && finalBooks.length > 0) {
-      for (const book of finalBooks) {
+    const existingTitlesAuthors = new Set(
+      updatedBooks.map(b => `${b.title.toLowerCase().trim()}_${b.author.toLowerCase().trim()}`)
+    );
+
+    const newBooks = migratedImportedBooks.filter(
+      importedBook =>
+        !existingTitlesAuthors.has(
+          `${importedBook.title.toLowerCase().trim()}_${importedBook.author.toLowerCase().trim()}`
+        )
+    );
+
+    const combinedBooks = [...updatedBooks, ...newBooks];
+    let final = updateBookStatusBasedOnDates(combinedBooks);
+    final = syncStatusFromHistory(final);
+
+    // Сохраняем книги в SQLite ДО обновления состояния
+    if (window.electronAPI?.db && final.length > 0) {
+      for (const book of final) {
         await window.electronAPI.db.updateBook(book);
       }
     }
+
+    // Обновляем состояние после сохранения
+    setBooks(final);
   };
 
   const handleUpdateBook = async (updatedBook: Book) => {

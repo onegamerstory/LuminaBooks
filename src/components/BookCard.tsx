@@ -2,7 +2,7 @@
 import React from 'react';
 import { Book, BookStatus } from '../types';
 import { getBookPercentage } from '../utils/bookUtils';
-import { Star, Edit2, Trash2, Calendar, User, Link, Library, Check } from 'lucide-react';
+import { Star, Edit2, Trash2, Calendar, User, Link, ListTodo, Check } from 'lucide-react';
 import { translations, formatHoursText } from '../utils/translations';
 import { calculateDaysDifference, calculateBookTotalHours } from '../utils/dateUtils';
 import { handleCoverError } from '../utils/coverUtils';
@@ -64,7 +64,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
               {book.status === BookStatus.WANT_TO_READ && book.inQueue ? (
                 <Check size={16} />
               ) : (
-                <Library size={16} />
+                <ListTodo size={16} />
               )}
             </button>
           )}

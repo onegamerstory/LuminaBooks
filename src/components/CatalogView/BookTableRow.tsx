@@ -7,7 +7,7 @@
 import React from 'react';
 import { Book, BookStatus } from '../../types';
 import { getStatusColor } from '../../utils/statusUtils';
-import { Library, Edit2, Trash2, Check } from 'lucide-react';
+import { ListTodo, Edit2, Trash2, Check } from 'lucide-react';
 import { translations } from '../../utils/translations';
 import { handleCoverError } from '../../utils/coverUtils';
 import { getBookPercentage } from '../../utils/bookUtils';
@@ -126,7 +126,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             {book.status === BookStatus.WANT_TO_READ && book.inQueue ? (
               <Check size={16} />
             ) : (
-              <Library size={16} />
+              <ListTodo size={16} />
             )}
           </button>
         )}
