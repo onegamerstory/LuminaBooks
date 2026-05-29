@@ -66,8 +66,8 @@ const AchievementPopup: React.FC<PopupProps> = ({ item, onDismiss, lang }) => {
   return (
     <div
       className={`
-        pointer-events-auto w-[380px] bg-slate-900/95 backdrop-blur-xl rounded-2xl
-        border border-amber-500/20 shadow-2xl shadow-amber-500/10 overflow-hidden
+        pointer-events-auto w-[380px] bg-[#F0F4F1] backdrop-blur-2xl rounded-2xl
+        border-2 border-amber-500/30 shadow-2xl shadow-amber-500/10 overflow-hidden
         transition-all duration-500 ease-out
         ${exiting ? 'translate-x-[120%] opacity-0' : 'translate-x-0 opacity-100'}
       `}
@@ -81,7 +81,7 @@ const AchievementPopup: React.FC<PopupProps> = ({ item, onDismiss, lang }) => {
         {/* Icon */}
         <div className="flex-shrink-0">
           <div className="w-16 h-16 rounded-2xl overflow-hidden bg-gradient-to-br from-amber-400 to-amber-600 p-[2px] shadow-lg shadow-amber-500/20">
-            <div className="w-full h-full rounded-2xl bg-slate-800 overflow-hidden">
+            <div className="w-full h-full rounded-2xl bg-[#E8EEE9] overflow-hidden">
               {achievementImages[item.achievementId] ? (
                 <img
                   src={achievementImages[item.achievementId]}
@@ -101,13 +101,13 @@ const AchievementPopup: React.FC<PopupProps> = ({ item, onDismiss, lang }) => {
 
         {/* Text */}
         <div className="flex-1 min-w-0 pt-0.5">
-          <p className="text-[10px] font-bold tracking-[0.15em] text-amber-400/90 uppercase mb-1">
+          <p className="text-[10px] font-bold tracking-[0.15em] text-amber-500 uppercase mb-1" style={{ textShadow: '0 1px 4px rgba(0,0,0,0.15)' }}>
             {lang === 'ru' ? 'Достижение получено' : 'Achievement Unlocked'}
           </p>
-          <h3 className="text-base font-bold text-white leading-tight mb-0.5">
+          <h3 className="text-base font-bold text-[#1E2920] leading-tight mb-0.5">
             {item.title}
           </h3>
-          <p className="text-sm text-slate-400 leading-tight">
+          <p className="text-sm text-slate-500 leading-tight">
             {item.desc}
           </p>
         </div>
@@ -115,7 +115,7 @@ const AchievementPopup: React.FC<PopupProps> = ({ item, onDismiss, lang }) => {
         {/* Close */}
         <button
           onClick={() => onDismiss(item.id)}
-          className="flex-shrink-0 self-start text-slate-600 hover:text-white transition-colors p-0.5"
+          className="flex-shrink-0 self-start text-slate-400 hover:text-[#1E2920] transition-colors p-0.5"
           aria-label="Close"
         >
           <X size={16} />
@@ -123,7 +123,7 @@ const AchievementPopup: React.FC<PopupProps> = ({ item, onDismiss, lang }) => {
       </div>
 
       {/* Progress bar */}
-      <div className="h-0.5 bg-slate-800">
+      <div className="h-0.5 bg-[#D6E1D8]">
         <div
           className="h-full bg-gradient-to-r from-amber-500 to-yellow-400 rounded-full"
           style={{

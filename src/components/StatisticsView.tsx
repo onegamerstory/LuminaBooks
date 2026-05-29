@@ -315,11 +315,25 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
                       const images = { '1': achievement1Png, '2': achievement2Png, '3': achievement3Png, '4': achievement4Png, '5': achievement5Png, '6': achievement6Png, '7': achievement7Png, '8': achievement8Png, '9': achievement9Png, '10': achievement10Png } as Record<string, string | undefined>;
                       const imgSrc = images[ach.id];
                       return imgSrc ? (
-                        <div className={`w-20 h-20 rounded-full mb-3 overflow-hidden ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`}>
-                          <img src={imgSrc} alt={ach.title[lang]} className={`w-full h-full object-cover ${ach.unlocked ? '' : 'opacity-40 grayscale'}`} />
-                        </div>
+                        ach.unlocked ? (
+                          <div className="w-20 h-20 rounded-full mb-3 overflow-hidden bg-gradient-to-br from-amber-400 to-amber-600 p-[2px] shadow-lg shadow-amber-500/20">
+                            <div className="w-full h-full rounded-full overflow-hidden bg-[#F0F4F1]">
+                              <img src={imgSrc} alt={ach.title[lang]} className="w-full h-full object-cover" />
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-full mb-3 overflow-hidden bg-slate-100 border-2 border-slate-200">
+                            <img src={imgSrc} alt={ach.title[lang]} className="w-full h-full object-cover opacity-40 grayscale" />
+                          </div>
+                        )
                       ) : (
-                        <div className={`w-20 h-20 rounded-full mb-3 ${ach.unlocked ? 'bg-[#6B9071]/20 border-2 border-[#6B9071]/40' : 'bg-slate-100 border-2 border-slate-200'}`} />
+                        ach.unlocked ? (
+                          <div className="w-20 h-20 rounded-full mb-3 bg-gradient-to-br from-amber-400 to-amber-600 p-[2px] shadow-lg shadow-amber-500/20">
+                            <div className="w-full h-full rounded-full bg-[#F0F4F1]" />
+                          </div>
+                        ) : (
+                          <div className="w-20 h-20 rounded-full mb-3 bg-slate-100 border-2 border-slate-200" />
+                        )
                       );
                     })()}
                     <h4 className={`text-sm font-semibold text-center mb-1 leading-tight ${ach.unlocked ? 'text-[#1E2920]' : 'text-slate-400'}`}>
