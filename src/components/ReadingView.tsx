@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Book, BookStatus, ReadingSession } from '../types';
-import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen, ChevronLeft, ChevronRight } from 'lucide-react';
+import { Play, Pause, RotateCcw, CheckCircle, Clock, Zap, Link, Trash2, X, BookOpen, ChevronLeft, ChevronRight, Timer } from 'lucide-react';
 import { createPortal } from 'react-dom';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
@@ -45,6 +45,31 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
   const [expandedBookId, setExpandedBookId] = useState<string | null>(null);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const pagesInputRef = useRef<HTMLInputElement>(null);
+
+  const deleteSession = (book: Book, sessionId: string) => {
+    const remainingSessions = book.sessions.filter(s => s.id !== sessionId);
+
+    let currentPage = 0;
+    let currentPercentage = 0;
+
+    if (remainingSessions.length > 0) {
+      const sorted = [...remainingSessions].sort(
+        (a, b) => new Date(b.endTime).getTime() - new Date(a.endTime).getTime()
+      );
+      const latest = sorted[0];
+      currentPage = latest.endPage ?? 0;
+      currentPercentage = latest.endPercentage ?? 0;
+    }
+
+    const updatedBook = {
+      ...book,
+      sessions: remainingSessions,
+      currentPage,
+      currentPercentage
+    };
+    onUpdateBook(updatedBook);
+    addToast(lang === 'ru' ? 'Сессия удалена' : 'Session deleted', 'success');
+  };
   const carouselRef = useRef<HTMLDivElement>(null);
 
   const currentlyReading = books.filter(b => b.status === BookStatus.READING);
@@ -401,243 +426,300 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
 
   const renderBookCard = (book: Book) => (
     <div key={book.id} className="bg-[#F0F4F1] rounded-xl shadow-md border border-[#C8D6CB] p-6">
-      <div className="flex justify-between items-start mb-4 gap-4">
-        {book.coverUrl && (
-          <div className="flex-shrink-0 relative">
-            <img
-              src={book.coverUrl}
-              alt={book.title}
-              className="w-20 h-28 object-cover rounded-lg shadow-md"
-              onError={handleCoverError}
-            />
-          </div>
-        )}
-        <div className="flex-1">
-          <div className="flex items-center gap-1">
-            <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
-            {book.isPartOfSeries && (
-              <Link size={18} className="text-[#6B9071] flex-shrink-0" />
-            )}
-          </div>
-          <p className="text-sm text-slate-600">{book.author}</p>
-          <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider mt-1 ${
-            book.status === BookStatus.READING 
-              ? 'bg-blue-100 text-blue-700' 
-              : book.status === BookStatus.POSTPONED 
-                ? 'bg-orange-100 text-orange-700'
-                : 'bg-slate-100 text-slate-700'
-          }`}>
-            {book.status === BookStatus.READING ? (lang === 'ru' ? 'Читаю' : 'Reading') : (lang === 'ru' ? 'Отложено' : 'Postponed')}
-          </div>
-          <div className="mt-2">
-            <div className="flex items-center gap-2">
-              <div className="w-1/2 bg-slate-200 rounded-full h-2">
-                <div className="bg-[#6B9071] h-2 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
+      <div className="grid grid-cols-[35fr_65fr] gap-6">
+        {/* LEFT: Book info */}
+        <div className="flex gap-5">
+          {book.coverUrl && (
+            <div className="flex-shrink-0">
+              <img
+                src={book.coverUrl}
+                alt={book.title}
+                className="w-20 h-28 object-cover rounded-lg shadow-md"
+                onError={handleCoverError}
+              />
+            </div>
+          )}
+          <div className="flex-1 space-y-3">
+            <div>
+              <div className="flex items-center gap-1">
+                <h3 className="text-lg font-semibold text-[#1E2920]">{book.title}</h3>
+                {book.isPartOfSeries && (
+                  <Link size={18} className="text-[#6B9071] flex-shrink-0" />
+                )}
               </div>
-              <span className="text-xs font-semibold text-slate-600 w-8 text-right">{getBookPercentage(book)}%</span>
+              <p className="text-sm text-slate-600">{book.author}</p>
+            </div>
+            <div className={`inline-block px-2 py-0.5 rounded text-xs font-bold uppercase tracking-wider ${
+              book.status === BookStatus.READING 
+                ? 'bg-blue-100 text-blue-700' 
+                : book.status === BookStatus.POSTPONED 
+                  ? 'bg-orange-100 text-orange-700'
+                  : 'bg-slate-100 text-slate-700'
+            }`}>
+              {book.status === BookStatus.READING ? (lang === 'ru' ? 'Читаю' : 'Reading') : (lang === 'ru' ? 'Отложено' : 'Postponed')}
+            </div>
+            <div>
+              <div className="flex items-center gap-2">
+                <div className="w-full bg-slate-200 rounded-full h-2">
+                  <div className="bg-[#6B9071] h-2 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
+                </div>
+                <span className="text-xs font-semibold text-slate-600 w-8 text-right">{getBookPercentage(book)}%</span>
+              </div>
+            </div>
+
+            {/* Progress info */}
+            {book.totalPages ? (
+              <div className="grid grid-cols-2 gap-2 text-xs">
+                <div>
+                  <div className="font-medium text-slate-600">{lang === 'ru' ? 'Прочитано' : 'Read'}</div>
+                  <div className="text-slate-500">
+                    {(book.currentPage || 0)} {lang === 'ru' ? 'стр.' : 'p.'} {lang === 'ru' ? 'из' : 'of'} {book.totalPages} {lang === 'ru' ? 'стр.' : 'p.'}
+                  </div>
+                </div>
+                <div>
+                  <div className="font-medium text-slate-600">{lang === 'ru' ? 'Осталось' : 'Remaining'}</div>
+                  <div className="text-slate-500">
+                    {Math.max(0, book.totalPages - (book.currentPage || 0))} {lang === 'ru' ? 'стр.' : 'p.'}
+                  </div>
+                </div>
+              </div>
+            ) : null}
+
+            {/* Status change buttons */}
+            <div className="flex flex-wrap gap-2 pt-2">
+              {book.status === BookStatus.READING && (
+                <>
+                  <button
+                    onClick={() => {
+                      const updatedBook = recordStatusChange(book, BookStatus.POSTPONED);
+                      onUpdateBook(updatedBook);
+                      addToast(lang === 'ru' ? 'Книга отложена' : 'Book postponed', 'info');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-transparent border border-[#CD853F] text-[#CD853F] rounded-lg hover:bg-[#CD853F]/10 transition-colors text-sm"
+                    title={lang === 'ru' ? 'Отложить' : 'Postpone'}
+                  >
+                    <Pause size={16} />
+                    <span>{lang === 'ru' ? 'Отложить' : 'Postpone'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
+                      onUpdateBook(updatedBook);
+                      addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-transparent border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000]/10 transition-colors text-sm"
+                    title={lang === 'ru' ? 'Бросить' : 'Abandon'}
+                  >
+                    <X size={16} />
+                    <span>{lang === 'ru' ? 'Бросить' : 'Abandon'}</span>
+                  </button>
+                </>
+              )}
+
+              {book.status === BookStatus.POSTPONED && (
+                <>
+                  <button
+                    onClick={() => {
+                      const updatedBook = recordStatusChange(book, BookStatus.READING);
+                      onUpdateBook(updatedBook);
+                      addToast(lang === 'ru' ? 'Статус изменен на "Читаю"' : 'Status changed to "Reading"', 'info');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-transparent border border-[#6495ED] text-[#6495ED] rounded-lg hover:bg-[#6495ED]/10 transition-colors text-sm"
+                    title={lang === 'ru' ? 'Читать' : 'Read'}
+                  >
+                    <BookOpen size={16} />
+                    <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
+                      onUpdateBook(updatedBook);
+                      addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
+                    }}
+                    className="flex items-center gap-2 px-3 py-2 bg-transparent border border-[#8B0000] text-[#8B0000] rounded-lg hover:bg-[#8B0000]/10 transition-colors text-sm"
+                    title={lang === 'ru' ? 'Бросить' : 'Abandon'}
+                  >
+                    <X size={16} />
+                    <span>{lang === 'ru' ? 'Бросить' : 'Abandon'}</span>
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
-        {sessionState?.bookId === book.id ? (
-          <div className="text-right">
-            <div className="text-3xl font-bold text-[#6B9071] font-mono mb-3">
-              {formatTime(elapsedSeconds)}
+
+        {/* RIGHT: Timer controls + Sessions */}
+        <div className="space-y-4 relative before:content-[''] before:absolute before:-left-3 before:top-6 before:bottom-6 before:w-px before:bg-gradient-to-b before:from-transparent before:via-[#C8D6CB] before:to-transparent">
+          {/* Timer controls */}
+          {sessionState?.bookId === book.id ? (
+            <div className="flex justify-between items-center">
+              <div className="flex items-center gap-2">
+                <Timer size={24} className="text-[#6B9071]" />
+                <div className="text-3xl font-bold text-[#6B9071] font-mono">
+                  {formatTime(elapsedSeconds)}
+                </div>
+              </div>
+              <div className="flex gap-2">
+                {sessionState.isRunning ? (
+                  <button
+                    onClick={pauseSession}
+                    className="flex items-center gap-2 px-4 py-2 bg-transparent border border-[#B09F31] text-[#B09F31] rounded-lg hover:bg-[#B09F31]/10 transition-colors"
+                  >
+                    <Pause size={18} />
+                    <span className="text-sm">{lang === 'ru' ? 'Пауза' : 'Pause'}</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={resumeSession}
+                    className="flex items-center gap-2 px-4 py-2 bg-transparent border border-[#846B90] text-[#846B90] rounded-lg hover:bg-[#846B90]/10 transition-colors"
+                  >
+                    <Play size={18} />
+                    <span className="text-sm">{lang === 'ru' ? 'Продолжить' : 'Resume'}</span>
+                  </button>
+                )}
+                <button
+                  onClick={cancelSession}
+                  className="flex items-center gap-2 px-4 py-2 bg-transparent border border-slate-400 text-slate-600 rounded-lg hover:bg-slate-100 transition-colors"
+                >
+                  <RotateCcw size={18} />
+                  <span className="text-sm">{lang === 'ru' ? 'Отмена' : 'Cancel'}</span>
+                </button>
+                <button
+                  onClick={() => {
+                    if (sessionState) {
+                      setSessionState({ ...sessionState, isRunning: false });
+                    }
+                    setSessionModalOpen(true);
+                  }}
+                  className="flex items-center gap-2 px-4 py-2 bg-transparent border border-[#6B9071] text-[#6B9071] rounded-lg hover:bg-[#6B9071]/10 transition-colors"
+                >
+                  <CheckCircle size={18} />
+                  <span className="text-sm">{lang === 'ru' ? 'Завершить' : 'End'}</span>
+                </button>
+              </div>
             </div>
-            <div className="flex gap-2">
-              {sessionState.isRunning ? (
-                <button
-                  onClick={pauseSession}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#B09F31] text-white rounded-lg hover:bg-[#7F7324] transition-colors"
-                >
-                  <Pause size={18} />
-                  <span className="text-sm">{lang === 'ru' ? 'Пауза' : 'Pause'}</span>
-                </button>
-              ) : (
-                <button
-                  onClick={resumeSession}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#846B90]/60 text-white rounded-lg hover:bg-[#846B90] transition-colors"
-                >
-                  <Play size={18} />
-                  <span className="text-sm">{lang === 'ru' ? 'Продолжить' : 'Resume'}</span>
-                </button>
-              )}
+          ) : (
+            <div className="flex flex-wrap gap-2 justify-end">
               <button
-                onClick={cancelSession}
-                className="flex items-center gap-2 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+                onClick={() => startSession(book.id)}
+                className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
               >
-                <RotateCcw size={18} />
-                <span className="text-sm">{lang === 'ru' ? 'Отмена' : 'Cancel'}</span>
+                <Play size={18} />
+                <span className="text-sm">{lang === 'ru' ? 'Начать сессию' : 'Start Session'}</span>
               </button>
               <button
                 onClick={() => {
-                  if (sessionState) {
-                    setSessionState({ ...sessionState, isRunning: false });
-                  }
-                  setSessionModalOpen(true);
+                  setManualSessionBookId(book.id);
+                  setManualSessionData({ date: new Date().toISOString().split('T')[0] });
+                  setManualSessionModalOpen(true);
                 }}
-                className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-transparent border border-slate-500 text-slate-500 rounded-lg hover:bg-slate-500/10 transition-colors"
               >
-                <CheckCircle size={18} />
-                <span className="text-sm">{lang === 'ru' ? 'Завершить' : 'End'}</span>
+                <Clock size={18} />
+                <span className="text-sm">{lang === 'ru' ? 'Добавить вручную' : 'Add Manual'}</span>
               </button>
             </div>
-          </div>
-        ) : (
-          <div className="flex flex-wrap gap-2">
-            <button
-              onClick={() => startSession(book.id)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] transition-colors"
-            >
-              <Play size={18} />
-              <span className="text-sm">{lang === 'ru' ? 'Начать сессию' : 'Start Session'}</span>
-            </button>
-            <button
-              onClick={() => {
-                setManualSessionBookId(book.id);
-                setManualSessionData({ date: new Date().toISOString().split('T')[0] });
-                setManualSessionModalOpen(true);
-              }}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-500 text-white rounded-lg hover:bg-slate-600 transition-colors"
-            >
-              <Clock size={18} />
-              <span className="text-sm">{lang === 'ru' ? 'Добавить вручную' : 'Add Manual'}</span>
-            </button>
-
-            {book.status === BookStatus.READING && (
-              <>
-                <button
-                  onClick={() => {
-                    const updatedBook = recordStatusChange(book, BookStatus.POSTPONED);
-                    onUpdateBook(updatedBook);
-                    addToast(lang === 'ru' ? 'Книга отложена' : 'Book postponed', 'info');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#CD853F] text-white rounded-lg hover:bg-[#D2691E] transition-colors"
-                  title={lang === 'ru' ? 'Отложить' : 'Postpone'}
-                >
-                  <Pause size={18} />
-                </button>
-                <button
-                  onClick={() => {
-                    const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
-                    onUpdateBook(updatedBook);
-                    addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#8B0000] text-white rounded-lg hover:bg-[#800000] transition-colors"
-                  title={lang === 'ru' ? 'Бросить' : 'Abandon'}
-                >
-                  <X size={18} />
-                </button>
-              </>
-            )}
-
-            {book.status === BookStatus.POSTPONED && (
-              <>
-                <button
-                  onClick={() => {
-                    const updatedBook = recordStatusChange(book, BookStatus.READING);
-                    onUpdateBook(updatedBook);
-                    addToast(lang === 'ru' ? 'Статус изменен на "Читаю"' : 'Status changed to "Reading"', 'info');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#6495ED] text-white rounded-lg hover:bg-[#4682B4] transition-colors"
-                  title={lang === 'ru' ? 'Читать' : 'Read'}
-                >
-                  <BookOpen size={18} />
-                </button>
-                <button
-                  onClick={() => {
-                    const updatedBook = recordStatusChange(book, BookStatus.ABANDONED);
-                    onUpdateBook(updatedBook);
-                    addToast(lang === 'ru' ? 'Книга брошена' : 'Book abandoned', 'info');
-                  }}
-                  className="flex items-center gap-2 px-4 py-2 bg-[#8B0000] text-white rounded-lg hover:bg-[#800000] transition-colors"
-                  title={lang === 'ru' ? 'Бросить' : 'Abandon'}
-                >
-                  <X size={18} />
-                </button>
-              </>
-            )}
-          </div>
-        )}
-      </div>
-
-      {/* История сессий */}
-      {book.sessions && book.sessions.length > 0 && (
-        <div className="mt-6 border-t border-slate-200 pt-4">
-          <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2 justify-between">
-            <div className="flex items-center gap-2">
-              <Zap size={16} className="text-amber-500" />
-              <span>{lang === 'ru' ? 'История сессий' : 'Session History'} ({book.sessions.length})</span>
-            </div>
-            <div className="text-xs font-normal text-[#1E2920] bg-[#DFE9E2] border border-[#B8D4C0] px-2 py-1 rounded">
-              {calculateBookTotalHours(book).toFixed(1)} {lang === 'ru' ? 'ч' : 'h'}
-            </div>
-          </h4>
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm">
-              <thead>
-                <tr className="bg-[#A1BAA5] border-b border-slate-200">
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Дата' : 'Date'}</th>
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Длительность' : 'Duration'}</th>
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Страницы' : 'Pages'}</th>
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Прочитано страниц' : 'Pages Read'}</th>
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Текущий процент' : 'Percentage'}</th>
-                  <th className="p-2 text-left text-xs font-semibold text-slate-600">{lang === 'ru' ? 'Прочитано %' : '% Read'}</th>
-                </tr>
-              </thead>
-              <tbody>
-                {(expandedBookId === book.id ? book.sessions : book.sessions.slice(-3)).map(session => {
-                  const startDate = new Date(session.startTime);
-                  const dateStr = startDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US');
-                  const hours = Math.floor(session.duration / 3600);
-                  const minutes = Math.floor((session.duration % 3600) / 60);
-                  const durationStr = hours > 0 
-                    ? `${hours}${lang === 'ru' ? 'ч' : 'h'} ${minutes}${lang === 'ru' ? 'м' : 'm'}` 
-                    : `${minutes}${lang === 'ru' ? 'м' : 'm'}`;
-
-                  return (
-                    <tr key={session.id} className="border-b border-slate-100 hover:bg-[#D6E1D8]">
-                      <td className="p-2 text-slate-700">{dateStr}</td>
-                      <td className="p-2 text-slate-700 font-medium">{durationStr}</td>
-                      <td className="p-2 text-slate-700">
-                        {session.startPage !== undefined && session.endPage !== undefined 
-                          ? `${session.startPage}–${session.endPage}` 
-                          : '-'}
-                      </td>
-                      <td className="p-2 text-slate-700 font-medium">
-                        {session.pagesRead !== undefined ? `${session.pagesRead}${lang === 'ru' ? ' страниц(ы)' : ' page(s)'}` : '-'}
-                      </td>
-                      <td className="p-2 text-slate-700">
-                        {session.startPercentage !== undefined && session.endPercentage !== undefined 
-                          ? `${session.startPercentage}–${session.endPercentage}%` 
-                          : '-'}
-                      </td>
-                      <td className="p-2 text-slate-700 font-medium">
-                        {session.percentageRead !== undefined ? `${session.percentageRead}%` : '-'}
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-          {book.sessions.length > 3 && expandedBookId !== book.id && (
-            <button
-              onClick={() => setExpandedBookId(book.id)}
-              className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
-            >
-              {lang === 'ru' ? '+ Показать все' : '+ Show All'} ({book.sessions.length - 3} {lang === 'ru' ? 'ещё' : 'more'})
-            </button>
           )}
-          {expandedBookId === book.id && book.sessions.length > 3 && (
-            <button
-              onClick={() => setExpandedBookId(null)}
-              className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
-            >
-              {lang === 'ru' ? '− Скрыть' : '− Hide'}
-            </button>
+
+          {/* История сессий */}
+          {book.sessions && book.sessions.length > 0 && (
+            <div className="border-t border-slate-200 pt-4">
+              <h4 className="text-sm font-semibold text-slate-700 mb-3 flex items-center gap-2 justify-between">
+                <div className="flex items-center gap-2">
+                  <Zap size={16} className="text-amber-500" />
+                  <span>{lang === 'ru' ? 'История сессий' : 'Session History'}</span>
+                  <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-[#DFE9E2] text-[#6B9071]">
+                    {book.sessions.length} {lang === 'ru'
+                      ? (book.sessions.length === 1
+                        ? 'запись'
+                        : (book.sessions.length >= 2 && book.sessions.length <= 4
+                          ? 'записи'
+                          : 'записей'))
+                      : (book.sessions.length === 1 ? 'entry' : 'entries')}
+                  </span>
+                </div>
+                <div className="text-xs font-normal text-[#1E2920] bg-[#DFE9E2] border border-[#B8D4C0] px-2 py-1 rounded">
+                  {calculateBookTotalHours(book).toFixed(1)} {lang === 'ru' ? 'ч' : 'h'}
+                </div>
+              </h4>
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs border-collapse">
+                  <thead>
+                    <tr className="bg-[#DFE9E2]">
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? 'Дата' : 'Date'}</th>
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? 'Длит.' : 'Dur.'}</th>
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? 'Стр.' : 'Pages'}</th>
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? 'Прочит.' : 'Read'}</th>
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? 'Процент' : 'Pct.'}</th>
+                      <th className="px-2 py-1 text-left font-medium text-slate-500 border-b border-[#C8D6CB]">{lang === 'ru' ? '%' : '%'}</th>
+                      <th className="px-2 py-1 border-b border-[#C8D6CB] w-8"></th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(expandedBookId === book.id ? book.sessions : book.sessions.slice(-3)).map(session => {
+                      const startDate = new Date(session.startTime);
+                      const dateStr = startDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US');
+                      const hours = Math.floor(session.duration / 3600);
+                      const minutes = Math.floor((session.duration % 3600) / 60);
+                      const durationStr = hours > 0 
+                        ? `${hours}${lang === 'ru' ? 'ч' : 'h'} ${minutes}${lang === 'ru' ? 'м' : 'm'}` 
+                        : `${minutes}${lang === 'ru' ? 'м' : 'm'}`;
+
+                      return (
+                        <tr key={session.id} className="hover:bg-[#D6E1D8] group">
+                          <td className="px-2 py-1 text-slate-700 border-b border-[#C8D6CB]">{dateStr}</td>
+                          <td className="px-2 py-1 text-slate-700 font-medium border-b border-[#C8D6CB]">{durationStr}</td>
+                          <td className="px-2 py-1 text-slate-700 border-b border-[#C8D6CB]">
+                            {session.startPage !== undefined && session.endPage !== undefined 
+                              ? `${session.startPage}–${session.endPage}` 
+                              : '-'}
+                          </td>
+                          <td className="px-2 py-1 text-slate-700 font-medium border-b border-[#C8D6CB]">
+                            {session.pagesRead !== undefined ? `${session.pagesRead}${lang === 'ru' ? ' стр.' : ' p.'}` : '-'}
+                          </td>
+                          <td className="px-2 py-1 text-slate-700 border-b border-[#C8D6CB]">
+                            {session.startPercentage !== undefined && session.endPercentage !== undefined 
+                              ? `${session.startPercentage}–${session.endPercentage}%` 
+                              : '-'}
+                          </td>
+                          <td className="px-2 py-1 text-slate-700 font-medium border-b border-[#C8D6CB]">
+                            {session.percentageRead !== undefined ? `${session.percentageRead}%` : '-'}
+                          </td>
+                          <td className="px-2 py-1 border-b border-[#C8D6CB]">
+                            <button
+                              onClick={() => deleteSession(book, session.id)}
+                              className="text-slate-400 hover:text-red-600 transition-colors"
+                              title={lang === 'ru' ? 'Удалить сессию' : 'Delete session'}
+                            >
+                              <Trash2 size={14} />
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+              {book.sessions.length > 3 && expandedBookId !== book.id && (
+                <button
+                  onClick={() => setExpandedBookId(book.id)}
+                  className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
+                >
+                  {lang === 'ru' ? '+ Показать все' : '+ Show All'} ({book.sessions.length - 3} {lang === 'ru' ? 'ещё' : 'more'})
+                </button>
+              )}
+              {expandedBookId === book.id && book.sessions.length > 3 && (
+                <button
+                  onClick={() => setExpandedBookId(null)}
+                  className="mt-3 px-3 py-1 text-sm text-[#6B9071] hover:text-[#59785E] font-medium hover:bg-[#F0F4F1] rounded transition-colors"
+                >
+                  {lang === 'ru' ? '− Скрыть' : '− Hide'}
+                </button>
+              )}
+            </div>
           )}
         </div>
-      )}
+      </div>
     </div>
   );
 
@@ -744,7 +826,18 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       {/* 2. Сейчас читаю */}
       {currentlyReading.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Читаю' : 'Reading'}</h3>
+          <h3 className="text-xl font-semibold text-[#1E2920] flex items-center gap-2">
+            {lang === 'ru' ? 'Читаю' : 'Reading'}
+            <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-[#DFE9E2] text-[#6B9071]">
+              {currentlyReading.length} {lang === 'ru'
+                ? (currentlyReading.length === 1
+                  ? 'книга'
+                  : (currentlyReading.length >= 2 && currentlyReading.length <= 4
+                    ? 'книги'
+                    : 'книг'))
+                : (currentlyReading.length === 1 ? 'book' : 'books')}
+            </span>
+          </h3>
           {currentlyReading.map(book => renderBookCard(book))}
         </div>
       )}
@@ -752,7 +845,18 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
       {/* 3. Отложено */}
       {postponedBooks.length > 0 && (
         <div className="space-y-4">
-          <h3 className="text-xl font-semibold text-[#1E2920]">{lang === 'ru' ? 'Отложено' : 'Postponed'}</h3>
+          <h3 className="text-xl font-semibold text-[#1E2920] flex items-center gap-2">
+            {lang === 'ru' ? 'Отложено' : 'Postponed'}
+            <span className="inline-block px-2 py-0.5 rounded text-xs font-bold bg-[#DFE9E2] text-[#6B9071]">
+              {postponedBooks.length} {lang === 'ru'
+                ? (postponedBooks.length === 1
+                  ? 'книга'
+                  : (postponedBooks.length >= 2 && postponedBooks.length <= 4
+                    ? 'книги'
+                    : 'книг'))
+                : (postponedBooks.length === 1 ? 'book' : 'books')}
+            </span>
+          </h3>
           {postponedBooks.map(book => renderBookCard(book))}
         </div>
       )}
