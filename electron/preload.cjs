@@ -6,6 +6,8 @@ contextBridge.exposeInMainWorld('electronAPI', {
   isWindows: process.platform === 'win32',
   isLinux: process.platform === 'linux',
 
+  getServerUrl: () => ipcRenderer.invoke('server:getUrl'),
+
   db: {
     getAllBooks: () => ipcRenderer.invoke('db:getAllBooks'),
     addBook: (book) => ipcRenderer.invoke('db:addBook', book),

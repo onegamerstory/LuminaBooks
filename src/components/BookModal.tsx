@@ -10,6 +10,7 @@ import BookRatingModal from './BookRatingModal';
 import FranchiseSelectModal from './FranchiseSelectModal.tsx';
 import { calculateBookTotalHours } from '../utils/dateUtils';
 import { searchBookOnOpenLibrary } from '../utils/openLibraryApi';
+import { uuid } from '../uuid';
 
 interface BookModalProps {
   isOpen: boolean;
@@ -95,7 +96,7 @@ const BookModal: React.FC<BookModalProps> = ({
     
     const newBook: Book = {
       ...formData as Book,
-      id: initialData?.id || crypto.randomUUID(),
+      id: initialData?.id || uuid(),
       title: formData.title || 'Untitled',
       author: formData.author || 'Unknown',
       year: formData.year || 'N/A',
@@ -165,7 +166,7 @@ const BookModal: React.FC<BookModalProps> = ({
     // Если пользователь хочет создать новую коллекцию
     if (newFranchiseName && newFranchiseName.trim() && onFranchisesUpdated) {
       const newFranchise: Franchise = {
-        id: crypto.randomUUID(),
+        id: uuid(),
         name: newFranchiseName,
         bookIds: [], // Книга будет добавлена при сохранении
         createdAt: new Date().toISOString(),

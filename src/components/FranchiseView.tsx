@@ -3,6 +3,7 @@ import { Book, Franchise } from '../types';
 import { Plus, Edit2, Trash2, Search, X } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
+import { uuid } from '../uuid';
 import FranchiseModal from './FranchiseModal.tsx';
 import Toast, { ToastMessage } from './Toast';
 import ConfirmationModal from './ConfirmationModal';
@@ -134,7 +135,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
   });
 
   const addToast = (message: string, type: 'success' | 'error' | 'info') => {
-    const id = crypto.randomUUID();
+    const id = uuid();
     setToasts((prev) => [...prev, { id, message, type }]);
     setTimeout(() => {
       setToasts((prev) => prev.filter((t) => t.id !== id));

@@ -1,7 +1,7 @@
 {
   "name": "luminabooks---personal-book-tracker",
   "private": true,
-  "version": "1.9.1",
+  "version": "1.10.0",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -20,6 +20,7 @@
     "@mantine/hooks": "^7.5.0",
     "better-sqlite3": "^12.10.0",
     "dayjs": "^1.11.10",
+    "express": "^5.2.1",
     "lucide-react": "^0.562.0",
     "react": "^19.2.3",
     "react-dom": "^19.2.3"
@@ -27,6 +28,7 @@
   "devDependencies": {
     "@electron/rebuild": "^4.0.4",
     "@types/better-sqlite3": "^7.6.13",
+    "@types/express": "^5.0.6",
     "@types/node": "^22.14.0",
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",

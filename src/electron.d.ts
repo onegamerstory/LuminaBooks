@@ -1,4 +1,3 @@
-// Типы для Electron API, доступного через preload
 export interface ElectronDBAPI {
   getAllBooks: () => Promise<any[]>;
   addBook: (book: any) => Promise<any>;
@@ -22,6 +21,7 @@ export interface ElectronAPI {
   isWindows: boolean;
   isLinux: boolean;
   db?: ElectronDBAPI;
+  getServerUrl?: () => Promise<string>;
 }
 
 declare global {
@@ -29,4 +29,3 @@ declare global {
     electronAPI?: ElectronAPI;
   }
 }
-

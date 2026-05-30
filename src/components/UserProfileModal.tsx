@@ -2,19 +2,22 @@ import React, { useState, useEffect, useRef } from 'react';
 import { X, User } from 'lucide-react';
 import { translations } from '../utils/translations';
 
-interface UserProfileModalProps {
-  isOpen: boolean;
-  onClose: () => void;
-  lang: 'en' | 'ru';
-}
-
 interface UserProfile {
   nickname: string;
   photoUrl: string;
   defaultCoverUrl: string;
 }
 
-const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, lang }) => {
+interface UserProfileModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onSave: (profile: UserProfile) => Promise<void>;
+  autoSync: boolean;
+  onAutoSyncChange: (value: boolean) => void;
+  lang: 'en' | 'ru';
+}
+
+const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, lang }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<UserProfile>({
@@ -26,7 +29,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
   const PROFILE_STORAGE_KEY = 'lumina_user_profile';
 
   useEffect(() => {
-    // Load profile from localStorage
     const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
     if (saved) {
       try {
@@ -35,7 +37,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
         console.error("Failed to load profile", e);
       }
     } else {
-      // Load legacy default cover URL if it exists
       const savedCoverUrl = localStorage.getItem('lumina_default_cover_url');
       if (savedCoverUrl) {
         setProfile(prev => ({
@@ -58,7 +59,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
       };
       reader.readAsDataURL(file);
     }
-    // Reset the input so the user can select the same file again
     if (fileInputRef.current) {
       fileInputRef.current.value = '';
     }
@@ -70,19 +70,8 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
 
   const handleSave = async () => {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-    if (window.electronAPI?.db) {
-      await window.electronAPI.db.setUserProfile(profile);
-    }
+    await onSave(profile);
     onClose();
-  };
-
-  const handleClearProfile = () => {
-    const newProfile: UserProfile = {
-      nickname: '',
-      photoUrl: '',
-      defaultCoverUrl: profile.defaultCoverUrl // Preserve cover URL
-    };
-    setProfile(newProfile);
   };
 
   const handleClearCover = () => {
@@ -115,7 +104,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               {t.profilePhoto}
             </label>
             
-            {/* Photo Preview - Clickable */}
             <button
               onClick={handlePhotoClick}
               className="flex justify-center mx-auto mb-4 group cursor-pointer"
@@ -140,7 +128,6 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               </div>
             </button>
 
-            {/* Hidden file input */}
             <input 
               ref={fileInputRef}
               type="file" 
@@ -195,25 +182,43 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, la
               </div>
             )}
           </div>
+
+          {/* Auto Sync Toggle */}
+          <div className="border-t pt-4">
+            <div className="flex items-center justify-between">
+              <div>
+                <label className="block text-sm font-semibold text-slate-700 mb-1">
+                  {lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}
+                </label>
+                <p className="text-xs text-slate-500">
+                  {lang === 'ru'
+                    ? 'Автоматически обновлять данные с других устройств'
+                    : 'Automatically sync data from other devices'}
+                </p>
+              </div>
+              <button
+                type="button"
+                role="switch"
+                aria-checked={autoSync}
+                onClick={() => onAutoSyncChange(!autoSync)}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${autoSync ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
+                />
+              </button>
+            </div>
+          </div>
         </div>
 
         {/* Action Buttons */}
         <div className="px-6 pb-6 pt-4 bg-white">
-          <div className="flex gap-3">
-            <button
-              onClick={handleSave}
-              className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
-            >
-              {t.save}
-            </button>
-            <button
-              onClick={handleClearCover}
-              className="flex-1 px-4 py-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 font-semibold transition-colors text-sm"
-              title={lang === 'ru' ? 'Очистить обложку' : 'Clear cover'}
-            >
-              {lang === 'ru' ? 'Очистить' : 'Clear'}
-            </button>
-          </div>
+          <button
+            onClick={handleSave}
+            className="w-full px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
+          >
+            {t.save}
+          </button>
         </div>
       </div>
     </div>

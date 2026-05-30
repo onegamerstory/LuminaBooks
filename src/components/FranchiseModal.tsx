@@ -3,6 +3,7 @@ import { Book, BookStatus, Franchise } from '../types';
 import { X, Search, Plus, Trash2, ChevronUp, ChevronDown, Check } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { handleCoverError } from '../utils/coverUtils';
+import { uuid } from '../uuid';
 
 interface FranchiseModalProps {
   isOpen: boolean;
@@ -102,7 +103,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
     setError('');
 
     const newFranchise: Franchise = {
-      id: initialData?.id || crypto.randomUUID(),
+      id: initialData?.id || uuid(),
       name: name.trim(),
       description: description.trim() || undefined,
       coverUrl: coverUrl.trim() || undefined,

@@ -1,6 +1,7 @@
 
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useCallback } from 'react';
 import { Book, BookStatus, ViewType, Franchise } from './types';
+import type { ElectronDBAPI } from './electron.d';
 import { CatalogView } from './components';
 import FranchiseView from './components/FranchiseView';
 import CalendarView from './components/CalendarView';
@@ -15,11 +16,13 @@ import { getUnlockedAchievementIds, ALL_ACHIEVEMENTS, AchievementNotificationIte
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
-import { Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link } from 'lucide-react';
+import { Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link, Globe, RefreshCw } from 'lucide-react';
+import { uuid } from './uuid';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { translations } from './utils/translations';
+import { httpApi } from './api';
 import appIcon from '../resources/icon.png';
 
 export { translations };
@@ -34,6 +37,9 @@ const App: React.FC = () => {
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
+  const [serverUrl, setServerUrl] = useState('');
+  const [autoSync, setAutoSync] = useState(() => localStorage.getItem('lumina_auto_sync') === 'true');
+  const [syncing, setSyncing] = useState(false);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [achievementQueue, setAchievementQueue] = useState<AchievementNotificationItem[]>([]);
   const achievementQueueRef = useRef<AchievementNotificationItem[]>([]);
@@ -54,10 +60,66 @@ const App: React.FC = () => {
     onConfirm: () => {},
   });
 
+  const dbApiRef = useRef<ElectronDBAPI | null>(null);
+
+  function getDbApi(): ElectronDBAPI | null {
+    return dbApiRef.current;
+  }
+
+  const syncDataFromApi = useCallback(async (api: ElectronDBAPI) => {
+    const loadedBooks = await api.getAllBooks();
+    if (loadedBooks && loadedBooks.length > 0) {
+      const normalizedBooks = loadedBooks.map((book: Book) => ({
+        ...book,
+        startDate: book.startDate?.trim() || '',
+        endDate: book.endDate?.trim() || '',
+      }));
+      let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
+      let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+      updatedBooks = syncStatusFromHistory(updatedBooks);
+      setBooks(updatedBooks);
+    } else {
+      setBooks([]);
+    }
+
+    const loadedFranchises = await api.getAllFranchises();
+    if (loadedFranchises && loadedFranchises.length > 0) {
+      setFranchises(loadedFranchises);
+    } else {
+      setFranchises([]);
+    }
+
+    const profile = await api.getUserProfile();
+    if (profile) {
+      localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
+      if (profile.defaultCoverUrl) {
+        setDefaultCoverUrl(profile.defaultCoverUrl);
+      }
+    }
+  }, []);
+
+  const handleManualSync = async () => {
+    if (syncing) return;
+    const api = getDbApi();
+    if (!api) {
+      addToast(lang === 'ru' ? 'Нет активного подключения к базе данных' : 'No active database connection', 'error');
+      return;
+    }
+    setSyncing(true);
+    try {
+      await syncDataFromApi(api);
+      addToast(lang === 'ru' ? 'Данные обновлены' : 'Data updated', 'success');
+    } catch (e) {
+      console.error('[Sync]', e);
+      addToast(lang === 'ru' ? 'Ошибка синхронизации' : 'Sync failed', 'error');
+    }
+    setSyncing(false);
+  };
+
   const t = translations[lang];
 
   const addToast = (message: string, type: 'success' | 'error' | 'info') => {
-    const id = crypto.randomUUID();
+    const id = uuid();
     setToasts(prev => [...prev, { id, message, type, duration: 4000 }]);
   };
 
@@ -167,7 +229,8 @@ const App: React.FC = () => {
     const loadData = async () => {
       try {
         if (window.electronAPI?.db) {
-          // === Режим Electron: SQLite ===
+          // === Режим Electron: IPC (SQLite через main process) ===
+          dbApiRef.current = window.electronAPI.db;
 
           // Миграция из localStorage в SQLite (однократно)
           const legacyBooks = localStorage.getItem('lumina_books_v1');
@@ -182,79 +245,79 @@ const App: React.FC = () => {
             console.log(`Migrated ${result.books} books and ${result.franchises} franchises to SQLite`);
           }
 
-          // Загружаем книги
-          const loadedBooks = await window.electronAPI.db.getAllBooks();
-          if (loadedBooks && loadedBooks.length > 0) {
-            const normalizedBooks = loadedBooks.map((book: Book) => ({
-              ...book,
-              startDate: book.startDate?.trim() || '',
-              endDate: book.endDate?.trim() || '',
-            }));
-            let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
-            let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
-            updatedBooks = syncStatusFromHistory(updatedBooks);
-            setBooks(updatedBooks);
-          }
-
-          // Загружаем коллекции
-          const loadedFranchises = await window.electronAPI.db.getAllFranchises();
-          if (loadedFranchises && loadedFranchises.length > 0) {
-            setFranchises(loadedFranchises);
-          }
-
-          // Загружаем профиль
-          const profile = await window.electronAPI.db.getUserProfile();
-          if (profile) {
-            localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
-            if (profile.defaultCoverUrl) {
-              setDefaultCoverUrl(profile.defaultCoverUrl);
-            }
-          }
+          // Загружаем данные через общую функцию синхронизации
+          await syncDataFromApi(window.electronAPI.db);
         } else {
-          // === Режим браузера: localStorage (fallback) ===
-          const saved = localStorage.getItem('lumina_books_v1');
-          if (saved) {
-            try {
-              const loadedBooks = JSON.parse(saved);
-              const normalizedBooks = loadedBooks.map((book: Book) => ({
-                ...book,
-                startDate: book.startDate?.trim() || '',
-                endDate: book.endDate?.trim() || '',
-              }));
-              let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
-              let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
-              updatedBooks = syncStatusFromHistory(updatedBooks);
-              setBooks(updatedBooks);
-            } catch (e) {
-              console.error("Failed to load books from localStorage", e);
-            }
-          }
+          // === Режим браузера ===
+          let httpAvailable = false;
+          try {
+            const resp = await fetch('/api/status');
+            httpAvailable = resp.ok;
+          } catch {}
 
-          const savedFranchises = localStorage.getItem('lumina_franchises_v1');
-          if (savedFranchises) {
-            try {
-              setFranchises(JSON.parse(savedFranchises));
-            } catch (e) {
-              console.error("Failed to load franchises from localStorage", e);
-            }
-          }
+          if (httpAvailable) {
+            // === Режим HTTP API (подключение к серверу LuminaBooks) ===
+            dbApiRef.current = httpApi;
 
-          const profileSaved = localStorage.getItem('lumina_user_profile');
-          if (profileSaved) {
             try {
-              const profile = JSON.parse(profileSaved);
-              setDefaultCoverUrl(profile.defaultCoverUrl || '');
+              await syncDataFromApi(httpApi);
             } catch (e) {
+              console.error("Failed to load data via HTTP API", e);
+            }
+          } else {
+            // === Режим браузера: localStorage (fallback) ===
+            const saved = localStorage.getItem('lumina_books_v1');
+            if (saved) {
+              try {
+                const loadedBooks = JSON.parse(saved);
+                const normalizedBooks = loadedBooks.map((book: Book) => ({
+                  ...book,
+                  startDate: book.startDate?.trim() || '',
+                  endDate: book.endDate?.trim() || '',
+                }));
+                let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
+                let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+                updatedBooks = syncStatusFromHistory(updatedBooks);
+                setBooks(updatedBooks);
+              } catch (e) {
+                console.error("Failed to load books from localStorage", e);
+              }
+            }
+
+            const savedFranchises = localStorage.getItem('lumina_franchises_v1');
+            if (savedFranchises) {
+              try {
+                setFranchises(JSON.parse(savedFranchises));
+              } catch (e) {
+                console.error("Failed to load franchises from localStorage", e);
+              }
+            }
+
+            const profileSaved = localStorage.getItem('lumina_user_profile');
+            if (profileSaved) {
+              try {
+                const profile = JSON.parse(profileSaved);
+                setDefaultCoverUrl(profile.defaultCoverUrl || '');
+              } catch (e) {
+                const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
+                if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
+              }
+            } else {
               const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
               if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
             }
-          } else {
-            const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
-            if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
           }
         }
       } catch (e) {
         console.error("Failed to load data", e);
+      }
+
+      // Получаем URL сервера (только в Electron режиме)
+      if (window.electronAPI?.getServerUrl) {
+        try {
+          const url = await window.electronAPI.getServerUrl();
+          setServerUrl(url);
+        } catch {}
       }
 
       // Настройки из localStorage (всегда)
@@ -270,22 +333,47 @@ const App: React.FC = () => {
     };
 
     loadData();
-  }, []);
+  }, [syncDataFromApi]);
+
+  // Периодическая синхронизация данных для кросс-устройств
+  useEffect(() => {
+    const api = getDbApi();
+    if (!api || !autoSync) return;
+
+    const poll = async () => {
+      try {
+        await syncDataFromApi(api);
+      } catch {}
+    };
+
+    const interval = setInterval(poll, 8000);
+
+    const onFocus = () => poll();
+    window.addEventListener('focus', onFocus);
+    document.addEventListener('visibilitychange', () => {
+      if (document.visibilityState === 'visible') poll();
+    });
+
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('focus', onFocus);
+    };
+  }, [syncDataFromApi, autoSync]);
 
   // Сохраняем настройки в localStorage
   useEffect(() => {
     localStorage.setItem('lumina_lang', lang);
   }, [lang]);
 
-  // Браузерный fallback: сохраняем книги/коллекции в localStorage
+  // Браузерный fallback: сохраняем книги/коллекции в localStorage (только если нет API)
   useEffect(() => {
-    if (!window.electronAPI?.db) {
+    if (!window.electronAPI?.db && !getDbApi()) {
       localStorage.setItem('lumina_books_v1', JSON.stringify(books));
     }
   }, [books]);
 
   useEffect(() => {
-    if (!window.electronAPI?.db) {
+    if (!window.electronAPI?.db && !getDbApi()) {
       localStorage.setItem('lumina_franchises_v1', JSON.stringify(franchises));
     }
   }, [franchises]);
@@ -388,12 +476,13 @@ const App: React.FC = () => {
       return updatedBooks;
     });
 
-    // Сохраняем книгу в SQLite
-    if (resultBook && window.electronAPI?.db) {
+    // Сохраняем книгу через активное API
+    const saveApi = getDbApi();
+    if (resultBook && saveApi) {
       if (editingBook) {
-        await window.electronAPI.db.updateBook(resultBook);
+        await saveApi.updateBook(resultBook);
       } else {
-        await window.electronAPI.db.addBook(resultBook);
+        await saveApi.addBook(resultBook);
       }
     }
 
@@ -421,10 +510,9 @@ const App: React.FC = () => {
       return updated;
     });
 
-    // Сохраняем измененные коллекции в SQLite
-    if (window.electronAPI?.db && resultBook) {
-      const allFranchises = await window.electronAPI.db.getAllFranchises();
-      // Частичное обновление: изменяем только те, что были затронуты
+    // Сохраняем измененные коллекции через активное API
+    if (saveApi && resultBook) {
+      const allFranchises = await saveApi.getAllFranchises();
       for (const f of allFranchises) {
         const shouldInclude = book.franchiseIds?.includes(f.id) ?? false;
         const currentlyIncludes = f.bookIds.includes(book.id);
@@ -434,7 +522,7 @@ const App: React.FC = () => {
             bookIds: shouldInclude ? [...f.bookIds, book.id] : f.bookIds.filter((id: string) => id !== book.id),
             updatedAt: new Date().toISOString(),
           };
-          await window.electronAPI.db.updateFranchise(updatedF);
+          await saveApi.updateFranchise(updatedF);
         }
       }
     }
@@ -453,8 +541,9 @@ const App: React.FC = () => {
       lang === 'ru' ? 'Удалить книгу' : 'Delete Book',
       t.deleteConfirm,
       async () => {
-        if (window.electronAPI?.db) {
-          await window.electronAPI.db.deleteBook(id);
+        const api = getDbApi();
+        if (api) {
+          await api.deleteBook(id);
         }
         setBooks(prev => prev.filter(b => b.id !== id));
         addToast(
@@ -478,8 +567,9 @@ const App: React.FC = () => {
       savedBook = updatedBook;
       return updatedBook;
     }));
-    if (savedBook && window.electronAPI?.db) {
-      await window.electronAPI.db.updateBook(savedBook);
+    const api = getDbApi();
+    if (savedBook && api) {
+      await api.updateBook(savedBook);
     }
   };
 
@@ -496,15 +586,17 @@ const App: React.FC = () => {
       savedBook = updatedBook;
       return updatedBook;
     }));
-    if (savedBook && window.electronAPI?.db) {
-      await window.electronAPI.db.updateBook(savedBook);
+    const api = getDbApi();
+    if (savedBook && api) {
+      await api.updateBook(savedBook);
     }
   };
 
   const handleImport = async (importedBooks: Book[], userProfile?: UserProfile, importedFranchises?: Franchise[]) => {
+    const importApi = getDbApi();
     // Если в импорте есть информация о пользователе, обновляем
-    if (userProfile && window.electronAPI?.db) {
-      await window.electronAPI.db.setUserProfile(userProfile);
+    if (userProfile && importApi) {
+      await importApi.setUserProfile(userProfile);
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
     }
 
@@ -527,15 +619,15 @@ const App: React.FC = () => {
         return [...updated, ...newFranchises];
       });
 
-      // Сохраняем коллекции в SQLite
-      if (window.electronAPI?.db) {
-        const allExistingFranchises = await window.electronAPI.db.getAllFranchises();
+      // Сохраняем коллекции через активное API
+      if (importApi) {
+        const allExistingFranchises = await importApi.getAllFranchises();
         for (const f of importedFranchises) {
           const existing = allExistingFranchises.find(ef => ef.id === f.id);
           if (existing) {
-            await window.electronAPI.db.updateFranchise({ ...f, createdAt: existing.createdAt });
+            await importApi.updateFranchise({ ...f, createdAt: existing.createdAt });
           } else {
-            await window.electronAPI.db.addFranchise(f);
+            await importApi.addFranchise(f);
           }
         }
       }
@@ -583,10 +675,10 @@ const App: React.FC = () => {
     let final = updateBookStatusBasedOnDates(combinedBooks);
     final = syncStatusFromHistory(final);
 
-    // Сохраняем книги в SQLite ДО обновления состояния
-    if (window.electronAPI?.db && final.length > 0) {
+    // Сохраняем книги через активное API ДО обновления состояния
+    if (importApi && final.length > 0) {
       for (const book of final) {
-        await window.electronAPI.db.updateBook(book);
+        await importApi.updateBook(book);
       }
     }
 
@@ -597,8 +689,9 @@ const App: React.FC = () => {
   const handleUpdateBook = async (updatedBook: Book) => {
     setBooks(prev => prev.map(b => b.id === updatedBook.id ? updatedBook : b));
     
-    if (window.electronAPI?.db) {
-      await window.electronAPI.db.updateBook(updatedBook);
+    const api = getDbApi();
+    if (api) {
+      await api.updateBook(updatedBook);
     }
 
     // Проверяем если книга достигла 100% прогресса и у нее нет оценки
@@ -624,8 +717,9 @@ const App: React.FC = () => {
       });
       return updateBookStatusBasedOnDates(updatedBooks);
     });
-    if (savedBook && window.electronAPI?.db) {
-      await window.electronAPI.db.updateBook(savedBook);
+    const api = getDbApi();
+    if (savedBook && api) {
+      await api.updateBook(savedBook);
     }
   };
 
@@ -634,24 +728,26 @@ const App: React.FC = () => {
   // Handlers for franchises
   const handleAddFranchise = async (franchise: Franchise) => {
     setFranchises(prev => [...prev, franchise]);
-    if (window.electronAPI?.db) {
-      await window.electronAPI.db.addFranchise(franchise);
+    const api = getDbApi();
+    if (api) {
+      await api.addFranchise(franchise);
     }
   };
 
   const handleUpdateFranchise = async (updatedFranchise: Franchise) => {
     setFranchises(prev => prev.map(f => f.id === updatedFranchise.id ? updatedFranchise : f));
-    if (window.electronAPI?.db) {
-      await window.electronAPI.db.updateFranchise(updatedFranchise);
+    const api = getDbApi();
+    if (api) {
+      await api.updateFranchise(updatedFranchise);
     }
   };
 
   const handleDeleteFranchise = async (id: string) => {
     setFranchises(prev => prev.filter(f => f.id !== id));
-    if (window.electronAPI?.db) {
-      await window.electronAPI.db.deleteFranchise(id);
+    const deleteApi = getDbApi();
+    if (deleteApi) {
+      await deleteApi.deleteFranchise(id);
     }
-    // Remove franchise from books and update isPartOfSeries flag
     let updatedBooks: Book[] = [];
     setBooks(prev => {
       updatedBooks = prev.map(b => {
@@ -664,19 +760,19 @@ const App: React.FC = () => {
       });
       return updatedBooks;
     });
-    // Save updated books to SQLite
-    if (window.electronAPI?.db) {
+    if (deleteApi) {
       for (const book of updatedBooks) {
-        await window.electronAPI.db.updateBook(book);
+        await deleteApi.updateBook(book);
       }
     }
   };
 
   const handleBooksUpdated = async (updatedBooks: Book[]) => {
     setBooks(updatedBooks);
-    if (window.electronAPI?.db) {
+    const api = getDbApi();
+    if (api) {
       for (const book of updatedBooks) {
-        await window.electronAPI.db.updateBook(book);
+        await api.updateBook(book);
       }
     }
   };
@@ -691,7 +787,20 @@ const App: React.FC = () => {
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <img src={appIcon} alt="LuminaBooks" className="w-10 h-10" />
-            <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
+            <div>
+              <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
+              {serverUrl && (
+                <button
+                  onClick={() => navigator.clipboard.writeText(serverUrl)}
+                  className="flex items-center gap-1 text-xs text-[#6B9071] hover:text-[#59785E] transition-colors cursor-pointer"
+                  title={lang === 'ru' ? 'Нажмите, чтобы скопировать адрес сервера' : 'Click to copy server address'}
+                >
+                  <Globe size={12} />
+                  <span className="hidden sm:inline">{serverUrl}</span>
+                  <span className="sm:hidden">{serverUrl.replace(/https?:\/\//, '')}</span>
+                </button>
+              )}
+            </div>
           </div>
 
           <div className="flex items-center gap-2">
@@ -762,6 +871,15 @@ const App: React.FC = () => {
             >
               <Languages size={18} />
               <span className="text-xs font-bold uppercase">{lang}</span>
+            </button>
+
+            <button
+              onClick={handleManualSync}
+              disabled={syncing}
+              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] disabled:opacity-60 text-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+              title={lang === 'ru' ? 'Синхронизировать данные' : 'Sync data'}
+            >
+              <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
             </button>
 
             <button
@@ -845,6 +963,17 @@ const App: React.FC = () => {
         <UserProfileModal 
           isOpen={isProfileOpen} 
           onClose={() => setIsProfileOpen(false)}
+          onSave={async (profile) => {
+            const api = getDbApi();
+            if (api) {
+              await api.setUserProfile(profile);
+            }
+          }}
+          autoSync={autoSync}
+          onAutoSyncChange={(value) => {
+            setAutoSync(value);
+            localStorage.setItem('lumina_auto_sync', String(value));
+          }}
           lang={lang}
         />
       )}

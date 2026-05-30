@@ -4,10 +4,19 @@ import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
 import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, migrateFromLocalStorage } from './database.js';
 
+
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
 const isDev = process.env.NODE_ENV === 'development' || !app.isPackaged;
+
+// Глобальные обработчики ошибок для диагностики
+process.on('uncaughtException', (err) => {
+  console.error('[LuminaBooks] Uncaught exception:', err);
+});
+process.on('unhandledRejection', (reason) => {
+  console.error('[LuminaBooks] Unhandled rejection:', reason);
+});
 
 let mainWindow: BrowserWindow | null = null;
 let tray: Tray | null = null;
@@ -42,10 +51,21 @@ if (!gotTheLock) {
   });
 
   // Этот метод будет вызван когда Electron закончит инициализацию
-  app.whenReady().then(() => {
-    // Инициализируем БД
-    initDatabase();
-    registerIpcHandlers();
+  app.whenReady().then(async () => {
+    try {
+      // Инициализируем БД
+      initDatabase();
+      registerIpcHandlers();
+
+      // Запускаем HTTP сервер с динамическим импортом (чтобы не блокировать запуск)
+      let serverInfo: { serverUrl: string } | null = null;
+      try {
+        const serverModule = await import('./server.js');
+        serverInfo = await serverModule.startServer(3456, isDev);
+      } catch (err) {
+        console.error('[LuminaBooks Server] Failed to start HTTP server:', err);
+      }
+      ipcMain.handle('server:getUrl', () => serverInfo?.serverUrl ?? '');
     
     Menu.setApplicationMenu(null);
     
@@ -64,6 +84,9 @@ if (!gotTheLock) {
         app.dock.show();
       }
     });
+    } catch (err) {
+      console.error('[LuminaBooks] Fatal error during initialization:', err);
+    }
   });
 
   // Выйти когда все окна закрыты - не закрываем приложение, сворачиваем в трей
