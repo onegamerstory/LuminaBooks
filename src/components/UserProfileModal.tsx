@@ -7,6 +7,7 @@ interface UserProfile {
   nickname: string;
   photoUrl: string;
   defaultCoverUrl: string;
+  achievements?: string[];
 }
 
 interface SettingsModalProps {
@@ -25,7 +26,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   const [profile, setProfile] = useState<UserProfile>({
     nickname: '',
     photoUrl: '',
-    defaultCoverUrl: ''
+    defaultCoverUrl: '',
+    achievements: []
   });
 
   const PROFILE_STORAGE_KEY = 'lumina_user_profile';
@@ -75,8 +77,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   };
 
   const handleSave = async () => {
-    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
-    await onSave(profile);
+    const saved = localStorage.getItem(PROFILE_STORAGE_KEY);
+    let existingAchievements: string[] = [];
+    if (saved) {
+      try { const p = JSON.parse(saved); existingAchievements = p.achievements || []; } catch {}
+    }
+    const profileToSave = { ...profile, achievements: existingAchievements };
+    localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profileToSave));
+    await onSave(profileToSave);
     onClose();
   };
 

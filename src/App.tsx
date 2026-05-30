@@ -43,6 +43,7 @@ const App: React.FC = () => {
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [achievementQueue, setAchievementQueue] = useState<AchievementNotificationItem[]>([]);
   const achievementQueueRef = useRef<AchievementNotificationItem[]>([]);
+  const notifiedAchievementsRef = useRef<Set<string>>(new Set());
   const [confirmationModal, setConfirmationModal] = useState<{
     isOpen: boolean;
     title: string;
@@ -67,6 +68,34 @@ const App: React.FC = () => {
   }
 
   const syncDataFromApi = useCallback(async (api: ElectronDBAPI) => {
+    // Профиль загружаем первым, чтобы ref с ачивками был заполнен
+    // до того, как setBooks вызовет ререндер и эффект проверки ачивок
+    try {
+      const profile = await api.getUserProfile();
+      if (profile) {
+        const dbAchievements = new Set(profile.achievements || []);
+
+        // Подхватываем ачивки из БД (от других устройств)
+        for (const id of dbAchievements) {
+          notifiedAchievementsRef.current.add(id);
+        }
+
+        // Сохраняем в БД ачивки, которые есть в ref, но ещё не в БД
+        const unsaved = [...notifiedAchievementsRef.current].filter(id => !dbAchievements.has(id));
+        if (unsaved.length > 0) {
+          profile.achievements = [...notifiedAchievementsRef.current];
+          await api.setUserProfile(profile);
+        }
+
+        localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
+        if (profile.defaultCoverUrl) {
+          setDefaultCoverUrl(profile.defaultCoverUrl);
+        }
+      }
+    } catch (e) {
+      console.error("Failed to load profile", e);
+    }
+
     const loadedBooks = await api.getAllBooks();
     if (loadedBooks && loadedBooks.length > 0) {
       const normalizedBooks = loadedBooks.map((book: Book) => ({
@@ -87,14 +116,6 @@ const App: React.FC = () => {
       setFranchises(loadedFranchises);
     } else {
       setFranchises([]);
-    }
-
-    const profile = await api.getUserProfile();
-    if (profile) {
-      localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
-      if (profile.defaultCoverUrl) {
-        setDefaultCoverUrl(profile.defaultCoverUrl);
-      }
     }
   }, []);
 
@@ -330,6 +351,16 @@ const App: React.FC = () => {
         const savedDefaultCoverUrl = localStorage.getItem('lumina_default_cover_url');
         if (savedDefaultCoverUrl) setDefaultCoverUrl(savedDefaultCoverUrl);
       }
+
+      // Если ref пуст — инициализируем из localStorage (standalone fallback)
+      if (notifiedAchievementsRef.current.size === 0) {
+        try {
+          const saved = JSON.parse(localStorage.getItem('lumina_achievements_unlocked') || '[]');
+          if (Array.isArray(saved)) {
+            notifiedAchievementsRef.current = new Set(saved);
+          }
+        } catch {}
+      }
     };
 
     loadData();
@@ -346,7 +377,7 @@ const App: React.FC = () => {
       } catch {}
     };
 
-    const interval = setInterval(poll, 8000);
+    const interval = setInterval(poll, 30000);
 
     const onFocus = () => poll();
     window.addEventListener('focus', onFocus);
@@ -378,35 +409,47 @@ const App: React.FC = () => {
     }
   }, [franchises]);
 
-  // Проверка достижений
+  // Проверка достижений (ref — единственный источник истины)
   useEffect(() => {
-    const savedNotified = new Set<string>(
-      JSON.parse(localStorage.getItem('lumina_achievements_unlocked') || '[]')
-    );
+    const checkAchievements = async () => {
+      const unlockedIds = getUnlockedAchievementIds(books);
+      const alreadyQueuedIds = new Set(achievementQueueRef.current.map(item => item.achievementId));
+      const newIds = unlockedIds.filter(id => !notifiedAchievementsRef.current.has(id) && !alreadyQueuedIds.has(id));
 
-    const unlockedIds = getUnlockedAchievementIds(books);
-    const alreadyQueuedIds = new Set(achievementQueueRef.current.map(item => item.achievementId));
-    const newIds = unlockedIds.filter(id => !savedNotified.has(id) && !alreadyQueuedIds.has(id));
+      if (newIds.length > 0) {
+        const items: AchievementNotificationItem[] = newIds.map((id, i) => {
+          const def = ALL_ACHIEVEMENTS.find(a => a.id === id)!;
+          return {
+            id: `${id}_${Date.now()}_${i}`,
+            achievementId: id,
+            title: def.title[lang],
+            desc: def.desc[lang],
+          };
+        });
+        setAchievementQueue(prev => {
+          const updated = [...prev, ...items];
+          achievementQueueRef.current = updated;
+          return updated;
+        });
 
-    if (newIds.length > 0) {
-      const items: AchievementNotificationItem[] = newIds.map((id, i) => {
-        const def = ALL_ACHIEVEMENTS.find(a => a.id === id)!;
-        return {
-          id: `${id}_${Date.now()}_${i}`,
-          achievementId: id,
-          title: def.title[lang],
-          desc: def.desc[lang],
-        };
-      });
-      setAchievementQueue(prev => {
-        const updated = [...prev, ...items];
-        achievementQueueRef.current = updated;
-        return updated;
-      });
+        newIds.forEach(id => notifiedAchievementsRef.current.add(id));
 
-      const updatedNotified = new Set([...savedNotified, ...newIds]);
-      localStorage.setItem('lumina_achievements_unlocked', JSON.stringify([...updatedNotified]));
-    }
+        // Если есть БД — сохраняем (с await, чтобы запись гарантированно завершилась)
+        const api = getDbApi();
+        if (api) {
+          try {
+            const profile = await api.getUserProfile();
+            profile.achievements = [...notifiedAchievementsRef.current];
+            await api.setUserProfile(profile);
+          } catch (e) {
+            console.error("Failed to save achievements to DB profile", e);
+          }
+        } else {
+          localStorage.setItem('lumina_achievements_unlocked', JSON.stringify([...notifiedAchievementsRef.current]));
+        }
+      }
+    };
+    checkAchievements();
   }, [books, lang]);
 
   const handleDismissAchievement = (id: string) => {
@@ -596,7 +639,7 @@ const App: React.FC = () => {
     const importApi = getDbApi();
     // Если в импорте есть информация о пользователе, обновляем
     if (userProfile && importApi) {
-      await importApi.setUserProfile(userProfile);
+      await importApi.setUserProfile({ ...userProfile, achievements: userProfile.achievements || [] });
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
     }
 
@@ -949,7 +992,7 @@ const App: React.FC = () => {
           onSave={async (profile) => {
             const api = getDbApi();
             if (api) {
-              await api.setUserProfile(profile);
+              await api.setUserProfile({ ...profile, achievements: profile.achievements || [] });
             }
           }}
           autoSync={autoSync}

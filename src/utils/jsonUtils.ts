@@ -5,6 +5,7 @@ export interface UserProfile {
   nickname: string;
   photoUrl: string;
   defaultCoverUrl: string;
+  achievements?: string[];
 }
 
 export interface ExportData {

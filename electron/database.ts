@@ -39,6 +39,7 @@ export interface UserProfile {
   nickname: string;
   photoUrl: string;
   defaultCoverUrl: string;
+  achievements: string[];
 }
 
 export function initDatabase(): void {
@@ -94,7 +95,14 @@ export function initDatabase(): void {
     // Column already exists
   }
 
-  db.prepare(`INSERT OR IGNORE INTO user_profile (id, nickname, photoUrl, defaultCoverUrl) VALUES (1, '', '', '')`).run();
+  // Migration: add achievements column to user_profile if missing
+  try {
+    db.exec(`ALTER TABLE user_profile ADD COLUMN achievements TEXT DEFAULT '[]'`);
+  } catch {
+    // Column already exists
+  }
+
+  db.prepare(`INSERT OR IGNORE INTO user_profile (id, nickname, photoUrl, defaultCoverUrl, achievements) VALUES (1, '', '', '', '[]')`).run();
 }
 
 // --- Book CRUD ---
@@ -168,17 +176,22 @@ export function deleteFranchise(id: string): void {
 
 export function getUserProfile(): UserProfile {
   const row = db.prepare('SELECT * FROM user_profile WHERE id = 1').get() as any;
+  let achievements: string[] = [];
+  try {
+    achievements = JSON.parse(row?.achievements || '[]');
+  } catch { /* ignore */ }
   return {
     nickname: row?.nickname || '',
     photoUrl: row?.photoUrl || '',
     defaultCoverUrl: row?.defaultCoverUrl || '',
+    achievements,
   };
 }
 
 export function setUserProfile(profile: UserProfile): void {
   db.prepare(`
-    UPDATE user_profile SET nickname = ?, photoUrl = ?, defaultCoverUrl = ? WHERE id = 1
-  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl);
+    UPDATE user_profile SET nickname = ?, photoUrl = ?, defaultCoverUrl = ?, achievements = ? WHERE id = 1
+  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl, JSON.stringify(profile.achievements || []));
 }
 
 // --- Migration ---

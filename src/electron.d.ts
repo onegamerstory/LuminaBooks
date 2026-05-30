@@ -9,8 +9,8 @@ export interface ElectronDBAPI {
   updateFranchise: (franchise: any) => Promise<any>;
   deleteFranchise: (id: string) => Promise<void>;
 
-  getUserProfile: () => Promise<{ nickname: string; photoUrl: string; defaultCoverUrl: string }>;
-  setUserProfile: (profile: { nickname: string; photoUrl: string; defaultCoverUrl: string }) => Promise<void>;
+  getUserProfile: () => Promise<{ nickname: string; photoUrl: string; defaultCoverUrl: string; achievements: string[] }>;
+  setUserProfile: (profile: { nickname: string; photoUrl: string; defaultCoverUrl: string; achievements: string[] }) => Promise<void>;
 
   migrate: () => Promise<{ books: number; franchises: number }>;
 }
