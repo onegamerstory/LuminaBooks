@@ -9,14 +9,14 @@ import StatisticsView from './components/StatisticsView';
 import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
-import UserProfileModal from './components/UserProfileModal';
+import SettingsModal from './components/UserProfileModal';
 import Toast, { ToastMessage } from './components/Toast';
 import AchievementNotification from './components/AchievementNotification';
 import { getUnlockedAchievementIds, ALL_ACHIEVEMENTS, AchievementNotificationItem } from './utils/achievements';
 import ConfirmationModal from './components/ConfirmationModal';
 import { UserProfile } from './utils/jsonUtils';
 import { recordStatusChange, getCurrentBookStatus, migrateAllBooksStatusHistory, regenerateStatusHistoryFromDates } from './utils/statusHistoryUtils';
-import { Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link, Globe, RefreshCw } from 'lucide-react';
+import { Calendar, Plus, Library, Languages, BarChart3, Zap, Settings, Link, RefreshCw } from 'lucide-react';
 import { uuid } from './uuid';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
@@ -789,17 +789,6 @@ const App: React.FC = () => {
             <img src={appIcon} alt="LuminaBooks" className="w-10 h-10" />
             <div>
               <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
-              {serverUrl && (
-                <button
-                  onClick={() => navigator.clipboard.writeText(serverUrl)}
-                  className="flex items-center gap-1 text-xs text-[#6B9071] hover:text-[#59785E] transition-colors cursor-pointer"
-                  title={lang === 'ru' ? 'Нажмите, чтобы скопировать адрес сервера' : 'Click to copy server address'}
-                >
-                  <Globe size={12} />
-                  <span className="hidden sm:inline">{serverUrl}</span>
-                  <span className="sm:hidden">{serverUrl.replace(/https?:\/\//, '')}</span>
-                </button>
-              )}
             </div>
           </div>
 
@@ -885,7 +874,7 @@ const App: React.FC = () => {
             <button
               onClick={() => setIsProfileOpen(true)}
               className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
-              title={lang === 'ru' ? 'Профиль пользователя' : 'User profile'}
+              title={lang === 'ru' ? 'Настройки' : 'Settings'}
             >
               <Settings size={18} />
             </button>
@@ -954,7 +943,7 @@ const App: React.FC = () => {
       )}
 
       {isProfileOpen && (
-        <UserProfileModal 
+        <SettingsModal 
           isOpen={isProfileOpen} 
           onClose={() => setIsProfileOpen(false)}
           onSave={async (profile) => {
@@ -968,6 +957,7 @@ const App: React.FC = () => {
             setAutoSync(value);
             localStorage.setItem('lumina_auto_sync', String(value));
           }}
+          serverUrl={serverUrl}
           lang={lang}
         />
       )}

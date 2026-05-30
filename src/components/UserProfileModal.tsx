@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User } from 'lucide-react';
+import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload } from 'lucide-react';
 import { translations } from '../utils/translations';
+import { version } from '../../package.json';
 
 interface UserProfile {
   nickname: string;
@@ -8,16 +9,17 @@ interface UserProfile {
   defaultCoverUrl: string;
 }
 
-interface UserProfileModalProps {
+interface SettingsModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (profile: UserProfile) => Promise<void>;
   autoSync: boolean;
   onAutoSyncChange: (value: boolean) => void;
+  serverUrl: string;
   lang: 'en' | 'ru';
 }
 
-const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, lang }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, serverUrl, lang }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<UserProfile>({
@@ -45,7 +47,7 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
         }));
       }
     }
-  }, []);
+  }, [isOpen]);
 
   if (!isOpen) return null;
 
@@ -68,25 +70,26 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
     fileInputRef.current?.click();
   };
 
+  const handleDeletePhoto = () => {
+    setProfile(prev => ({ ...prev, photoUrl: '' }));
+  };
+
   const handleSave = async () => {
     localStorage.setItem(PROFILE_STORAGE_KEY, JSON.stringify(profile));
     await onSave(profile);
     onClose();
   };
 
-  const handleClearCover = () => {
-    setProfile(prev => ({
-      ...prev,
-      defaultCoverUrl: ''
-    }));
+  const handleCopyUrl = () => {
+    navigator.clipboard.writeText(serverUrl);
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-md shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-        <div className="border-b px-6 py-4 flex items-center justify-between sticky top-0 bg-white">
+      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="border-b px-8 py-5 flex items-center justify-between sticky top-0 bg-white">
           <h2 className="text-xl font-bold font-serif text-[#1E2920]">
-            {t.userProfile}
+            {lang === 'ru' ? 'Настройки' : 'Settings'}
           </h2>
           <button 
             onClick={onClose} 
@@ -97,37 +100,46 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
           </button>
         </div>
 
-        <div className="bg-white p-6 space-y-6">
-          {/* Profile Photo Section */}
-          <div className="text-center">
-            <label className="block text-sm font-semibold text-slate-700 mb-3">
-              {t.profilePhoto}
-            </label>
-            
-            <button
-              onClick={handlePhotoClick}
-              className="flex justify-center mx-auto mb-4 group cursor-pointer"
-              type="button"
-              title={lang === 'ru' ? 'Нажмите для загрузки фото' : 'Click to upload photo'}
-            >
-              <div className="w-24 h-24 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-2 border-[#6B9071] group-hover:border-[#59785E] group-hover:bg-slate-300 transition-all">
-                {profile.photoUrl ? (
-                  <img 
-                    src={profile.photoUrl} 
-                    alt="Profile"
-                    className="w-full h-full object-cover"
-                    onError={(e) => {
-                      e.currentTarget.style.display = 'none';
-                      e.currentTarget.nextElementSibling?.removeAttribute('style');
-                    }}
-                  />
-                ) : null}
-                {!profile.photoUrl && (
-                  <User size={40} className="text-slate-400 group-hover:text-slate-600 transition-colors" />
-                )}
+        <div className="p-8 space-y-0">
+          {/* Section 1: Avatar */}
+          <div className="py-6">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-48">
+                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
               </div>
-            </button>
-
+              <div className="flex items-center gap-4 flex-1 justify-center">
+                <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-2 border-[#6B9071] flex-shrink-0">
+                  {profile.photoUrl ? (
+                    <img 
+                      src={profile.photoUrl} 
+                      alt="Profile"
+                      className="w-full h-full object-cover"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  ) : (
+                    <User size={32} className="text-slate-400" />
+                  )}
+                </div>
+                <div className="flex flex-col gap-2">
+                  <button
+                    onClick={handlePhotoClick}
+                    className="px-4 py-1.5 border-2 border-[#6B9071] text-[#6B9071] text-sm rounded-lg hover:bg-[#6B9071] hover:text-white transition-colors flex items-center gap-1.5"
+                  >
+                    <Upload size={16} />
+                    {lang === 'ru' ? 'Загрузить фото' : 'Upload photo'}
+                  </button>
+                  <button
+                    onClick={handleDeletePhoto}
+                    className="px-4 py-1.5 bg-slate-100 text-slate-600 text-sm rounded-lg hover:bg-slate-200 transition-colors"
+                  >
+                    {lang === 'ru' ? 'Удалить' : 'Delete'}
+                  </button>
+                </div>
+              </div>
+            </div>
             <input 
               ref={fileInputRef}
               type="file" 
@@ -135,87 +147,142 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
               onChange={handlePhotoSelect}
               className="hidden"
             />
-            
-            <p className="text-xs text-slate-500 text-center">
-              {lang === 'ru' ? 'Нажмите на фото для загрузки' : 'Click photo to upload'}
-            </p>
           </div>
 
-          {/* Nickname Section */}
-          <div>
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              {t.nickname}
-            </label>
-            <input 
-              type="text" 
-              placeholder={t.enterNickname}
-              value={profile.nickname}
-              onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
-            />
-          </div>
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-          {/* Default Cover Settings Section */}
-          <div className="border-t pt-4">
-            <label className="block text-sm font-semibold text-slate-700 mb-2">
-              {t.defaultCoverSettings}
-            </label>
-            <input 
-              type="text" 
-              placeholder={t.enterCoverUrl}
-              value={profile.defaultCoverUrl}
-              onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
-              className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
-            />
-            
-            {profile.defaultCoverUrl && (
-              <div className="mt-3 p-3 rounded-lg bg-slate-50 border border-slate-200">
-                <p className="text-xs text-slate-600 mb-2">{t.preview}:</p>
-                <img 
-                  src={profile.defaultCoverUrl} 
-                  alt="Cover preview"
-                  className="w-20 h-28 object-cover rounded"
-                  onError={(e) => {
-                    e.currentTarget.src = 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 60 80"%3E%3Crect fill="%23e2e8f0" width="60" height="80"/%3E%3Ctext x="50%25" y="50%25" font-size="12" fill="%23cbd5e1" text-anchor="middle" dy=".3em"%3EError%3C/text%3E%3C/svg%3E';
-                  }}
+          {/* Section 2: Nickname */}
+          <div className="py-6">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-48">
+                <div className="flex items-center gap-2">
+                  <User size={16} className="text-slate-500" />
+                  <p className="text-sm font-semibold text-slate-700">{t.nickname}</p>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Ваше имя в приложении' : 'Your name in the app'}</p>
+              </div>
+              <div className="flex-1">
+                <input 
+                  type="text" 
+                  placeholder={t.enterNickname}
+                  value={profile.nickname}
+                  onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
                 />
               </div>
-            )}
+            </div>
           </div>
 
-          {/* Auto Sync Toggle */}
-          <div className="border-t pt-4">
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Section 3: Default Cover */}
+          <div className="py-6">
+            <div className="flex gap-6">
+              <div className="flex-shrink-0 w-48">
+                <div className="flex items-center gap-2">
+                  <Book size={16} className="text-slate-500" />
+                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Обложка по умолчанию' : 'Default Cover'}</p>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Обложка будет использоваться для книг без обложки' : 'Cover will be used for books without a cover'}</p>
+              </div>
+              <div className="flex-1">
+                <div className="relative">
+                  <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <input 
+                    type="text" 
+                    placeholder={lang === 'ru' ? 'Введите URL обложки...' : 'Enter cover URL...'}
+                    value={profile.defaultCoverUrl}
+                    onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
+                    className="w-full pl-10 pr-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                  />
+                </div>
+                {profile.defaultCoverUrl && (
+                  <div className="mt-3 flex justify-end">
+                    <img 
+                      src={profile.defaultCoverUrl} 
+                      alt="Cover preview"
+                      className="w-16 h-24 object-cover rounded-lg border border-slate-200"
+                      onError={(e) => {
+                        e.currentTarget.style.display = 'none';
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Section 4: Auto Sync */}
+          <div className="py-6">
             <div className="flex items-center justify-between">
-              <div>
-                <label className="block text-sm font-semibold text-slate-700 mb-1">
-                  {lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}
-                </label>
-                <p className="text-xs text-slate-500">
-                  {lang === 'ru'
-                    ? 'Автоматически обновлять данные с других устройств'
-                    : 'Automatically sync data from other devices'}
-                </p>
+              <div className="flex-shrink-0 w-48">
+                <div className="flex items-center gap-2">
+                  <RefreshCw size={16} className="text-slate-500" />
+                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}</p>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Автоматически обновлять данные с другого устройства' : 'Automatically sync data from other devices'}</p>
               </div>
-              <button
-                type="button"
-                role="switch"
-                aria-checked={autoSync}
-                onClick={() => onAutoSyncChange(!autoSync)}
-                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${autoSync ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
-              >
-                <span
-                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
-                />
-              </button>
+              <div className="flex-shrink-0">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={autoSync}
+                  onClick={() => onAutoSyncChange(!autoSync)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${autoSync ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Section 5: Version & Browser */}
+          <div className="py-6 space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex-shrink-0">
+                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Версия приложения' : 'App Version'}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <p className="text-sm text-slate-600">{version}</p>
+              </div>
+            </div>
+            <div className="flex items-center justify-between">
+              <div className="flex-shrink-0">
+                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Доступно в браузере' : 'Available in browser'}</p>
+              </div>
+              <div className="flex-shrink-0">
+                {serverUrl ? (
+                  <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
+                      <Globe size={14} className="text-[#6B9071]" />
+                      <span>{serverUrl}</span>
+                    </div>
+                    <button
+                      onClick={handleCopyUrl}
+                      className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-500 transition-colors"
+                      title={lang === 'ru' ? 'Копировать URL' : 'Copy URL'}
+                    >
+                      <Copy size={16} />
+                    </button>
+                  </div>
+                ) : (
+                  <p className="text-sm text-slate-400">{lang === 'ru' ? 'Сервер не запущен' : 'Server not running'}</p>
+                )}
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Action Buttons */}
-        <div className="px-6 pb-6 pt-4 bg-white">
+        <div className="px-8 pb-8 pt-2 bg-white">
           <button
             onClick={handleSave}
-            className="w-full px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
+            className="w-full px-4 py-2.5 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
           >
             {t.save}
           </button>
@@ -225,4 +292,4 @@ const UserProfileModal: React.FC<UserProfileModalProps> = ({ isOpen, onClose, on
   );
 };
 
-export default UserProfileModal;
+export default SettingsModal;
