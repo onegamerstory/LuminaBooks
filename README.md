@@ -72,6 +72,12 @@
 
 <img width="1304" height="609" alt="image" src="https://github.com/user-attachments/assets/7e09530e-9b7c-48b3-b334-59f5ba708f3a" />
 
+## Настройки
+
+Окно настроек, где можно указать имя, аватар, обложку по умолчанию, а также включить авто-синхронизацию (если пользуетесь несколькими версиями приложениями)  
+
+<img width="651" height="847" alt="image" src="https://github.com/user-attachments/assets/d296f22b-6dda-4bdf-b665-8121a10ec097" />
+
 # ПК-приложение и браузерная версия
 
 ## Как это работает?
@@ -80,7 +86,7 @@
 2. "Под капотом" вместе с этим запускается сервер, который позволяет нам подключиться к этому ПК через браузер
 3. Берете, например, macbook и, находясь в той же сети, в браузере переходите по ссылке, указанной в меню приложения
 
-<img width="541" height="195" alt="image" src="https://github.com/user-attachments/assets/da00bd57-4a92-42cd-b11e-a2424b4d48d0" />
+<img width="655" height="219" alt="image" src="https://github.com/user-attachments/assets/6299e2a7-4502-4aaa-9b6d-28f4b1ac002c" />
 
 
 # Сборка Desktop приложения из исходников
