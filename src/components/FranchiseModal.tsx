@@ -323,7 +323,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                 placeholder={lang === 'ru' ? 'Поиск по названию или автору...' : 'Search by title or author...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                className="w-full pl-10 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded focus:ring-2 focus:ring-[#6B9071] outline-none"
               />
             </div>
 
@@ -337,7 +337,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                     key={status}
                     type="button"
                     onClick={() => setStatusFilter(status)}
-                    className={`px-3 py-1 rounded-full text-xs font-semibold transition-all ${
+                    className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
                       isActive
                         ? isAll
                           ? 'bg-[#6B9071] text-white'
@@ -387,7 +387,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                               </p>
                             </td>
                             <td className="py-2 px-2">
-                              <span className={`inline-block px-2 py-0.5 rounded-full text-xs font-semibold ${statusColors[book.status]}`}>
+                              <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${statusColors[book.status]}`}>
                                 {getStatusLabel(t, book.status)}
                               </span>
                             </td>

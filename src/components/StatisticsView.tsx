@@ -292,7 +292,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         <div className="h-full bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB] relative min-w-0">
           <h3 className="text-lg font-semibold text-[#1E2920] mb-4 flex items-center gap-3">
             {lang === 'ru' ? 'Достижения' : 'Achievements'}
-            <span className="text-sm font-medium text-[#4A6B50] bg-[#C8D6CB]/50 px-2.5 py-0.5 rounded-full">
+            <span className="text-sm font-medium text-[#4A6B50] bg-[#C8D6CB]/50 px-2.5 py-0.5 rounded">
               {unlockedIds.size} {lang === 'ru' ? 'из' : 'of'} {ALL_ACHIEVEMENTS.length}
             </span>
           </h3>
