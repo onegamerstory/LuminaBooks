@@ -15,7 +15,7 @@ import FilterPanel from './FilterPanel';
 import ViewModeButtons from './ViewModeButtons';
 import EmptyState from './EmptyState';
 import BookTableRow from './BookTableRow';
-import { Search, Dices, Upload, Download } from 'lucide-react';
+import { Search, Dices, Upload, Download, Plus } from 'lucide-react';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../../utils/jsonUtils';
 import { translations } from '../../utils/translations';
 
@@ -34,6 +34,7 @@ interface CatalogViewProps {
   onAddToQueue: (book: Book) => void;
   onStartReading: (book: Book) => void;
   onImport: (books: Book[], userProfile?: UserProfile, franchises?: Franchise[]) => void;
+  onAddBook: () => void;
   lang: 'en' | 'ru';
 }
 
@@ -45,6 +46,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
   onAddToQueue, 
   onStartReading, 
   onImport, 
+  onAddBook, 
   lang 
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -350,6 +352,14 @@ const CatalogView: React.FC<CatalogViewProps> = ({
             lang={lang}
           />
 
+          {/* Add book button */}
+          <button
+            onClick={onAddBook}
+            className="flex items-center gap-2 bg-[#6B9071] hover:bg-[#59785E] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+          >
+            <Plus size={18} />
+            <span className="hidden sm:inline">{t.addBook}</span>
+          </button>
         </div>
       </div>
 

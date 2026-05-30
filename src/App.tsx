@@ -890,16 +890,6 @@ const App: React.FC = () => {
               <Settings size={18} />
             </button>
 
-            <button
-              onClick={() => {
-                setEditingBook(undefined);
-                setIsModalOpen(true);
-              }}
-              className="flex items-center gap-2 bg-[#6B9071] hover:bg-[#59785E] text-white px-4 py-2 rounded-lg text-sm font-semibold transition-colors shadow-lg shadow-[#59785E]/50"
-            >
-              <Plus size={18} />
-              <span className="hidden sm:inline">{t.addBook}</span>
-            </button>
           </div>
         </div>
       </header>
@@ -915,6 +905,10 @@ const App: React.FC = () => {
             onStartReading={handleStartReadingBook}
             onImport={handleImport}
             lang={lang}
+            onAddBook={() => {
+              setEditingBook(undefined);
+              setIsModalOpen(true);
+            }}
           />
         ) : activeView === 'collections' ? (
           <FranchiseView 
