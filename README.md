@@ -10,12 +10,14 @@
 
 - React + Vite + Electron
 - Данные профиля и книги со всей информацией сохраняются в БД SQLite на ПК
+- Интеграция с Google Books API
 - Windows-платформа (+ доступ из любого браузера в локальной сети, если запущено основное приложение)
 - Нет мобильной версии (ни отдельного приложения, ни браузерной версии)
 
 # Функциональные возможности
 
 - Ведение каталога книг
+- Поиск книги по названию в Google Books ([необходим API-ключ](#как-получить-api-ключ))
 - Трекинг сессий чтения для каждой книги
 - Предложение случайной книги
 - Создание коллекций книг
@@ -87,6 +89,51 @@
 3. Берете, например, macbook и, находясь в той же сети, в браузере переходите по ссылке, указанной в меню приложения
 
 <img width="655" height="219" alt="image" src="https://github.com/user-attachments/assets/6299e2a7-4502-4aaa-9b6d-28f4b1ac002c" />
+
+# Google Books API
+
+Приложение поддерживает поиск книг в Google Books, чтобы было удобнее и быстрее добавлять книги в вашу библиотеку.
+Вы вводите название книги и нажимаете "Поиск", приложение запрашивает Google Books и подставляет полной название книги, автора, год выпуска и количество страниц (оно может быть разным в зависимости от издания).
+
+<img width="653" height="570" alt="image" src="https://github.com/user-attachments/assets/39fbd287-f488-433a-88fc-d5e9ddef8c25" />
+
+Для того, чтобы этот функционал работал, необходимо выпустить свой API-ключ
+
+## Как получить API-ключ
+
+Необходимо зарегистрировать Google Account или использовать существующий.
+Далее:
+
+1. Переходим на [Google Cloud Console](https://console.cloud.google.com/)
+
+2. Вверху нажимаем `Select project` → `New Project` и называем, к примеру, `LuminaBooks`. 
+
+<img width="499" height="123" alt="image" src="https://github.com/user-attachments/assets/3439835c-4f09-4599-9bae-add850f8a021" />
+<img width="799" height="135" alt="image" src="https://github.com/user-attachments/assets/c50b9450-8a06-4660-b701-6be27827c8a5" />
+
+3. Нужно дождаться создания проекта и затем еще раз выбрать его наверху
+
+<img width="499" height="123" alt="image" src="https://github.com/user-attachments/assets/c5e4ff91-eeba-41bf-9c11-1dfeacbd39a3" />
+
+4. Открываем [Google Books API Page](https://console.cloud.google.com/apis/library/books.googleapis.com) и нажимаем `Enable`
+
+<img width="653" height="258" alt="image" src="https://github.com/user-attachments/assets/1d47855f-8ef2-4c8c-940e-5454dc14a1c5" />
+
+5. Создаем ключ. Переходим `APIs & Services` → `Credentials` → `Create Credentials` → `API key`
+
+<img width="1079" height="445" alt="image" src="https://github.com/user-attachments/assets/43688515-e263-46c0-bcff-c8c2fa61e44f" />
+
+В открывшемся окне заполняем имя ключ (можно оставить по умолчанию) и самое главное в графе `Select API restrictions` выбираем Books API.
+
+<img width="582" height="891" alt="image" src="https://github.com/user-attachments/assets/f473636f-c169-4ded-8c66-2539c7a71691" />
+
+После этого Google покажем вам ключ:
+
+<img width="586" height="169" alt="image" src="https://github.com/user-attachments/assets/ac6ced9b-9b66-41af-8dc1-6741715ca2a6" />
+
+6. Копируем его, вставляем в настройки приложения и сохраняем
+
+<img width="648" height="248" alt="image" src="https://github.com/user-attachments/assets/6ca9a46e-0a94-4e15-8c81-1c6aa25a0489" />
 
 
 # Сборка Desktop приложения из исходников
