@@ -36,6 +36,7 @@ const App: React.FC = () => {
   const [lang, setLang] = useState<'en' | 'ru'>('ru');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
   const [defaultCoverUrl, setDefaultCoverUrl] = useState('');
+  const [googleApiKey, setGoogleApiKey] = useState('');
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState('');
   const [autoSync, setAutoSync] = useState(() => localStorage.getItem('lumina_auto_sync') === 'true');
@@ -90,6 +91,9 @@ const App: React.FC = () => {
         localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
         if (profile.defaultCoverUrl) {
           setDefaultCoverUrl(profile.defaultCoverUrl);
+        }
+        if (profile.googleApiKey) {
+          setGoogleApiKey(profile.googleApiKey);
         }
       }
     } catch (e) {
@@ -639,7 +643,7 @@ const App: React.FC = () => {
     const importApi = getDbApi();
     // Если в импорте есть информация о пользователе, обновляем
     if (userProfile && importApi) {
-      await importApi.setUserProfile({ ...userProfile, achievements: userProfile.achievements || [] });
+      await importApi.setUserProfile({ ...userProfile, achievements: userProfile.achievements || [], googleApiKey: '' });
       localStorage.setItem('lumina_user_profile', JSON.stringify(userProfile));
     }
 
@@ -982,6 +986,15 @@ const App: React.FC = () => {
           defaultCoverUrl={defaultCoverUrl}
           franchises={franchises}
           onFranchisesUpdated={handleAddFranchise}
+          googleApiKey={googleApiKey}
+          onLocalSearch={async (title, author) => {
+            const api = getDbApi();
+            return api?.searchBooksDictionary?.(title, author) ?? [];
+          }}
+          onSaveToDictionary={async (entry) => {
+            const api = getDbApi();
+            await api?.saveToBooksDictionary?.(entry);
+          }}
         />
       )}
 
@@ -994,6 +1007,7 @@ const App: React.FC = () => {
             if (api) {
               await api.setUserProfile({ ...profile, achievements: profile.achievements || [] });
             }
+            setGoogleApiKey(profile.googleApiKey || '');
           }}
           autoSync={autoSync}
           onAutoSyncChange={(value) => {

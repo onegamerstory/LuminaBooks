@@ -83,4 +83,21 @@ export const httpApi: ElectronDBAPI = {
   migrate: async () => {
     return { books: 0, franchises: 0 };
   },
+
+  searchBooksDictionary: async (title: string, author?: string) => {
+    const params = new URLSearchParams({ title });
+    if (author) params.set('author', author);
+    const res = await fetch(`${BASE}/api/books-dictionary/search?${params}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+
+  saveToBooksDictionary: async (entry: any) => {
+    const res = await fetch(`${BASE}/api/books-dictionary`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(entry),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+  },
 };

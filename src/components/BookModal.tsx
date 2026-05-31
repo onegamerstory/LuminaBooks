@@ -9,7 +9,8 @@ import dayjs from 'dayjs';
 import BookRatingModal from './BookRatingModal';
 import FranchiseSelectModal from './FranchiseSelectModal.tsx';
 import { calculateBookTotalHours } from '../utils/dateUtils';
-import { searchBookOnOpenLibrary } from '../utils/openLibraryApi';
+import { searchBook } from '../utils/bookSearch';
+import type { BookDictEntry } from '../electron.d';
 import { uuid } from '../uuid';
 
 interface BookModalProps {
@@ -21,6 +22,9 @@ interface BookModalProps {
   franchises?: Franchise[];
   lang: 'en' | 'ru';
   defaultCoverUrl?: string;
+  googleApiKey?: string;
+  onLocalSearch?: (title: string, author?: string) => Promise<BookDictEntry[]>;
+  onSaveToDictionary?: (entry: BookDictEntry) => Promise<void>;
 }
 
 const BookModal: React.FC<BookModalProps> = ({ 
@@ -31,7 +35,10 @@ const BookModal: React.FC<BookModalProps> = ({
   initialData, 
   franchises = [],
   lang, 
-  defaultCoverUrl = '' 
+  defaultCoverUrl = '',
+  googleApiKey = '',
+  onLocalSearch,
+  onSaveToDictionary,
 }) => {
   const t = translations[lang];
   const [formData, setFormData] = useState<Partial<Book>>({
@@ -193,8 +200,20 @@ const BookModal: React.FC<BookModalProps> = ({
     setIsSearching(true);
     setSearchMessage(null);
 
+    const searchLocal = async (title: string, author?: string) => {
+      if (onLocalSearch) {
+        return onLocalSearch(title, author);
+      }
+      return [];
+    };
+
     try {
-      const result = await searchBookOnOpenLibrary(formData.title, formData.author);
+      const result = await searchBook(
+        formData.title,
+        formData.author,
+        googleApiKey || undefined,
+        searchLocal,
+      );
 
       if (result) {
         setFormData(prev => ({
@@ -206,6 +225,17 @@ const BookModal: React.FC<BookModalProps> = ({
           totalPages: result.totalPages ?? undefined,
         }));
         setSearchMessage({ text: t.bookInfoFilled, type: 'success' });
+
+        if (result.source !== 'local' && onSaveToDictionary) {
+          onSaveToDictionary({
+            title: result.title,
+            author: result.author,
+            year: String(result.year),
+            coverUrl: result.coverUrl,
+            lang: result.lang || '',
+            source: result.source,
+          });
+        }
       } else {
         setSearchMessage({ text: t.bookNotFound, type: 'error' });
       }

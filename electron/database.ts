@@ -40,6 +40,7 @@ export interface UserProfile {
   photoUrl: string;
   defaultCoverUrl: string;
   achievements: string[];
+  googleApiKey: string;
 }
 
 export function initDatabase(): void {
@@ -47,6 +48,23 @@ export function initDatabase(): void {
   db = new Database(dbPath);
   db.pragma('journal_mode = WAL');
   db.pragma('foreign_keys = ON');
+
+  db.exec(`
+    CREATE TABLE IF NOT EXISTS books_dictionary (
+      id INTEGER PRIMARY KEY AUTOINCREMENT,
+      title TEXT NOT NULL,
+      author TEXT NOT NULL,
+      year TEXT DEFAULT '',
+      cover_url TEXT DEFAULT '',
+      lang TEXT DEFAULT '',
+      source TEXT DEFAULT '',
+      created_at TEXT DEFAULT (datetime('now'))
+    );
+  `);
+  try {
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_dict_title ON books_dictionary(title COLLATE NOCASE)`);
+    db.exec(`CREATE INDEX IF NOT EXISTS idx_dict_author ON books_dictionary(author COLLATE NOCASE)`);
+  } catch { /* indexes may already exist */ }
 
   db.exec(`
     CREATE TABLE IF NOT EXISTS books (
@@ -102,7 +120,14 @@ export function initDatabase(): void {
     // Column already exists
   }
 
-  db.prepare(`INSERT OR IGNORE INTO user_profile (id, nickname, photoUrl, defaultCoverUrl, achievements) VALUES (1, '', '', '', '[]')`).run();
+  // Migration: add googleApiKey column to user_profile if missing
+  try {
+    db.exec(`ALTER TABLE user_profile ADD COLUMN googleApiKey TEXT DEFAULT ''`);
+  } catch {
+    // Column already exists
+  }
+
+  db.prepare(`INSERT OR IGNORE INTO user_profile (id, nickname, photoUrl, defaultCoverUrl, achievements, googleApiKey) VALUES (1, '', '', '', '[]', '')`).run();
 }
 
 // --- Book CRUD ---
@@ -185,13 +210,14 @@ export function getUserProfile(): UserProfile {
     photoUrl: row?.photoUrl || '',
     defaultCoverUrl: row?.defaultCoverUrl || '',
     achievements,
+    googleApiKey: row?.googleApiKey || '',
   };
 }
 
 export function setUserProfile(profile: UserProfile): void {
   db.prepare(`
-    UPDATE user_profile SET nickname = ?, photoUrl = ?, defaultCoverUrl = ?, achievements = ? WHERE id = 1
-  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl, JSON.stringify(profile.achievements || []));
+    UPDATE user_profile SET nickname = ?, photoUrl = ?, defaultCoverUrl = ?, achievements = ?, googleApiKey = ? WHERE id = 1
+  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl, JSON.stringify(profile.achievements || []), profile.googleApiKey || '');
 }
 
 // --- Migration ---
@@ -221,6 +247,47 @@ export function migrateFromLocalStorage(data: { books: Book[], franchises: Franc
   transaction();
 
   return { books: data.books.length, franchises: data.franchises.length };
+}
+
+// --- Books Dictionary ---
+
+export interface BookDictEntry {
+  title: string;
+  author: string;
+  year: string;
+  coverUrl: string;
+  lang: string;
+  source: string;
+}
+
+export function searchBooksDictionary(title: string, author?: string): BookDictEntry[] {
+  let query = `SELECT DISTINCT title, author, year, cover_url AS coverUrl, lang, source FROM books_dictionary WHERE 1=1`;
+  const params: any[] = [];
+
+  if (title.trim()) {
+    query += ` AND title LIKE ? COLLATE NOCASE`;
+    params.push(`%${title.trim()}%`);
+  }
+  if (author?.trim()) {
+    query += ` AND author LIKE ? COLLATE NOCASE`;
+    params.push(`%${author.trim()}%`);
+  }
+
+  query += ` LIMIT 10`;
+  return db.prepare(query).all(...params) as BookDictEntry[];
+}
+
+export function saveToBooksDictionary(entry: BookDictEntry): void {
+  const exists = db.prepare(`
+    SELECT id FROM books_dictionary WHERE title = ? AND author = ? LIMIT 1
+  `).get(entry.title, entry.author);
+
+  if (exists) return;
+
+  db.prepare(`
+    INSERT INTO books_dictionary (title, author, year, cover_url, lang, source)
+    VALUES (?, ?, ?, ?, ?, ?)
+  `).run(entry.title, entry.author, entry.year, entry.coverUrl, entry.lang, entry.source);
 }
 
 // --- Helpers ---

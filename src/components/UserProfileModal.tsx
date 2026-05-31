@@ -8,6 +8,7 @@ interface UserProfile {
   photoUrl: string;
   defaultCoverUrl: string;
   achievements?: string[];
+  googleApiKey: string;
 }
 
 interface SettingsModalProps {
@@ -27,7 +28,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
     nickname: '',
     photoUrl: '',
     defaultCoverUrl: '',
-    achievements: []
+    achievements: [],
+    googleApiKey: '',
   });
 
   const PROFILE_STORAGE_KEY = 'lumina_user_profile';
@@ -250,7 +252,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
 
           <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
-          {/* Section 5: Version & Browser */}
+          {/* Section 5: Google Books API Key */}
+          <div className="py-6">
+            <div className="flex items-center gap-6">
+              <div className="flex-shrink-0 w-48">
+                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Google Books API ключ' : 'Google Books API Key'}</p>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Ключ для расширенного поиска книг по API Google' : 'API key for extended book search via Google'}</p>
+              </div>
+              <div className="flex-1">
+                <input
+                  type="password"
+                  placeholder={lang === 'ru' ? 'Введите API ключ...' : 'Enter API key...'}
+                  value={profile.googleApiKey}
+                  onChange={(e) => setProfile(prev => ({ ...prev, googleApiKey: e.target.value }))}
+                  className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071] font-mono text-sm"
+                />
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Section 6: Version & Browser */}
           <div className="py-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">

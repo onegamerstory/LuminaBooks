@@ -5,7 +5,8 @@ import { networkInterfaces } from 'os';
 import {
   getAllBooks, addBook, updateBook, deleteBook,
   getAllFranchises, addFranchise, updateFranchise, deleteFranchise,
-  getUserProfile, setUserProfile
+  getUserProfile, setUserProfile,
+  searchBooksDictionary, saveToBooksDictionary
 } from './database.js';
 
 const __filename = fileURLToPath(import.meta.url);
@@ -136,6 +137,26 @@ export async function startServer(port: number = 3456, isDev: boolean = false) {
     try {
       setUserProfile(req.body);
       res.json(req.body);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  // --- Books Dictionary API ---
+  app.get('/api/books-dictionary/search', (req: any, res: any) => {
+    try {
+      const { title, author } = req.query;
+      const results = searchBooksDictionary(title || '', author || '');
+      res.json(results);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  app.post('/api/books-dictionary', (req: any, res: any) => {
+    try {
+      saveToBooksDictionary(req.body);
+      res.status(201).json({ ok: true });
     } catch (err) {
       res.status(500).json({ error: String(err) });
     }

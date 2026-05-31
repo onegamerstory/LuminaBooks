@@ -23,6 +23,9 @@ contextBridge.exposeInMainWorld('electronAPI', {
     setUserProfile: (profile) => ipcRenderer.invoke('db:setUserProfile', profile),
 
     migrate: () => ipcRenderer.invoke('db:migrate'),
+
+    searchBooksDictionary: (title, author) => ipcRenderer.invoke('db:searchBooksDictionary', title, author),
+    saveToBooksDictionary: (entry) => ipcRenderer.invoke('db:saveToBooksDictionary', entry),
   },
 });
 

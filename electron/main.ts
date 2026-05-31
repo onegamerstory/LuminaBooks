@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
-import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, migrateFromLocalStorage } from './database.js';
+import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, migrateFromLocalStorage, searchBooksDictionary, saveToBooksDictionary } from './database.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -159,6 +159,14 @@ function registerIpcHandlers() {
       })()
     `);
     return migrateFromLocalStorage(localStorageData);
+  });
+
+  ipcMain.handle('db:searchBooksDictionary', (_event, title, author) => {
+    return searchBooksDictionary(title, author);
+  });
+
+  ipcMain.handle('db:saveToBooksDictionary', (_event, entry) => {
+    saveToBooksDictionary(entry);
   });
 }
 

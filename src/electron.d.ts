@@ -1,3 +1,20 @@
+export interface BookDictEntry {
+  title: string;
+  author: string;
+  year: string;
+  coverUrl: string;
+  lang: string;
+  source: string;
+}
+
+export interface UserProfileData {
+  nickname: string;
+  photoUrl: string;
+  defaultCoverUrl: string;
+  achievements: string[];
+  googleApiKey: string;
+}
+
 export interface ElectronDBAPI {
   getAllBooks: () => Promise<any[]>;
   addBook: (book: any) => Promise<any>;
@@ -9,10 +26,13 @@ export interface ElectronDBAPI {
   updateFranchise: (franchise: any) => Promise<any>;
   deleteFranchise: (id: string) => Promise<void>;
 
-  getUserProfile: () => Promise<{ nickname: string; photoUrl: string; defaultCoverUrl: string; achievements: string[] }>;
-  setUserProfile: (profile: { nickname: string; photoUrl: string; defaultCoverUrl: string; achievements: string[] }) => Promise<void>;
+  getUserProfile: () => Promise<UserProfileData>;
+  setUserProfile: (profile: UserProfileData) => Promise<void>;
 
   migrate: () => Promise<{ books: number; franchises: number }>;
+
+  searchBooksDictionary: (title: string, author?: string) => Promise<BookDictEntry[]>;
+  saveToBooksDictionary: (entry: BookDictEntry) => Promise<void>;
 }
 
 export interface ElectronAPI {
