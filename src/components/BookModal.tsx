@@ -56,7 +56,7 @@ const BookModal: React.FC<BookModalProps> = ({
   });
   const [showFranchiseSelect, setShowFranchiseSelect] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [searchMessage, setSearchMessage] = useState<{ text: string; type: 'success' | 'error' } | null>(null);
+  const [searchMessage, setSearchMessage] = useState<{ text: string; type: 'success' | 'error' | 'warning' } | null>(null);
   const isEditingExistingBook = !!initialData;
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showRatingEditModal, setShowRatingEditModal] = useState(false);
@@ -224,7 +224,14 @@ const BookModal: React.FC<BookModalProps> = ({
           coverUrl: result.coverUrl,
           totalPages: result.totalPages ?? undefined,
         }));
-        setSearchMessage({ text: t.bookInfoFilled, type: 'success' });
+
+        const sourceLabel = result.source === 'local'
+          ? (lang === 'ru' ? 'Справочнике' : 'Reference')
+          : 'Google Books';
+        const foundText = lang === 'ru'
+          ? `Книга найдена в ${sourceLabel}`
+          : `Book found in ${sourceLabel}`;
+        setSearchMessage({ text: foundText, type: 'success' });
 
         if (result.source !== 'local' && onSaveToDictionary) {
           onSaveToDictionary({
@@ -236,6 +243,13 @@ const BookModal: React.FC<BookModalProps> = ({
             source: result.source,
           });
         }
+      } else if (!googleApiKey) {
+        setSearchMessage({
+          text: lang === 'ru'
+            ? 'Книга не найдена. Для поиска книг в Google Books нужен API-ключ'
+            : 'Book not found. Google Books API key is required for search',
+          type: 'warning',
+        });
       } else {
         setSearchMessage({ text: t.bookNotFound, type: 'error' });
       }
@@ -358,7 +372,11 @@ const BookModal: React.FC<BookModalProps> = ({
                   </div>
                 </div>
                 {searchMessage && (
-                  <p className={`text-xs mt-1.5 ${searchMessage.type === 'error' ? 'text-red-600' : 'text-emerald-600'}`}>
+                  <p className={`text-xs mt-1.5 ${
+                    searchMessage.type === 'error' ? 'text-red-600' :
+                    searchMessage.type === 'warning' ? 'text-amber-600' :
+                    'text-emerald-600'
+                  }`}>
                     {searchMessage.text}
                   </p>
                 )}
