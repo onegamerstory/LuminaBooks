@@ -29,3 +29,7 @@ release
 
 CATALOGVIEW_REFACTOR_PLAN.md
 CODE_ANALYSIS_PLAN.md
+
+# MCP indexes
+.codegraph/
+.memories/

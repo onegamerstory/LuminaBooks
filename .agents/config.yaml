@@ -1,0 +1,6 @@
+name: agent_memory
+description: Agent memory configuration
+version: 0.1.0
+memory:
+  provider: local
+  store: ~/.config/memories/local.db
