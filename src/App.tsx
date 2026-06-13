@@ -40,7 +40,16 @@ const App: React.FC = () => {
   const [bookToRateId, setBookToRateId] = useState<string | null>(null);
   const [serverUrl, setServerUrl] = useState('');
   const [autoSync, setAutoSync] = useState(() => localStorage.getItem('lumina_auto_sync') === 'true');
+  const [launchAtStartup, setLaunchAtStartup] = useState(false);
   const [syncing, setSyncing] = useState(false);
+
+  useEffect(() => {
+    if (window.electronAPI?.getLoginItemSettings) {
+      window.electronAPI.getLoginItemSettings().then((settings) => {
+        setLaunchAtStartup(settings.openAtLogin);
+      });
+    }
+  }, []);
   const [toasts, setToasts] = useState<ToastMessage[]>([]);
   const [achievementQueue, setAchievementQueue] = useState<AchievementNotificationItem[]>([]);
   const achievementQueueRef = useRef<AchievementNotificationItem[]>([]);
@@ -1013,6 +1022,11 @@ const App: React.FC = () => {
           onAutoSyncChange={(value) => {
             setAutoSync(value);
             localStorage.setItem('lumina_auto_sync', String(value));
+          }}
+          launchAtStartup={launchAtStartup}
+          onLaunchAtStartupChange={(value) => {
+            setLaunchAtStartup(value);
+            window.electronAPI?.setLoginItemSettings?.({ openAtLogin: value });
           }}
           serverUrl={serverUrl}
           lang={lang}

@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload } from 'lucide-react';
+import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { version } from '../../package.json';
 
@@ -17,11 +17,13 @@ interface SettingsModalProps {
   onSave: (profile: UserProfile) => Promise<void>;
   autoSync: boolean;
   onAutoSyncChange: (value: boolean) => void;
+  launchAtStartup: boolean;
+  onLaunchAtStartupChange: (value: boolean) => void;
   serverUrl: string;
   lang: 'en' | 'ru';
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, serverUrl, lang }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, launchAtStartup, onLaunchAtStartupChange, serverUrl, lang }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [profile, setProfile] = useState<UserProfile>({
@@ -244,6 +246,34 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
+                  />
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+
+          {/* Section 4.5: Launch at Login */}
+          <div className="py-6">
+            <div className="flex items-center justify-between">
+              <div className="flex-shrink-0 w-48">
+                <div className="flex items-center gap-2">
+                  <Power size={16} className="text-slate-500" />
+                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Запуск при входе' : 'Launch at Login'}</p>
+                </div>
+                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Автоматически запускать приложение при входе в систему' : 'Automatically start the app when you log in'}</p>
+              </div>
+              <div className="flex-shrink-0">
+                <button
+                  type="button"
+                  role="switch"
+                  aria-checked={launchAtStartup}
+                  onClick={() => onLaunchAtStartupChange(!launchAtStartup)}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${launchAtStartup ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
+                >
+                  <span
+                    className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${launchAtStartup ? 'translate-x-5' : 'translate-x-0'}`}
                   />
                 </button>
               </div>

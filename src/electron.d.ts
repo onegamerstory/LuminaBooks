@@ -42,6 +42,8 @@ export interface ElectronAPI {
   isLinux: boolean;
   db?: ElectronDBAPI;
   getServerUrl?: () => Promise<string>;
+  getLoginItemSettings?: () => Promise<{ openAtLogin: boolean; openAsHidden: boolean }>;
+  setLoginItemSettings?: (settings: { openAtLogin: boolean; openAsHidden?: boolean }) => Promise<void>;
 }
 
 declare global {

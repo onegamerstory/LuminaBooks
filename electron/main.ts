@@ -168,6 +168,14 @@ function registerIpcHandlers() {
   ipcMain.handle('db:saveToBooksDictionary', (_event, entry) => {
     saveToBooksDictionary(entry);
   });
+
+  ipcMain.handle('app:getLoginItemSettings', () => {
+    return app.getLoginItemSettings();
+  });
+
+  ipcMain.handle('app:setLoginItemSettings', (_event, settings: { openAtLogin: boolean; openAsHidden?: boolean }) => {
+    app.setLoginItemSettings(settings);
+  });
 }
 
 function createWindow() {
