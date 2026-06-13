@@ -448,8 +448,6 @@ function createTray() {
     }
   ]);
 
-  // Устанавливаем контекстное меню
-  tray.setContextMenu(contextMenu);
   tray.setToolTip('LuminaBooks');
 
   // Обработка клика по иконке трея
@@ -473,15 +471,16 @@ function createTray() {
       }
     });
 
-    // Для Windows и Linux используем правый клик для контекстного меню
-    if (process.platform === 'win32' || process.platform === 'linux') {
+    if (process.platform === 'darwin') {
+      // На macOS не вызываем setContextMenu — он вешает меню на левый клик,
+      // из-за чего окно сначала показывается, а потом скрывается при отпускании кнопки.
+      // Вместо этого показываем меню только по правому клику.
       tray.on('right-click', () => {
         tray?.popUpContextMenu(contextMenu);
       });
-    }
-    
-    // Для macOS также обрабатываем правый клик
-    if (process.platform === 'darwin') {
+    } else {
+      // Windows и Linux: левый клик — показать/скрыть окно, правый — контекстное меню
+      tray.setContextMenu(contextMenu);
       tray.on('right-click', () => {
         tray?.popUpContextMenu(contextMenu);
       });
