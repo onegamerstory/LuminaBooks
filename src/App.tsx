@@ -838,103 +838,109 @@ const App: React.FC = () => {
 
   return (
     <MantineProvider>
-      <div className="min-h-screen bg-white flex flex-col">
-      <header className={`bg-[#F0F4F1] border-b sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}>
+      <div className="min-h-screen bg-page">
+      <header
+        className={`sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}
+        style={{
+          backgroundColor: 'color-mix(in oklab, var(--surface), transparent 8%)',
+          backdropFilter: 'blur(16px)',
+          WebkitBackdropFilter: 'blur(16px)',
+          borderBottom: '1px solid var(--border-soft)',
+        }}
+      >
         <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <img src={appIcon} alt="LuminaBooks" className="w-10 h-10" />
-            <div>
-              <h1 className="text-xl font-bold font-serif tracking-tight text-[#1E2920]">LuminaBooks</h1>
-            </div>
+          <div className="flex items-center gap-3">
+            <img src={appIcon} alt="LuminaBooks" className="w-9 h-9" />
+            <h1 className="text-lg font-display tracking-tight" style={{ color: 'var(--fg)' }}>LuminaBooks</h1>
           </div>
 
-          <div className="flex items-center gap-2">
-            <nav className="flex items-center gap-1 bg-[#F0F4F1] p-1 rounded-xl">
-              <button
-                onClick={() => setActiveView('statistics')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'statistics' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <BarChart3 size={18} />
-                <span className="hidden sm:inline">{lang === 'ru' ? 'Профиль' : 'Profile'}</span>
-              </button>
-              <button
-                onClick={() => setActiveView('catalog')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'catalog' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <Library size={18} />
-                <span className="hidden sm:inline">{t.catalog}</span>
-              </button>
-              <button
-                onClick={() => setActiveView('collections')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'collections' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <Link size={18} />
-                <span className="hidden sm:inline">{lang === 'ru' ? 'Коллекции' : 'Collections'}</span>
-              </button>
-              <button
-                onClick={() => setActiveView('calendar')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'calendar' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md'  
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <Calendar size={18} />
-                <span className="hidden sm:inline">{t.calendar}</span>
-              </button>
-              <button
-                onClick={() => setActiveView('reading')}
-                className={`flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-medium transition-all ${
-                  activeView === 'reading' 
-                  ? 'bg-[#6B9071] text-[#F0F4F1] shadow-md' 
-                  : 'text-slate-600 hover:text-[#1E2920]'
-                }`}
-              >
-                <Zap size={18} />
-                <span className="hidden sm:inline">{lang === 'ru' ? 'Чтение' : 'Reading'}</span>
-              </button>
-            </nav>
-          </div>
+          <nav className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--accent-soft)' }}>
+            <button
+              onClick={() => setActiveView('statistics')}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: activeView === 'statistics' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'statistics' ? 'var(--accent-on)' : 'var(--muted)',
+              }}
+            >
+              <BarChart3 size={17} />
+              <span className="hidden sm:inline">{lang === 'ru' ? 'Профиль' : 'Profile'}</span>
+            </button>
+            <button
+              onClick={() => setActiveView('catalog')}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: activeView === 'catalog' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'catalog' ? 'var(--accent-on)' : 'var(--muted)',
+              }}
+            >
+              <Library size={17} />
+              <span className="hidden sm:inline">{t.catalog}</span>
+            </button>
+            <button
+              onClick={() => setActiveView('collections')}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: activeView === 'collections' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'collections' ? 'var(--accent-on)' : 'var(--muted)',
+              }}
+            >
+              <Link size={17} />
+              <span className="hidden sm:inline">{lang === 'ru' ? 'Коллекции' : 'Collections'}</span>
+            </button>
+            <button
+              onClick={() => setActiveView('calendar')}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: activeView === 'calendar' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'calendar' ? 'var(--accent-on)' : 'var(--muted)',
+              }}
+            >
+              <Calendar size={17} />
+              <span className="hidden sm:inline">{t.calendar}</span>
+            </button>
+            <button
+              onClick={() => setActiveView('reading')}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              style={{
+                backgroundColor: activeView === 'reading' ? 'var(--accent)' : 'transparent',
+                color: activeView === 'reading' ? 'var(--accent-on)' : 'var(--muted)',
+              }}
+            >
+              <Zap size={17} />
+              <span className="hidden sm:inline">{lang === 'ru' ? 'Чтение' : 'Reading'}</span>
+            </button>
+          </nav>
 
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-1">
             <button
               onClick={toggleLang}
-              className="p-2 hover:bg-[#D6E1D8] rounded-lg text-slate-600 flex items-center gap-2 transition-colors"
+              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors"
+              style={{ color: 'var(--muted)' }}
               title="Switch Language"
             >
-              <Languages size={18} />
-              <span className="text-xs font-bold uppercase">{lang}</span>
+              <Languages size={17} />
+              <span className="text-xs font-bold uppercase tracking-wider">{lang}</span>
             </button>
 
             <button
               onClick={handleManualSync}
               disabled={syncing}
-              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] disabled:opacity-60 text-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+              style={{ color: 'var(--muted)' }}
               title={lang === 'ru' ? 'Синхронизировать данные' : 'Sync data'}
             >
-              <RefreshCw size={18} className={syncing ? 'animate-spin' : ''} />
+              <RefreshCw size={17} className={syncing ? 'animate-spin' : ''} />
             </button>
 
             <button
               onClick={() => setIsProfileOpen(true)}
-              className="flex items-center gap-2 bg-[#F0F4F1] hover:bg-[#D6E1D8] text-slate-600 px-3 py-2 rounded-lg text-sm font-semibold transition-colors"
+              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-semibold transition-colors"
+              style={{ color: 'var(--muted)' }}
               title={lang === 'ru' ? 'Настройки' : 'Settings'}
             >
-              <Settings size={18} />
+              <Settings size={17} />
             </button>
-
           </div>
         </div>
       </header>
@@ -1073,7 +1079,7 @@ const App: React.FC = () => {
         isDangerous={confirmationModal.isDangerous}
       />
       
-      <footer className="py-8 border-t bg-[#F0F4F1] text-center text-slate-400 text-sm">
+      <footer className="py-6 text-center text-sm" style={{ color: 'var(--meta)', borderTop: '1px solid var(--border-soft)' }}>
         &copy; {new Date().getFullYear()} LuminaBooks. {lang === 'ru' ? 'Следите за своим прогрессом чтения.' : 'Track your reading journey.'}
       </footer>
     </div>

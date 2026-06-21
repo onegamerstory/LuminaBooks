@@ -91,10 +91,10 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   ];
 
   return (
-    <div className="w-60 shrink-0 space-y-6 bg-[#F0F4F1] border border-[#C8D6CB] rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+    <div className="w-60 shrink-0 space-y-6 bg-page border border-default rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
       {/* Sort section */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1E2920] uppercase tracking-wide mb-3">
+        <h3 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
           {lang === 'ru' ? 'Сортировка' : 'Sort'}
         </h3>
         <div className="space-y-1">
@@ -104,17 +104,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             return (
               <div
                 key={field.key}
-                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] transition-colors"
+                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-accent-soft transition-colors"
               >
-                <span className="text-sm text-[#1E2920]">{field.label}</span>
+                <span className="text-sm text-fg">{field.label}</span>
                 <div className="flex gap-1">
                   <button
                     onClick={() => onSortChange(field.ascOption)}
                     className={`p-1.5 rounded transition-colors ${
                       isAsc
-                        ? 'bg-[#6b9071] text-white'
-                        : 'text-slate-600 hover:bg-[#B8CCBC]'
+                        ? 'bg-accent text-accent-on'
+                        : 'text-slate-600'
                     }`}
+                    onMouseEnter={e => { if (!isAsc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
+                    onMouseLeave={e => { if (!isAsc) e.currentTarget.style.backgroundColor = '' }}
                     title={lang === 'ru' ? 'По возрастанию' : 'Ascending'}
                   >
                     {field.ascIcon}
@@ -123,9 +125,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     onClick={() => onSortChange(field.descOption)}
                     className={`p-1.5 rounded transition-colors ${
                       isDesc
-                        ? 'bg-[#6b9071] text-white'
-                        : 'text-slate-600 hover:bg-[#B8CCBC]'
+                        ? 'bg-accent text-accent-on'
+                        : 'text-slate-600'
                     }`}
+                    onMouseEnter={e => { if (!isDesc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
+                    onMouseLeave={e => { if (!isDesc) e.currentTarget.style.backgroundColor = '' }}
                     title={lang === 'ru' ? 'По убыванию' : 'Descending'}
                   >
                     {field.descIcon}
@@ -139,19 +143,19 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
 
       {/* Status filter section */}
       <div>
-        <h3 className="text-sm font-semibold text-[#1E2920] uppercase tracking-wide mb-3">
+        <h3 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
           {t.status}
         </h3>
         <div className="space-y-1">
-          <label className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] cursor-pointer transition-colors">
+          <label className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-accent-soft cursor-pointer transition-colors">
             <div className="flex items-center gap-2">
               <input
                 type="checkbox"
                 checked={isAllSelected}
                 onChange={() => onToggleStatus('All')}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[#6B9071]"
+                className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[var(--accent)]"
               />
-              <span className="text-sm text-[#1E2920] font-medium">{t.allStatuses}</span>
+              <span className="text-sm text-fg font-medium">{t.allStatuses}</span>
             </div>
             <span className="text-xs text-slate-500">{books.length}</span>
           </label>
@@ -162,14 +166,14 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
             return (
               <label
                 key={status}
-                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-[#D6E1D8] cursor-pointer transition-colors"
+                className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-accent-soft cursor-pointer transition-colors"
               >
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => onToggleStatus(status)}
-                    className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[#6B9071]"
+                    className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[var(--accent)]"
                   />
                   <span className={`text-sm ${getStatusColor(status)}`}>
                     {t[statusLabels[status]]}

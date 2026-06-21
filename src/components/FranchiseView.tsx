@@ -30,7 +30,7 @@ const FranchiseCard: React.FC<{
   const remainingCount = franchiseBooks.length - displayBooks.length;
 
   return (
-    <div className="bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#C8D6CB] flex flex-col h-full">
+    <div className="bg-page rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-default flex flex-col h-full">
       {/* Обложка коллекции или стопка обложек книг */}
       <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden">
         {franchise.coverUrl ? (
@@ -60,7 +60,7 @@ const FranchiseCard: React.FC<{
               </div>
             ))}
             {remainingCount > 0 && (
-              <div className="absolute bottom-4 right-4 bg-[#6B9071] text-white px-2 py-1 rounded text-xs font-bold">
+              <div className="absolute bottom-4 right-4 bg-accent text-accent-on px-2 py-1 rounded text-xs font-bold">
                 +{remainingCount}
               </div>
             )}
@@ -74,7 +74,7 @@ const FranchiseCard: React.FC<{
 
       {/* Информация */}
       <div className="p-4 flex flex-col flex-grow">
-        <h3 className="font-bold text-[#1E2920] line-clamp-2 text-lg leading-tight mb-2">
+        <h3 className="font-bold text-fg line-clamp-2 text-lg leading-tight mb-2">
           {franchise.name}
         </h3>
 
@@ -92,7 +92,7 @@ const FranchiseCard: React.FC<{
         <div className="flex gap-2">
           <button
             onClick={onEdit}
-            className="flex-1 p-2 bg-white border border-slate-300 text-[#1E2920] rounded-lg hover:bg-slate-100 transition-colors font-medium text-sm"
+            className="flex-1 p-2 bg-white border border-slate-300 text-fg rounded-lg hover:bg-slate-100 transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Редактировать' : 'Edit'}
           >
             <Edit2 size={16} className="inline mr-1" />
@@ -200,7 +200,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       {/* Заголовок и поиск */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-6">
         <div className="flex-grow">
-          <h1 className="text-2xl font-bold text-[#1E2920] mb-2">
+          <h1 className="text-2xl font-bold text-fg mb-2">
             {lang === 'ru' ? 'Коллекции' : 'Collections'}
           </h1>
           <p className="text-sm text-slate-500">
@@ -220,7 +220,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] transition-colors font-semibold shadow-lg shadow-[#6B9071]/20 whitespace-nowrap"
+          className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-on rounded-lg hover:bg-accent-hover transition-colors font-semibold shadow-lg whitespace-nowrap"
         >
           <Plus size={20} />
           <span className="hidden sm:inline">
@@ -239,7 +239,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
           }
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+          className="w-full pl-10 pr-4 py-2 bg-white border border-[var(--accent)]/30 rounded-lg focus:ring-2 focus:ring-[var(--accent)] outline-none"
         />
       </div>
 
@@ -272,7 +272,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
             {!searchTerm && (
               <button
                 onClick={handleAdd}
-                className="text-[#6B9071] hover:text-[#5A7A60] font-semibold"
+                className="text-accent hover:text-accent-hover font-semibold"
               >
                 {lang === 'ru' ? 'Создать первую' : 'Create your first one'}
               </button>

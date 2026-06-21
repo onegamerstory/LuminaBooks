@@ -226,20 +226,20 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
 
   return (
-    <div className="flex bg-[#F8FAF7] rounded-2xl shadow-md border border-[#D5DFD8] overflow-hidden">
+    <div className="flex bg-page rounded-2xl shadow-md border border-default overflow-hidden">
       {/* Left: Calendar */}
-      <div className="flex-1 flex flex-col bg-[#F8FAF7] overflow-hidden">
+      <div className="flex-1 flex flex-col bg-page overflow-hidden">
         {/* Header */}
-        <div className="p-4 border-b border-[#D5DFD8] flex flex-col sm:flex-row items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-serif text-[#1E2920] shrink-0">{t.readingCalendar}</h2>
+        <div className="p-4 border-b border-default flex flex-col sm:flex-row items-center justify-between gap-3">
+          <h2 className="text-xl font-bold font-serif text-fg shrink-0">{t.readingCalendar}</h2>
 
-          <div className="flex items-center gap-2 bg-[#E8EAEA] p-1 rounded-xl">
+          <div className="flex items-center gap-2 p-1 rounded-xl" style={{backgroundColor: 'var(--border)'}}>
               <button
                 onClick={() => setViewMode('phases')}
                 className={`px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
                   viewMode === 'phases'
-                    ? 'bg-[#6B9071] text-white'
-                  : 'text-slate-600 hover:bg-[#D0D8CF]'
+                    ? 'bg-accent text-accent-on'
+                  : 'text-muted hover:bg-accent-soft'
                 }`}
               >
                 {lang === 'ru' ? 'Фазы' : 'Phases'}
@@ -248,8 +248,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                 onClick={() => setViewMode('sessions')}
                 className={`px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
                   viewMode === 'sessions'
-                    ? 'bg-[#6B9071] text-white'
-                    : 'text-slate-600 hover:bg-[#D0D8CF]'
+                    ? 'bg-accent text-accent-on'
+                    : 'text-muted hover:bg-accent-soft'
                 }`}
               >
                 {lang === 'ru' ? 'Сессии' : 'Sessions'}
@@ -262,29 +262,29 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             {/* Left Arrow Button */}
             <button 
               onClick={() => changeMonth(-1)} 
-              className="p-1.5 bg-[#F8FAF7] border border-[#D5DFD8] hover:bg-[#F0F4F1] rounded-lg transition-colors"
+              className="p-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors"
             >
-              <ChevronLeft size={18} className="text-slate-600" />
+              <ChevronLeft size={18} className="text-muted" />
             </button>
 
             {/* Month and Year */}
-            <button className="p-1 bg-[#F8FAF7] border border-[#D5DFD8] hover:bg-[#F0F4F1] rounded-lg transition-colors font-bold text-slate-700 min-w-[130px] text-center capitalize text-sm">
+            <button className="p-1 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors font-bold text-fg min-w-[130px] text-center capitalize text-sm">
               {monthName} {year}
             </button>
 
             {/* Right Arrow Button */}
             <button 
               onClick={() => changeMonth(1)} 
-              className="p-1.5 bg-[#F8FAF7] border border-[#D5DFD8] hover:bg-[#F0F4F1] rounded-lg transition-colors"
+              className="p-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors"
             >
-              <ChevronRight size={18} className="text-slate-600" />
+              <ChevronRight size={18} className="text-muted" />
             </button>
 
             
 
             <button
               onClick={() => setCurrentDate(new Date())}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-[#F8FAF7] border border-[#D5DFD8] hover:bg-[#F0F4F1] rounded-lg transition-colors text-sm font-medium text-slate-600"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors text-sm font-medium text-muted"
             >
               <CalendarDays size={16} />
               {t.today}
@@ -293,9 +293,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-[#F8FAF7] border-b border-[#D5DFD8]">
+        <div className="grid grid-cols-7 bg-page border-b border-default">
           {weekDays.map((day: string) => (
-            <div key={day} className="py-2 text-center text-xs font-bold text-slate-600 uppercase tracking-widest">
+            <div key={day} className="py-2 text-center text-xs font-bold text-muted uppercase tracking-widest">
               {day}
             </div>
           ))}
@@ -305,7 +305,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         <div className="grid grid-cols-7 auto-rows-[130px] sm:auto-rows-[160px] flex-1">
           {daysInMonth.map((day: Date | null, idx: number) => {
             if (!day) return (
-              <div key={`empty-${idx}`} className="bg-white border-r border-b border-[#E8EAEA]" />
+              <div key={`empty-${idx}`} className="bg-surface border-r border-b border-default" />
             );
 
             const booksToday = getBooksForDay(day);
@@ -314,19 +314,19 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             return (
               <div 
                 key={day.toISOString()} 
-                className={`relative border-r border-b border-[#E8EAEA] p-1 group hover:border-[#6B9071] hover:border-[2px] hover:z-10 transition-colors cursor-pointer bg-white ${
-                  isToday ? 'ring-1 ring-[#6B9071] ring-inset' : ''
+                className={`relative border-r border-b border-default p-1 group hover:border-accent hover:border-[2px] hover:z-10 transition-colors cursor-pointer bg-surface ${
+                  isToday ? 'ring-1 ring-[var(--accent)] ring-inset' : ''
                 }`}
                 onContextMenu={(e: React.MouseEvent) => handleDayContextMenu(e, day)}
                 title={lang === 'ru' ? 'Правый клик для начала чтения книги' : 'Right click to start reading a book'}
               >
                 <div className="flex items-center justify-between gap-1">
-                  <span className={`z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full 'text-slate-500'`}>
+                  <span className={`z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full 'text-muted'`}>
                     {day.getDate()}
                   </span>
 
                   {getDailyHours(day) > 0 && (
-                    <div className="bg-[#6B9071] text-white rounded px-1.5 py-0.5 flex items-center justify-center text-[10px] font-bold whitespace-nowrap">
+                    <div className="bg-accent text-accent-on rounded px-1.5 py-0.5 flex items-center justify-center text-[10px] font-bold whitespace-nowrap">
                       {getDailyHours(day)}h
                     </div>
                   )}
@@ -382,53 +382,53 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       </div>
 
       {/* Divider */}
-      <div className="w-px bg-[#D5DFD8]"></div>
+      <div className="w-px" style={{backgroundColor: 'var(--border)'}}></div>
 
       {/* Right: Statistics */}
-      <div className="w-[280px] shrink-0 bg-[#F8FAF7] overflow-auto flex flex-col">
-        <div className="p-4 border-b border-[#D5DFD8]">
-          <h3 className="text-base font-bold font-serif text-[#1E2920]">
+      <div className="w-[280px] shrink-0 bg-page overflow-auto flex flex-col">
+        <div className="p-4 border-b border-default">
+          <h3 className="text-base font-bold font-serif text-fg">
             {t.statisticsFor} {monthName}
           </h3>
         </div>
         <div className="p-4 space-y-3 flex-1">
-          <div className="flex items-center gap-3 bg-white border border-[#D5DFD8] rounded-xl p-3">
-            <div className="w-9 h-9 rounded-lg bg-[#EDF0EC] flex items-center justify-center shrink-0">
-              <Clock size={18} className="text-[#6B9071]" />
+          <div className="flex items-center gap-3 bg-surface border border-default rounded-xl p-3">
+            <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
+              <Clock size={18} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs text-slate-500">{t.hoursRead}</div>
-              <div className="text-lg font-bold text-[#1E2920]">{monthlyHours} <span className="text-sm font-normal text-slate-500">ч</span></div>
+              <div className="text-xs text-muted">{t.hoursRead}</div>
+              <div className="text-lg font-bold text-fg">{monthlyHours} <span className="text-sm font-normal text-muted">ч</span></div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white border border-[#D5DFD8] rounded-xl p-3">
-            <div className="w-9 h-9 rounded-lg bg-[#EDF0EC] flex items-center justify-center shrink-0">
-              <BookOpen size={18} className="text-[#6B9071]" />
+          <div className="flex items-center gap-3 bg-surface border border-default rounded-xl p-3">
+            <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
+              <BookOpen size={18} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs text-slate-500">{t.booksRead}</div>
-              <div className="text-lg font-bold text-[#1E2920]">{booksReadInMonth}</div>
+              <div className="text-xs text-muted">{t.booksRead}</div>
+              <div className="text-lg font-bold text-fg">{booksReadInMonth}</div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white border border-[#D5DFD8] rounded-xl p-3">
-            <div className="w-9 h-9 rounded-lg bg-[#EDF0EC] flex items-center justify-center shrink-0">
-              <Flame size={18} className="text-[#6B9071]" />
+          <div className="flex items-center gap-3 bg-surface border border-default rounded-xl p-3">
+            <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
+              <Flame size={18} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs text-slate-500">{t.longestStreak}</div>
-              <div className="text-lg font-bold text-[#1E2920]">{longestStreak} <span className="text-sm font-normal text-slate-500">{lang === 'ru' ? 'дн.' : 'days'}</span></div>
+              <div className="text-xs text-muted">{t.longestStreak}</div>
+              <div className="text-lg font-bold text-fg">{longestStreak} <span className="text-sm font-normal text-muted">{lang === 'ru' ? 'дн.' : 'days'}</span></div>
             </div>
           </div>
 
-          <div className="flex items-center gap-3 bg-white border border-[#D5DFD8] rounded-xl p-3">
-            <div className="w-9 h-9 rounded-lg bg-[#EDF0EC] flex items-center justify-center shrink-0">
-              <CalendarDays size={18} className="text-[#6B9071]" />
+          <div className="flex items-center gap-3 bg-surface border border-default rounded-xl p-3">
+            <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
+              <CalendarDays size={18} className="text-accent" />
             </div>
             <div className="min-w-0">
-              <div className="text-xs text-slate-500">{t.daysRead}</div>
-              <div className="text-lg font-bold text-[#1E2920]">{daysReadInMonth} <span className="text-sm font-normal text-slate-500">{lang === 'ru' ? 'дн.' : 'days'}</span></div>
+              <div className="text-xs text-muted">{t.daysRead}</div>
+              <div className="text-lg font-bold text-fg">{daysReadInMonth} <span className="text-sm font-normal text-muted">{lang === 'ru' ? 'дн.' : 'days'}</span></div>
             </div>
           </div>
         </div>
@@ -437,18 +437,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       {/* Modal for book selection */}
       {isBookSelectionModalOpen && selectedDate && (
         <div 
-          className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm"
+          className="fixed inset-0 z-50 flex items-center justify-center p-4 backdrop-blur-sm" style={{backgroundColor: 'color-mix(in srgb, var(--fg) 60%, transparent)'}}
           onClick={() => {
             setIsBookSelectionModalOpen(false);
             setSelectedDate(null);
           }}
         >
           <div 
-            className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl"
+            className="bg-surface rounded-2xl w-full max-w-md max-h-[80vh] overflow-hidden shadow-2xl"
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
-            <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold font-serif text-[#1E2920]">
+            <div className="sticky top-0 bg-surface border-b px-6 py-4 flex items-center justify-between z-10">
+              <h2 className="text-xl font-bold font-serif text-fg">
                 {t.selectBookToStart}
               </h2>
               <button 
@@ -456,14 +456,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                   setIsBookSelectionModalOpen(false);
                   setSelectedDate(null);
                 }} 
-                className="p-2 hover:bg-slate-100 rounded-full text-slate-400"
+                className="p-2 hover:bg-accent-soft rounded-full text-muted"
               >
                 <X size={20} />
               </button>
             </div>
 
             <div className="p-4">
-              <div className="text-sm text-slate-600 mb-4">
+              <div className="text-sm text-muted mb-4">
                 {lang === 'ru' 
                   ? `Выберите книгу для начала чтения ${selectedDate.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US')}`
                   : `Select a book to start reading on ${selectedDate.toLocaleDateString('en-US')}`
@@ -471,23 +471,26 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
               </div>
 
               <div className="relative mb-4">
-                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
                 <input 
                   type="text" 
                   placeholder={lang === 'ru' ? 'Поиск по названию/автору...' : 'Search by title/author...'}
                   value={bookSearchTerm}
                   onChange={(e) => setBookSearchTerm(e.target.value)}
-                  className="w-full pl-9 pr-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6b9071] text-sm"
+                  className="w-full pl-9 pr-4 py-2 bg-surface rounded-lg focus:outline-none text-sm border"
+                  style={{borderColor: 'color-mix(in srgb, var(--accent) 30%, transparent)'}}
+                  onFocus={(e) => { e.currentTarget.style.borderColor = 'var(--accent)'; e.currentTarget.style.boxShadow = '0 0 0 2px var(--accent)' }}
+                  onBlur={(e) => { e.currentTarget.style.borderColor = 'color-mix(in srgb, var(--accent) 30%, transparent)'; e.currentTarget.style.boxShadow = '' }}
                   autoFocus
                 />
               </div>
 
               {getBooksToStart().length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-8 text-muted">
                   {t.noBooksToStart}
                 </div>
               ) : getFilteredBooksToStart().length === 0 ? (
-                <div className="text-center py-8 text-slate-400">
+                <div className="text-center py-8 text-muted">
                   {lang === 'ru' ? 'Книги не найдены' : 'No books found'}
                 </div>
               ) : (
@@ -496,24 +499,24 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                     <button
                       key={book.id}
                       onClick={() => handleBookSelect(book)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-[#F8FAF7] border border-slate-200 hover:border-[#6B9071] transition-colors text-left"
+                      className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-page border border-default hover:border-accent transition-colors text-left"
                     >
                       <img 
                         src={book.coverUrl} 
                         alt={book.title}
-                        className="w-16 h-24 object-cover rounded shadow-md border border-slate-200"
+                        className="w-16 h-24 object-cover rounded shadow-md border border-default"
                         onError={handleCoverError}
                       />
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-1">
-                          <h3 className="font-bold text-[#1E2920] truncate">{book.title}</h3>
+                          <h3 className="font-bold text-fg truncate">{book.title}</h3>
                           {book.isPartOfSeries && (
-                            <Link size={14} className="text-[#6B9071] flex-shrink-0" />
+                            <Link size={14} className="text-accent flex-shrink-0" />
                           )}
                         </div>
-                        <p className="text-sm text-slate-500 truncate">{book.author}</p>
+                        <p className="text-sm text-muted truncate">{book.author}</p>
                         {book.year && (
-                          <p className="text-xs text-slate-400 mt-1">{book.year}</p>
+                          <p className="text-xs text-muted mt-1">{book.year}</p>
                         )}
                       </div>
                     </button>

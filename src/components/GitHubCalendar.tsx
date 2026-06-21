@@ -60,12 +60,12 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
   }, [dailyHours]);
 
   const getCellColor = (hours: number): string => {
-    if (hours === 0) return 'bg-slate-100';
+    if (hours === 0) return 'var(--border)';
     const intensity = hours / maxHours;
-    if (intensity <= 0.25) return 'bg-[#D6E1D8]';
-    if (intensity <= 0.5) return 'bg-[#B8CCBC]';
-    if (intensity <= 0.75) return 'bg-[#8AAB90]';
-    return 'bg-[#6B9071]';
+    if (intensity <= 0.25) return 'var(--accent-soft)';
+    if (intensity <= 0.5) return '#B8CCBC';
+    if (intensity <= 0.75) return '#8AAB90';
+    return 'var(--accent)';
   };
 
   const monthLabels = lang === 'ru'
@@ -110,58 +110,72 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
 
   const getKey = (d: Date): string => d.toISOString().split('T')[0];
 
+  const cardStyle: React.CSSProperties = {
+    backgroundColor: 'var(--surface)',
+    borderRadius: 'var(--radius-lg)',
+    padding: 'var(--space-6)',
+    border: '1px solid var(--border)',
+    boxShadow: 'var(--elev-raised)',
+  };
+
   return (
-    <div className="bg-[#D6E1D8]/30 rounded-xl p-6 shadow-md border border-[#C8D6CB]">
-      <div className="mb-4">
-        <h3 className="text-lg font-semibold text-[#1E2920] mb-2">
+    <div style={cardStyle}>
+      <div style={{ marginBottom: 'var(--space-4)' }}>
+        <h3 style={{ fontSize: 'var(--text-lg)', fontWeight: 600, color: 'var(--fg)', margin: 0, marginBottom: 'var(--space-2)' }}>
           {lang === 'ru' ? 'Активность чтения' : 'Reading Activity'}
         </h3>
-        <p className="text-sm text-slate-500">
+        <p style={{ fontSize: 'var(--text-sm)', color: 'var(--muted)' }}>
           {lang === 'ru'
             ? 'Чем больше часов чтения в день, тем темнее ячейка'
             : 'The more hours read per day, the darker the cell'}
         </p>
       </div>
 
-      <div className="flex justify-center">
-        <div className="overflow-x-auto pb-2">
-          <div className="inline-flex flex-col">
-          <div style={{ position: 'relative', height: `${CELL_SIZE}px`, marginLeft: '22px', marginBottom: '2px' }}>
+      <div style={{ display: 'flex', justifyContent: 'center' }}>
+        <div style={{ overflowX: 'auto', paddingBottom: 'var(--space-2)' }}>
+          <div style={{ display: 'inline-flex', flexDirection: 'column' }}>
+          <div style={{ position: 'relative', height: CELL_SIZE, marginLeft: 22, marginBottom: 2 }}>
             {monthStartCols
               .filter((m, i, arr) => i === 0 || m.col !== arr[i - 1].col)
               .map((m) => (
                 <div
                   key={m.label}
-                  className="text-xs text-slate-500 absolute top-0"
-                  style={{ left: `${m.col * COL_WIDTH}px`, whiteSpace: 'nowrap', lineHeight: `${CELL_SIZE}px` }}
+                  style={{
+                    position: 'absolute', top: 0, left: m.col * COL_WIDTH,
+                    whiteSpace: 'nowrap', lineHeight: `${CELL_SIZE}px`,
+                    fontSize: 'var(--text-xs)', color: 'var(--meta)',
+                  }}
                 >
                   {m.label}
                 </div>
               ))}
           </div>
 
-          <div className="flex">
-            <div className="flex flex-col gap-[3px] mr-[3px]">
+          <div style={{ display: 'flex' }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: CELL_GAP, marginRight: CELL_GAP }}>
               {dayLabels.map((label, i) => (
                 <div
                   key={i}
-                  className="text-xs text-slate-500 text-right pr-1"
-                  style={{ width: '22px', height: `${CELL_SIZE}px`, lineHeight: `${CELL_SIZE}px` }}
+                  style={{
+                    width: 22, height: CELL_SIZE, lineHeight: `${CELL_SIZE}px`,
+                    fontSize: 'var(--text-xs)', color: 'var(--meta)', textAlign: 'right',
+                    paddingRight: 4,
+                  }}
                 >
                   {label || ''}
                 </div>
               ))}
             </div>
 
-            <div className="flex gap-[3px]">
+            <div style={{ display: 'flex', gap: CELL_GAP }}>
               {weeks.map((week, wi) => (
-                <div key={wi} className="flex flex-col gap-[3px]">
+                <div key={wi} style={{ display: 'flex', flexDirection: 'column', gap: CELL_GAP }}>
                   {week.map((day, di) => {
                     if (!day) {
                       return (
                         <div
                           key={`${wi}-${di}`}
-                          style={{ width: `${CELL_SIZE}px`, height: `${CELL_SIZE}px` }}
+                          style={{ width: CELL_SIZE, height: CELL_SIZE }}
                         />
                       );
                     }
@@ -170,9 +184,17 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
                     return (
                       <div
                         key={key}
-                        className={`rounded-sm border border-slate-500/30 ${getCellColor(hours)} transition-colors hover:ring-2 hover:ring-[#6B9071] cursor-pointer`}
-                        style={{ width: `${CELL_SIZE}px`, height: `${CELL_SIZE}px` }}
                         title={getTooltip(day, hours)}
+                        style={{
+                          width: CELL_SIZE, height: CELL_SIZE,
+                          borderRadius: 2,
+                          backgroundColor: getCellColor(hours),
+                          border: '1px solid color-mix(in oklab, var(--accent) 20%, transparent)',
+                          transition: 'all 0.15s',
+                          cursor: 'pointer',
+                        }}
+                        onMouseEnter={e => { e.currentTarget.style.outline = '2px solid var(--accent)'; e.currentTarget.style.outlineOffset = '1px'; }}
+                        onMouseLeave={e => { e.currentTarget.style.outline = 'none'; }}
                       />
                     );
                   })}
@@ -184,15 +206,14 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
         </div>
       </div>
 
-      {/* Легенда */}
-      <div className="flex items-center gap-2 mt-4 text-xs text-slate-500">
+      <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--meta)' }}>
         <span>{lang === 'ru' ? 'Меньше' : 'Less'}</span>
-        <div className="flex gap-1">
-          <div className="w-3 h-3 rounded-sm bg-slate-100" />
-          <div className="w-3 h-3 rounded-sm bg-[#D6E1D8]" />
-          <div className="w-3 h-3 rounded-sm bg-[#B8CCBC]" />
-          <div className="w-3 h-3 rounded-sm bg-[#8AAB90]" />
-          <div className="w-3 h-3 rounded-sm bg-[#6B9071]" />
+        <div style={{ display: 'flex', gap: 4 }}>
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--border)' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--accent-soft)' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#B8CCBC' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#8AAB90' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--accent)' }} />
         </div>
         <span>{lang === 'ru' ? 'Больше' : 'More'}</span>
       </div>

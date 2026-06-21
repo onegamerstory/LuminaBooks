@@ -17,14 +17,14 @@ const EmptyState: React.FC<EmptyStateProps> = ({ lang, hasBooks }) => {
   const t = translations[lang];
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-[#F0F4F1] rounded-2xl border-2 border-dashed border-[#6b9071]">
-      <Library size={48} className="text-[#6b9071] mb-4 opacity-20" />
+    <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-page rounded-2xl border-2 border-dashed border-accent">
+      <Library size={48} className="text-accent mb-4 opacity-20" />
       {hasBooks ? (
-        <p className="text-lg text-[#6b9071]">{t.noBooksFiltered}</p>
+        <p className="text-lg text-accent">{t.noBooksFiltered}</p>
       ) : (
         <>
-          <p className="text-lg text-[#6b9071]">{t.noBooks}</p>
-          <p className="text-sm text-[#6b9071]">{t.tryAdding}</p>
+          <p className="text-lg text-accent">{t.noBooks}</p>
+          <p className="text-sm text-accent">{t.tryAdding}</p>
         </>
       )}
     </div>

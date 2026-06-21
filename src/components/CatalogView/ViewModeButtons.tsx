@@ -24,13 +24,13 @@ const ViewModeButtons: React.FC<ViewModeButtonsProps> = ({
   const t = translations[lang];
 
   return (
-    <div className="flex gap-1 bg-[#F0F4F1] p-1 rounded-lg border border-slate-200">
+    <div className="flex gap-1 bg-page p-1 rounded-lg border border-slate-200">
       <button
         onClick={() => onModeChange('large')}
         className={`p-2 rounded-lg transition-colors ${
           currentMode === 'large'
-            ? 'bg-[#6b9071] text-white'
-            : 'bg-[#F0F4F1] text-slate-600 hover:bg-[#D6E1D8]'
+            ? 'bg-accent text-accent-on'
+            : 'bg-page text-slate-600 hover:bg-accent-soft'
         }`}
         title={lang === 'ru' ? 'Крупная сетка' : 'Large grid'}
       >
@@ -40,8 +40,8 @@ const ViewModeButtons: React.FC<ViewModeButtonsProps> = ({
         onClick={() => onModeChange('table')}
         className={`p-2 rounded-lg transition-colors ${
           currentMode === 'table'
-            ? 'bg-[#6b9071] text-white'
-            : 'bg-[#F0F4F1] text-slate-600 hover:bg-[#D6E1D8]'
+            ? 'bg-accent text-accent-on'
+            : 'bg-page text-slate-600 hover:bg-accent-soft'
         }`}
         title={lang === 'ru' ? 'Таблица' : 'Table'}
       >
