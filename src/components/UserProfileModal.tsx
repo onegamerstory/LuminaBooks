@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power } from 'lucide-react';
+import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power, Check } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { version } from '../../package.json';
 
@@ -92,8 +92,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
     onClose();
   };
 
+  const [copied, setCopied] = useState(false);
+
   const handleCopyUrl = () => {
-    navigator.clipboard.writeText(serverUrl);
+    navigator.clipboard.writeText(serverUrl).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
   };
 
   return (
@@ -242,7 +247,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   role="switch"
                   aria-checked={autoSync}
                   onClick={() => onAutoSyncChange(!autoSync)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${autoSync ? 'bg-accent' : 'bg-accent-soft/50'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${autoSync ? 'bg-accent' : 'bg-accent-soft'}`}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
@@ -270,7 +275,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   role="switch"
                   aria-checked={launchAtStartup}
                   onClick={() => onLaunchAtStartupChange(!launchAtStartup)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${launchAtStartup ? 'bg-accent' : 'bg-accent-soft/50'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${launchAtStartup ? 'bg-accent' : 'bg-accent-soft'}`}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${launchAtStartup ? 'translate-x-5' : 'translate-x-0'}`}
@@ -326,10 +331,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                     </div>
                     <button
                       onClick={handleCopyUrl}
-                      className="p-2 bg-accent-soft/50 hover:bg-accent-soft rounded-lg text-muted transition-colors"
+                      className={`p-2 rounded-lg transition-colors ${copied ? 'bg-accent text-accent-on' : 'hover:bg-accent-soft text-muted'}`}
                       title={lang === 'ru' ? 'Копировать URL' : 'Copy URL'}
                     >
-                      <Copy size={16} />
+                      {copied ? <Check size={16} /> : <Copy size={16} />}
                     </button>
                   </div>
                 ) : (
