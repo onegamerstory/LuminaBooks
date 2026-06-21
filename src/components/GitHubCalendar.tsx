@@ -60,11 +60,11 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
   }, [dailyHours]);
 
   const getCellColor = (hours: number): string => {
-    if (hours === 0) return 'var(--border)';
+    if (hours === 0) return 'color-mix(in oklab, var(--accent) 10%, var(--surface))';
     const intensity = hours / maxHours;
     if (intensity <= 0.25) return 'var(--accent-soft)';
-    if (intensity <= 0.5) return '#B8CCBC';
-    if (intensity <= 0.75) return '#8AAB90';
+    if (intensity <= 0.5) return 'color-mix(in oklab, var(--accent) 40%, var(--surface))';
+    if (intensity <= 0.75) return 'color-mix(in oklab, var(--accent) 65%, var(--surface))';
     return 'var(--accent)';
   };
 
@@ -209,10 +209,10 @@ const GitHubCalendar: React.FC<GitHubCalendarProps> = ({ books, lang }) => {
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-2)', marginTop: 'var(--space-4)', fontSize: 'var(--text-xs)', color: 'var(--meta)' }}>
         <span>{lang === 'ru' ? 'Меньше' : 'Less'}</span>
         <div style={{ display: 'flex', gap: 4 }}>
-          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--border)' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'color-mix(in oklab, var(--accent) 10%, var(--surface))' }} />
           <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--accent-soft)' }} />
-          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#B8CCBC' }} />
-          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: '#8AAB90' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'color-mix(in oklab, var(--accent) 40%, var(--surface))' }} />
+          <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'color-mix(in oklab, var(--accent) 65%, var(--surface))' }} />
           <div style={{ width: 12, height: 12, borderRadius: 2, backgroundColor: 'var(--accent)' }} />
         </div>
         <span>{lang === 'ru' ? 'Больше' : 'More'}</span>

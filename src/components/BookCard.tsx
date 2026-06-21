@@ -35,8 +35,8 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
   };
 
   return (
-    <div className="group bg-[#F0F4F1] rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-[#C8D6CB] flex flex-col h-full">
-      <div className="relative aspect-[2/3] overflow-hidden bg-slate-100">
+    <div className="group bg-surface rounded-2xl overflow-hidden shadow-card hover:shadow-xl transition-all duration-300 border border-default flex flex-col h-full">
+      <div className="relative aspect-[2/3] overflow-hidden bg-accent-soft">
         <img 
           src={book.coverUrl || `https://picsum.photos/seed/${book.title}/400/600`} 
           alt={book.title}
@@ -56,8 +56,8 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
               disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
               className={`p-2 backdrop-blur-md rounded-lg transition-colors shadow-md ${
       book.status === BookStatus.WANT_TO_READ && !book.inQueue
-        ? 'bg-[#D6E1D8] hover:bg-[#B8CCBC] text-[#1E2920] cursor-pointer'
-        : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'
+        ? 'bg-accent-soft hover:bg-accent text-accent-on hover:text-accent-on cursor-pointer'
+        : 'bg-accent-soft/30 text-muted cursor-not-allowed'
               }`}
               title={lang === 'ru' ? 'В очередь' : 'To Queue'}
             >
@@ -70,14 +70,14 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
           )}
           <button 
             onClick={(e) => { e.stopPropagation(); onEdit(); }}
-            className="p-2 bg-[#F0F4F1]/90 hover:bg-[#F0F4F1] backdrop-blur-md rounded-lg text-[#1E2920] transition-colors shadow-md"
+            className="p-2 bg-surface/80 hover:bg-surface backdrop-blur-md rounded-lg text-fg transition-colors shadow-card"
             title={lang === 'ru' ? 'Редактировать' : 'Edit'}
           >
             <Edit2 size={16} />
           </button>
           <button 
             onClick={(e) => { e.stopPropagation(); onDelete(); }}
-            className="p-2 bg-red-500/90 hover:bg-red-500 backdrop-blur-md rounded-lg text-white transition-colors shadow-md"
+            className="p-2 bg-danger/80 hover:bg-danger backdrop-blur-md rounded-lg text-white transition-colors shadow-card"
             title={lang === 'ru' ? 'Удалить' : 'Delete'}
           >
             <Trash2 size={16} />
@@ -91,7 +91,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
         {/* Процент прочтения — прогресс бар */}
         <div className="absolute bottom-0 left-0 right-0 bg-black/60 backdrop-blur-sm p-2">
           <div className="w-full bg-white/20 rounded-full h-1.5 mb-1">
-            <div className="bg-[#6B9071] h-1.5 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
+            <div className="bg-accent h-1.5 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
           </div>
           <div className="text-white text-xs font-semibold text-center">{getBookPercentage(book)}%</div>
         </div>
@@ -100,12 +100,12 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
       <div className="p-4 flex flex-col flex-grow space-y-2">
         <div className="flex items-start justify-between gap-2">
           <div className="flex items-start gap-1 flex-grow min-w-0">
-            <h3 className="font-bold text-[#1E2920] line-clamp-1 text-lg leading-tight" title={book.title}>
+            <h3 className="font-bold text-fg line-clamp-1 text-lg leading-tight" title={book.title}>
               {book.title}
             </h3>
             {book.isPartOfSeries && (
               <div className="flex-shrink-0 pt-1" title={lang === 'ru' ? 'Часть цикла/коллекции' : 'Part of series/collection'}>
-                <Link size={16} className="text-[#6B9071]" />
+                <Link size={16} className="text-accent" />
               </div>
             )}
           </div>
@@ -115,13 +115,13 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
           </div>
         </div>
 
-        <div className="flex items-center gap-1.5 text-slate-500 text-sm">
+        <div className="flex items-center gap-1.5 text-muted text-sm">
           <User size={14} />
           <span className="line-clamp-1">{book.author} • {book.year}</span>
         </div>
 
         {book.startDate && (
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs">
+          <div className="flex items-center gap-1.5 text-muted text-xs">
             <Calendar size={14} />
             <span>
               {book.startDate} 
@@ -135,7 +135,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
         )}
 
         {book.description && (
-          <p className="text-slate-500 text-xs line-clamp-2 italic pt-2 border-t border-slate-300">
+          <p className="text-muted text-xs line-clamp-2 italic pt-2 border-t border-default">
             "{book.description}"
           </p>
         )}

@@ -27,7 +27,7 @@ const getStatusColor = (status: BookStatus): string => {
     case BookStatus.POSTPONED:
       return 'text-orange-600 bg-orange-50';
     default:
-      return 'text-slate-600 bg-slate-50';
+      return 'text-muted bg-page';
   }
 };
 
@@ -62,13 +62,13 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
   if (!isOpen || !book) return null;
 
   return createPortal(
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-xl shadow-2xl max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
-        <div className="flex items-start justify-between p-4 border-b border-slate-100">
-          <h2 className="text-lg font-bold text-[#1E2920]">{t.randomBook}</h2>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="bg-surface rounded-xl shadow-overlay max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
+        <div className="flex items-start justify-between p-4 border-b border-default">
+          <h2 className="text-lg font-bold text-fg">{t.randomBook}</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-muted hover:text-fg transition-colors"
             aria-label="Close"
           >
             <X size={20} />
@@ -82,24 +82,24 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
                 <img
                   src={book.coverUrl}
                   alt={book.title}
-                  className="w-32 h-48 object-cover rounded-lg shadow-md"
+                  className="w-32 h-48 object-cover rounded-lg shadow-card"
                   onError={handleCoverError}
                 />
               ) : (
-                <div className="w-32 h-48 bg-[#D6E1D8] rounded-lg flex items-center justify-center">
-                  <span className="text-[#6B9071] text-sm">No cover</span>
+                <div className="w-32 h-48 bg-accent-soft rounded-lg flex items-center justify-center">
+                  <span className="text-accent text-sm">No cover</span>
                 </div>
               )}
             </div>
 
             <div className="flex-1 space-y-3">
               <div>
-                <h3 className="text-xl font-bold text-[#1E2920]">{book.title}</h3>
+                <h3 className="text-xl font-bold text-fg">{book.title}</h3>
                 {book.author && (
-                  <p className="text-slate-600 mt-1">{book.author}</p>
+                  <p className="text-muted mt-1">{book.author}</p>
                 )}
                 {book.year && (
-                  <p className="text-slate-500 text-sm">{book.year}</p>
+                  <p className="text-muted text-sm">{book.year}</p>
                 )}
               </div>
 
@@ -112,10 +112,10 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-3 p-4 border-t border-slate-100 bg-slate-50">
+        <div className="flex gap-3 p-4 border-t border-default bg-page">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-slate-700 hover:text-slate-900 font-medium text-sm rounded-lg hover:bg-slate-100 transition-colors"
+            className="flex-1 px-4 py-2 text-fg hover:text-fg font-medium text-sm rounded-lg hover:bg-surface transition-colors"
           >
             {t.cancel}
           </button>
@@ -124,7 +124,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
               onStartReading(book);
               onClose();
             }}
-            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-[#6B9071] hover:bg-[#5A7A60] text-white font-medium text-sm rounded-lg transition-colors"
+            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-accent-on font-medium text-sm rounded-lg transition-colors"
           >
             <Play size={16} />
             <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
@@ -134,7 +134,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
               onAddToQueue(book);
               onClose();
             }}
-            className="flex-1 px-4 py-2 bg-[#D6E1D8] hover:bg-[#B8CCBC] text-[#1E2920] font-medium text-sm rounded-lg transition-colors"
+            className="flex-1 px-4 py-2 bg-accent-soft hover:bg-accent text-accent hover:text-accent-on font-medium text-sm rounded-lg transition-colors"
           >
             {t.addToQueue}
           </button>

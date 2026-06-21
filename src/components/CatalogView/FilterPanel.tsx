@@ -91,7 +91,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   ];
 
   return (
-    <div className="w-60 shrink-0 space-y-6 bg-page border border-default rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+    <div className="w-60 shrink-0 space-y-6 bg-surface border border-default rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
       {/* Sort section */}
       <div>
         <h3 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
@@ -113,7 +113,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     className={`p-1.5 rounded transition-colors ${
                       isAsc
                         ? 'bg-accent text-accent-on'
-                        : 'text-slate-600'
+                        : 'text-muted'
                     }`}
                     onMouseEnter={e => { if (!isAsc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
                     onMouseLeave={e => { if (!isAsc) e.currentTarget.style.backgroundColor = '' }}
@@ -126,7 +126,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     className={`p-1.5 rounded transition-colors ${
                       isDesc
                         ? 'bg-accent text-accent-on'
-                        : 'text-slate-600'
+                        : 'text-muted'
                     }`}
                     onMouseEnter={e => { if (!isDesc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
                     onMouseLeave={e => { if (!isDesc) e.currentTarget.style.backgroundColor = '' }}
@@ -153,11 +153,11 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 type="checkbox"
                 checked={isAllSelected}
                 onChange={() => onToggleStatus('All')}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[var(--accent)]"
+                    className="w-4 h-4 rounded border-default cursor-pointer accent-[var(--accent)]"
               />
               <span className="text-sm text-fg font-medium">{t.allStatuses}</span>
             </div>
-            <span className="text-xs text-slate-500">{books.length}</span>
+            <span className="text-xs text-muted">{books.length}</span>
           </label>
 
           {STATUS_LIST.map(status => {
@@ -173,13 +173,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => onToggleStatus(status)}
-                    className="w-4 h-4 rounded border-slate-300 cursor-pointer accent-[var(--accent)]"
+                className="w-4 h-4 rounded border-default cursor-pointer accent-[var(--accent)]"
                   />
-                  <span className={`text-sm ${getStatusColor(status)}`}>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusColor(status)}`}>
                     {t[statusLabels[status]]}
                   </span>
                 </div>
-                <span className="text-xs text-slate-500">{count}</span>
+                <span className="text-xs text-muted">{count}</span>
               </label>
             );
           })}

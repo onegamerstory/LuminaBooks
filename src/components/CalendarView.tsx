@@ -226,12 +226,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
 
   return (
-    <div className="flex bg-page rounded-2xl shadow-md border border-default overflow-hidden">
+    <div className="flex bg-surface rounded-2xl shadow-md border border-default overflow-hidden">
       {/* Left: Calendar */}
-      <div className="flex-1 flex flex-col bg-page overflow-hidden">
+      <div className="flex-1 flex flex-col bg-surface overflow-hidden">
         {/* Header */}
         <div className="p-4 border-b border-default flex flex-col sm:flex-row items-center justify-between gap-3">
-          <h2 className="text-xl font-bold font-serif text-fg shrink-0">{t.readingCalendar}</h2>
+          <h2 className="text-xl font-bold font-display text-fg shrink-0">{t.readingCalendar}</h2>
 
           <div className="flex items-center gap-2 p-1 rounded-xl" style={{backgroundColor: 'var(--border)'}}>
               <button
@@ -293,7 +293,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-page border-b border-default">
+        <div className="grid grid-cols-7 bg-surface border-b border-default">
           {weekDays.map((day: string) => (
             <div key={day} className="py-2 text-center text-xs font-bold text-muted uppercase tracking-widest">
               {day}
@@ -385,9 +385,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       <div className="w-px" style={{backgroundColor: 'var(--border)'}}></div>
 
       {/* Right: Statistics */}
-      <div className="w-[280px] shrink-0 bg-page overflow-auto flex flex-col">
+      <div className="w-[280px] shrink-0 bg-surface overflow-auto flex flex-col">
         <div className="p-4 border-b border-default">
-          <h3 className="text-base font-bold font-serif text-fg">
+          <h3 className="text-base font-bold text-fg">
             {t.statisticsFor} {monthName}
           </h3>
         </div>
@@ -448,7 +448,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             onClick={(e: React.MouseEvent) => e.stopPropagation()}
           >
             <div className="sticky top-0 bg-surface border-b px-6 py-4 flex items-center justify-between z-10">
-              <h2 className="text-xl font-bold font-serif text-fg">
+              <h2 className="text-xl font-bold font-display text-fg">
                 {t.selectBookToStart}
               </h2>
               <button 

@@ -97,15 +97,15 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-2xl shadow-2xl animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-        <div className="border-b px-8 py-5 flex items-center justify-between sticky top-0 bg-white">
-          <h2 className="text-xl font-bold font-serif text-[#1E2920]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-overlay animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
+        <div className="border-b border-default px-8 py-5 flex items-center justify-between sticky top-0 bg-surface">
+          <h2 className="text-xl font-bold font-display text-fg">
             {lang === 'ru' ? 'Настройки' : 'Settings'}
           </h2>
           <button 
             onClick={onClose} 
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400"
+            className="p-2 hover:bg-page rounded-full text-muted"
             title="Close"
           >
             <X size={20} />
@@ -117,11 +117,11 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="py-6">
             <div className="flex items-center gap-6">
               <div className="flex-shrink-0 w-48">
-                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
+                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
               </div>
               <div className="flex items-center gap-4 flex-1 justify-center">
-                <div className="w-20 h-20 rounded-full bg-slate-200 flex items-center justify-center overflow-hidden border-2 border-[#6B9071] flex-shrink-0">
+                <div className="w-20 h-20 rounded-full bg-accent-soft flex items-center justify-center overflow-hidden border-2 border-accent flex-shrink-0">
                   {profile.photoUrl ? (
                     <img 
                       src={profile.photoUrl} 
@@ -132,20 +132,20 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                       }}
                     />
                   ) : (
-                    <User size={32} className="text-slate-400" />
+                    <User size={32} className="text-muted" />
                   )}
                 </div>
                 <div className="flex flex-col gap-2">
                   <button
                     onClick={handlePhotoClick}
-                    className="px-4 py-1.5 border-2 border-[#6B9071] text-[#6B9071] text-sm rounded-lg hover:bg-[#6B9071] hover:text-white transition-colors flex items-center gap-1.5"
+                    className="px-4 py-1.5 border-2 border-accent text-accent text-sm rounded-lg hover:bg-accent hover:text-accent-on transition-colors flex items-center gap-1.5"
                   >
                     <Upload size={16} />
                     {lang === 'ru' ? 'Загрузить фото' : 'Upload photo'}
                   </button>
                   <button
                     onClick={handleDeletePhoto}
-                    className="px-4 py-1.5 bg-slate-100 text-slate-600 text-sm rounded-lg hover:bg-slate-200 transition-colors"
+                    className="px-4 py-1.5 bg-accent-soft/50 text-muted text-sm rounded-lg hover:bg-danger/10 hover:text-danger transition-colors"
                   >
                     {lang === 'ru' ? 'Удалить' : 'Delete'}
                   </button>
@@ -161,17 +161,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
             />
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 2: Nickname */}
           <div className="py-6">
             <div className="flex items-center gap-6">
               <div className="flex-shrink-0 w-48">
                 <div className="flex items-center gap-2">
-                  <User size={16} className="text-slate-500" />
-                  <p className="text-sm font-semibold text-slate-700">{t.nickname}</p>
+                  <User size={16} className="text-muted" />
+                  <p className="text-sm font-semibold text-fg">{t.nickname}</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Ваше имя в приложении' : 'Your name in the app'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Ваше имя в приложении' : 'Your name in the app'}</p>
               </div>
               <div className="flex-1">
                 <input 
@@ -179,33 +179,33 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   placeholder={t.enterNickname}
                   value={profile.nickname}
                   onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                  className="w-full px-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                 />
               </div>
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 3: Default Cover */}
           <div className="py-6">
             <div className="flex gap-6">
               <div className="flex-shrink-0 w-48">
                 <div className="flex items-center gap-2">
-                  <Book size={16} className="text-slate-500" />
-                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Обложка по умолчанию' : 'Default Cover'}</p>
+                  <Book size={16} className="text-muted" />
+                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Обложка по умолчанию' : 'Default Cover'}</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Обложка будет использоваться для книг без обложки' : 'Cover will be used for books without a cover'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Обложка будет использоваться для книг без обложки' : 'Cover will be used for books without a cover'}</p>
               </div>
               <div className="flex-1">
                 <div className="relative">
-                  <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={16} />
+                  <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
                   <input 
                     type="text" 
                     placeholder={lang === 'ru' ? 'Введите URL обложки...' : 'Enter cover URL...'}
                     value={profile.defaultCoverUrl}
                     onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071]"
+                    className="w-full pl-10 pr-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
                   />
                 </div>
                 {profile.defaultCoverUrl && (
@@ -213,7 +213,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                     <img 
                       src={profile.defaultCoverUrl} 
                       alt="Cover preview"
-                      className="w-16 h-24 object-cover rounded-lg border border-slate-200"
+                      className="w-16 h-24 object-cover rounded-lg border border-default"
                       onError={(e) => {
                         e.currentTarget.style.display = 'none';
                       }}
@@ -224,17 +224,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 4: Auto Sync */}
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0 w-48">
                 <div className="flex items-center gap-2">
-                  <RefreshCw size={16} className="text-slate-500" />
-                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}</p>
+                  <RefreshCw size={16} className="text-muted" />
+                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Автоматически обновлять данные с другого устройства' : 'Automatically sync data from other devices'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Автоматически обновлять данные с другого устройства' : 'Automatically sync data from other devices'}</p>
               </div>
               <div className="flex-shrink-0">
                 <button
@@ -242,7 +242,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   role="switch"
                   aria-checked={autoSync}
                   onClick={() => onAutoSyncChange(!autoSync)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${autoSync ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${autoSync ? 'bg-accent' : 'bg-accent-soft/50'}`}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${autoSync ? 'translate-x-5' : 'translate-x-0'}`}
@@ -252,17 +252,17 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 4.5: Launch at Login */}
           <div className="py-6">
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0 w-48">
                 <div className="flex items-center gap-2">
-                  <Power size={16} className="text-slate-500" />
-                  <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Запуск при входе' : 'Launch at Login'}</p>
+                  <Power size={16} className="text-muted" />
+                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Запуск при входе' : 'Launch at Login'}</p>
                 </div>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Автоматически запускать приложение при входе в систему' : 'Automatically start the app when you log in'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Автоматически запускать приложение при входе в систему' : 'Automatically start the app when you log in'}</p>
               </div>
               <div className="flex-shrink-0">
                 <button
@@ -270,7 +270,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   role="switch"
                   aria-checked={launchAtStartup}
                   onClick={() => onLaunchAtStartupChange(!launchAtStartup)}
-                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-[#6B9071] focus:ring-offset-2 ${launchAtStartup ? 'bg-[#6B9071]' : 'bg-slate-300'}`}
+                  className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${launchAtStartup ? 'bg-accent' : 'bg-accent-soft/50'}`}
                 >
                   <span
                     className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow ring-0 transition duration-200 ease-in-out ${launchAtStartup ? 'translate-x-5' : 'translate-x-0'}`}
@@ -286,8 +286,8 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="py-6">
             <div className="flex items-center gap-6">
               <div className="flex-shrink-0 w-48">
-                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Google Books API ключ' : 'Google Books API Key'}</p>
-                <p className="text-xs text-slate-500 mt-1">{lang === 'ru' ? 'Ключ для расширенного поиска книг по API Google' : 'API key for extended book search via Google'}</p>
+                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Google Books API ключ' : 'Google Books API Key'}</p>
+                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Ключ для расширенного поиска книг по API Google' : 'API key for extended book search via Google'}</p>
               </div>
               <div className="flex-1">
                 <input
@@ -295,55 +295,55 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                   placeholder={lang === 'ru' ? 'Введите API ключ...' : 'Enter API key...'}
                   value={profile.googleApiKey}
                   onChange={(e) => setProfile(prev => ({ ...prev, googleApiKey: e.target.value }))}
-                  className="w-full px-3 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[#6B9071] font-mono text-sm"
+                  className="w-full px-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent font-mono text-sm"
                 />
               </div>
             </div>
           </div>
 
-          <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
+          <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 6: Version & Browser */}
           <div className="py-6 space-y-4">
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">
-                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Версия приложения' : 'App Version'}</p>
+                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Версия приложения' : 'App Version'}</p>
               </div>
               <div className="flex-shrink-0">
-                <p className="text-sm text-slate-600">{version}</p>
+                <p className="text-sm text-muted">{version}</p>
               </div>
             </div>
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">
-                <p className="text-sm font-semibold text-slate-700">{lang === 'ru' ? 'Доступно в браузере' : 'Available in browser'}</p>
+                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Доступно в браузере' : 'Available in browser'}</p>
               </div>
               <div className="flex-shrink-0">
                 {serverUrl ? (
                   <div className="flex items-center gap-2">
-                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-slate-50 border border-slate-200 rounded-lg text-sm text-slate-600">
-                      <Globe size={14} className="text-[#6B9071]" />
+                    <div className="flex items-center gap-1.5 px-3 py-1.5 bg-page border border-default rounded-lg text-sm text-fg">
+                      <Globe size={14} className="text-accent" />
                       <span>{serverUrl}</span>
                     </div>
                     <button
                       onClick={handleCopyUrl}
-                      className="p-2 bg-slate-100 hover:bg-slate-200 rounded-lg text-slate-500 transition-colors"
+                      className="p-2 bg-accent-soft/50 hover:bg-accent-soft rounded-lg text-muted transition-colors"
                       title={lang === 'ru' ? 'Копировать URL' : 'Copy URL'}
                     >
                       <Copy size={16} />
                     </button>
                   </div>
                 ) : (
-                  <p className="text-sm text-slate-400">{lang === 'ru' ? 'Сервер не запущен' : 'Server not running'}</p>
+                  <p className="text-sm text-muted">{lang === 'ru' ? 'Сервер не запущен' : 'Server not running'}</p>
                 )}
               </div>
             </div>
           </div>
         </div>
 
-        <div className="px-8 pb-8 pt-2 bg-white">
+        <div className="px-8 pb-8 pt-2 bg-surface">
           <button
             onClick={handleSave}
-            className="w-full px-4 py-2.5 bg-[#6B9071] text-white rounded-lg hover:bg-[#59785E] font-semibold transition-colors"
+            className="w-full px-4 py-2.5 bg-accent text-accent-on rounded-lg hover:bg-accent-hover font-semibold transition-colors"
           >
             {t.save}
           </button>

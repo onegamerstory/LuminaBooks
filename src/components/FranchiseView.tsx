@@ -30,9 +30,9 @@ const FranchiseCard: React.FC<{
   const remainingCount = franchiseBooks.length - displayBooks.length;
 
   return (
-    <div className="bg-page rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-default flex flex-col h-full">
+    <div className="bg-surface rounded-2xl overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-default flex flex-col h-full">
       {/* Обложка коллекции или стопка обложек книг */}
-      <div className="relative h-48 bg-gradient-to-br from-slate-100 to-slate-50 flex items-center justify-center overflow-hidden">
+      <div className="relative h-48 bg-gradient-to-br from-accent-soft/50 to-page flex items-center justify-center overflow-hidden">
         {franchise.coverUrl ? (
           <img
             src={franchise.coverUrl}
@@ -66,7 +66,7 @@ const FranchiseCard: React.FC<{
             )}
           </div>
         ) : (
-          <div className="text-center text-slate-400">
+          <div className="text-center text-muted">
             <p className="text-sm">{lang === 'ru' ? 'Нет книг' : 'No books'}</p>
           </div>
         )}
@@ -79,12 +79,12 @@ const FranchiseCard: React.FC<{
         </h3>
 
         {franchise.description && (
-          <p className="text-slate-500 text-xs line-clamp-2 italic mb-3 border-t border-slate-300 pt-2">
+          <p className="text-muted text-xs line-clamp-2 italic mb-3 border-t border-default pt-2">
             {franchise.description}
           </p>
         )}
 
-        <div className="text-slate-500 text-sm mb-3 flex-grow">
+        <div className="text-muted text-sm mb-3 flex-grow">
           {franchiseBooks.length} {lang === 'ru' ? 'книг' : 'books'}
         </div>
 
@@ -92,7 +92,7 @@ const FranchiseCard: React.FC<{
         <div className="flex gap-2">
           <button
             onClick={onEdit}
-            className="flex-1 p-2 bg-white border border-slate-300 text-fg rounded-lg hover:bg-slate-100 transition-colors font-medium text-sm"
+            className="flex-1 p-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Редактировать' : 'Edit'}
           >
             <Edit2 size={16} className="inline mr-1" />
@@ -100,7 +100,7 @@ const FranchiseCard: React.FC<{
           </button>
           <button
             onClick={onDelete}
-            className="flex-1 p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium text-sm"
+            className="flex-1 p-2 bg-danger/10 text-danger rounded-lg hover:bg-danger/20 transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Удалить' : 'Delete'}
           >
             <Trash2 size={16} className="inline mr-1" />
@@ -200,10 +200,10 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       {/* Заголовок и поиск */}
       <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center mb-6">
         <div className="flex-grow">
-          <h1 className="text-2xl font-bold text-fg mb-2">
+          <h1 className="text-2xl font-bold font-display text-fg mb-2">
             {lang === 'ru' ? 'Коллекции' : 'Collections'}
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-muted">
             {lang === 'ru'
               ? (() => {
                   const n = franchises.length;
@@ -231,7 +231,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
 
       {/* Поиск */}
       <div className="relative mb-6">
-        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400" />
+        <Search size={18} className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted" />
         <input
           type="text"
           placeholder={
@@ -239,7 +239,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
           }
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="w-full pl-10 pr-4 py-2 bg-white border border-[var(--accent)]/30 rounded-lg focus:ring-2 focus:ring-[var(--accent)] outline-none"
+          className="w-full pl-10 pr-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
         />
       </div>
 
@@ -260,7 +260,7 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
       ) : (
         <div className="flex-grow flex items-center justify-center text-center">
           <div>
-            <p className="text-slate-400 mb-2">
+            <p className="text-muted mb-2">
               {searchTerm
                 ? lang === 'ru'
                   ? 'Коллекции не найдены'

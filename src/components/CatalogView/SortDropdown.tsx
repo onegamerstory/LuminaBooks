@@ -47,9 +47,9 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   }, [isOpen, onToggle]);
 
   const renderRatingSection = () => (
-    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+      <div className="border-b border-default last:border-0 px-4 py-3">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Рейтинг' : 'Rating'}</span>
+        <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Рейтинг' : 'Rating'}</span>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -59,7 +59,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'rating-desc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'По убыванию' : 'Descending'}
           >
@@ -73,7 +73,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'rating-asc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'По возрастанию' : 'Ascending'}
           > 
@@ -85,9 +85,9 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   );
 
   const renderTitleSection = () => (
-    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+    <div className="border-b border-default last:border-0 px-4 py-3">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Название' : 'Name'}</span>
+        <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Название' : 'Name'}</span>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -97,7 +97,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'title-asc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'A-Z' : 'A-Z'}
           >
@@ -111,7 +111,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'title-desc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'Z-A' : 'Z-A'}
           >
@@ -123,9 +123,9 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   );
 
   const renderStatusSection = () => (
-    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+    <div className="border-b border-default last:border-0 px-4 py-3">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Статус' : 'Status'}</span>
+        <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Статус' : 'Status'}</span>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -135,7 +135,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'status-desc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'A-Z' : 'A-Z'}
           >
@@ -149,7 +149,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'status-asc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'Z-A' : 'Z-A'}
           >
@@ -161,9 +161,9 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
   );
 
   const renderPagesSection = () => (
-    <div className="border-b border-slate-100 last:border-0 px-4 py-3">
+    <div className="border-b border-default last:border-0 px-4 py-3">
       <div className="flex items-center justify-between gap-4">
-        <span className="text-sm text-slate-700 font-medium">{lang === 'ru' ? 'Страницы' : 'Pages'}</span>
+        <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Страницы' : 'Pages'}</span>
         <div className="flex gap-2">
           <button
             onClick={() => {
@@ -173,7 +173,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'pages-desc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'По убыванию' : 'Descending'}
           >
@@ -187,7 +187,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className={`p-2 rounded transition-colors ${
               currentOption === 'pages-asc'
                 ? 'bg-accent text-accent-on'
-                : 'text-slate-600 hover:bg-accent-soft'
+                : 'text-muted hover:bg-accent-soft'
             }`}
             title={lang === 'ru' ? 'По возрастанию' : 'Ascending'}
           >
@@ -203,37 +203,37 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
       {/* Sort Button */}
       <button
         onClick={onToggle}
-        className="flex items-center gap-2 bg-page border border-slate-200 rounded-lg px-3 py-2.5 hover:border-slate-300 transition-colors"
+        className="flex items-center gap-2 bg-surface border border-default rounded-lg px-3 py-2.5 hover:border-accent transition-colors"
       >
         {(currentOption === 'rating-desc' || currentOption === 'rating-asc') && (
           <>
             <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Рейтинг' : 'Rating'}</span>
-            {currentOption === 'rating-desc' && <TrendingDown size={16} className="text-slate-600" />}
-            {currentOption === 'rating-asc' && <TrendingUp size={16} className="text-slate-600" />}
+            {currentOption === 'rating-desc' && <TrendingDown size={16} className="text-muted" />}
+            {currentOption === 'rating-asc' && <TrendingUp size={16} className="text-muted" />}
           </>
         )}
         {(currentOption === 'title-asc' || currentOption === 'title-desc') && (
           <>
             <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Название' : 'Name'}</span>
-            {currentOption === 'title-asc' && <ArrowDownAZ size={16} className="text-slate-600" />}
-            {currentOption === 'title-desc' && <ArrowUpAZ size={16} className="text-slate-600" />}
+            {currentOption === 'title-asc' && <ArrowDownAZ size={16} className="text-muted" />}
+            {currentOption === 'title-desc' && <ArrowUpAZ size={16} className="text-muted" />}
           </>
         )}
         {(currentOption === 'status-asc' || currentOption === 'status-desc') && (
           <>
             <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Статус' : 'Status'}</span>
-            {currentOption === 'status-desc' && <ArrowDownAZ size={16} className="text-slate-600" />}
-            {currentOption === 'status-asc' && <ArrowUpAZ size={16} className="text-slate-600" />}
+            {currentOption === 'status-desc' && <ArrowDownAZ size={16} className="text-muted" />}
+            {currentOption === 'status-asc' && <ArrowUpAZ size={16} className="text-muted" />}
           </>
         )}
         {(currentOption === 'pages-asc' || currentOption === 'pages-desc') && (
           <>
             <span className="text-sm text-fg font-medium">{lang === 'ru' ? 'Страницы' : 'Pages'}</span>
-            {currentOption === 'pages-desc' && <ArrowDown01 size={16} className="text-slate-600" />}
-            {currentOption === 'pages-asc' && <ArrowUp01 size={16} className="text-slate-600" />}
+            {currentOption === 'pages-desc' && <ArrowDown01 size={16} className="text-muted" />}
+            {currentOption === 'pages-asc' && <ArrowUp01 size={16} className="text-muted" />}
           </>
         )}
-        <ChevronDown size={16} className="text-slate-400" />
+        <ChevronDown size={16} className="text-muted" />
       </button>
 
       {/* Dropdown Menu */}
@@ -243,7 +243,7 @@ const SortDropdown: React.FC<SortDropdownProps> = ({
             className="fixed inset-0 z-10" 
             onClick={onToggle}
           />
-          <div className="absolute top-full mt-2 right-0 bg-page border border-slate-200 rounded-lg shadow-lg z-20 min-w-max">
+          <div className="absolute top-full mt-2 right-0 bg-surface border border-default rounded-lg shadow-lg z-20 min-w-max">
             {renderRatingSection()}
             {renderTitleSection()}
             {renderStatusSection()}

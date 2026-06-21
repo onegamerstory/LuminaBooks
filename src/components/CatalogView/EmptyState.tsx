@@ -17,7 +17,7 @@ const EmptyState: React.FC<EmptyStateProps> = ({ lang, hasBooks }) => {
   const t = translations[lang];
 
   return (
-    <div className="flex flex-col items-center justify-center py-20 text-slate-400 bg-page rounded-2xl border-2 border-dashed border-accent">
+    <div className="flex flex-col items-center justify-center py-20 text-muted bg-surface rounded-2xl border-2 border-dashed border-accent">
       <Library size={48} className="text-accent mb-4 opacity-20" />
       {hasBooks ? (
         <p className="text-lg text-accent">{t.noBooksFiltered}</p>

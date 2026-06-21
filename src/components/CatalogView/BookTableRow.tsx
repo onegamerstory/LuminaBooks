@@ -30,7 +30,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
   const t = translations[lang];
 
   return (
-    <div className="bg-page rounded-xl shadow-sm border border-default hover:shadow-md hover:border-accent transition-all duration-200 p-4 flex gap-4 items-start">
+    <div className="bg-surface rounded-xl shadow-sm border border-default hover:shadow-md hover:border-accent transition-all duration-200 p-4 flex gap-4 items-start">
       {/* Обложка */}
       <div className="flex-shrink-0">
         {book.coverUrl && (
@@ -51,7 +51,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             <span className="text-accent flex-shrink-0">🔗</span>
           )}
         </div>
-        <p className="text-slate-600 text-xs mb-3">{book.author} • {book.year}</p>
+        <p className="text-muted text-xs mb-3">{book.author} • {book.year}</p>
         
         <div className="flex flex-wrap gap-3 items-center text-xs">
           {/* Статус */}
@@ -76,10 +76,10 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
 
           {/* Процент прочтения — прогресс бар */}
           <div className="flex items-center gap-2 min-w-[80px]">
-            <div className="flex-1 bg-slate-200 rounded-full h-2">
+            <div className="flex-1 bg-page rounded-full h-2">
               <div className="bg-accent h-2 rounded-full transition-all duration-500" style={{ width: `${getBookPercentage(book)}%` }} />
             </div>
-            <span className="text-xs font-medium text-slate-600 w-8 text-right">{getBookPercentage(book)}%</span>
+            <span className="text-xs font-medium text-muted w-8 text-right">{getBookPercentage(book)}%</span>
           </div>
 
           {/* Оценка */}
@@ -92,15 +92,15 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
 
           {/* Страницы */}
           {book.totalPages && (
-            <div className="text-slate-600">
+            <div className="text-muted">
               {book.totalPages} {lang === 'ru' ? 'стр.' : 'pages'}
             </div>
           )}
 
           {/* Даты */}
-          <div className="text-slate-500 text-xs">
+          <div className="text-muted text-xs">
             {book.startDate && <span>{book.startDate}</span>}
-            {book.startDate && book.endDate && <span className="text-slate-400 mx-1">→</span>}
+            {book.startDate && book.endDate && <span className="text-muted mx-1">→</span>}
             {book.endDate && <span>{book.endDate}</span>}
           </div>
         </div>
@@ -119,7 +119,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             className={`p-2 rounded-lg transition-colors font-medium ${
               book.status === BookStatus.WANT_TO_READ && !book.inQueue
                 ? 'bg-accent-soft text-fg'
-                : 'bg-slate-200/50 text-slate-400 cursor-not-allowed'
+                : 'bg-page/50 text-muted cursor-not-allowed'
             }`}
             onMouseEnter={e => {
               if (book.status === BookStatus.WANT_TO_READ && !book.inQueue) {
@@ -142,7 +142,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
         )}
         <button
           onClick={onEdit}
-          className="p-2 bg-white border border-slate-300 rounded-lg text-fg hover:bg-slate-100 transition-colors"
+          className="p-2 bg-surface border border-default rounded-lg text-fg hover:bg-page transition-colors"
           title={lang === 'ru' ? 'Редактировать' : 'Edit'}
         >
           <Edit2 size={16} />

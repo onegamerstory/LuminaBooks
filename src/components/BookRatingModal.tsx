@@ -79,7 +79,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
         {/* Фоновая звезда (пустая) */}
         <Star
           size={42}
-          className="text-slate-300 transition-colors"
+          className="text-muted transition-colors"
         />
         
         {/* Закрашенная звезда (целая или половина) */}
@@ -101,15 +101,15 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-xl shadow-2xl animate-in zoom-in duration-200">
-        <div className="flex items-center justify-between px-6 py-4 border-b">
-          <h2 className="text-xl font-bold font-serif text-[#1E2920]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="bg-surface rounded-2xl w-full max-w-xl shadow-overlay animate-in zoom-in duration-200">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-default">
+          <h2 className="text-xl font-bold font-display text-fg">
             {lang === 'ru' ? 'Оцените книгу' : 'Rate the Book'}
           </h2>
           <button 
             onClick={() => onSkip ? onSkip() : onClose()}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400 transition-colors"
+            className="p-2 hover:bg-page rounded-full text-muted transition-colors"
           >
             <X size={20} />
           </button>
@@ -117,10 +117,10 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
 
         <div className="p-8 flex flex-col items-center gap-8">
           <div className="text-center">
-            <p className="text-sm text-slate-500 mb-2">
+            <p className="text-sm text-muted mb-2">
               {lang === 'ru' ? 'Вы только что закончили' : 'You just finished reading'}
             </p>
-            <p className="text-lg font-semibold text-[#1E2920] truncate px-4">
+            <p className="text-lg font-semibold text-fg truncate px-4">
               "{bookTitle}"
             </p>
           </div>
@@ -130,21 +130,21 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
           </div>
 
           <div className="text-center">
-            <div className="text-4xl font-bold text-amber-500">
+            <div className="text-4xl font-bold text-warn">
               {(hoveredRating || rating).toFixed(1)}
             </div>
-            <p className="text-sm text-slate-400 mt-2">/ 10</p>
+            <p className="text-sm text-muted mt-2">/ 10</p>
           </div>
 
           <div className="w-full">
-            <label className="block text-sm font-medium text-slate-600 mb-2">
+            <label className="block text-sm font-medium text-fg mb-2">
               {lang === 'ru' ? 'Ваш отзыв (опционально)' : 'Your review (optional)'}
             </label>
             <textarea
               value={review}
               onChange={(e) => setReview(e.target.value)}
               placeholder={lang === 'ru' ? 'Напишите, что вы думаете об этой книге...' : 'Share your thoughts about this book...'}
-              className="w-full px-4 py-3 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-24 text-sm"
+              className="w-full px-4 py-3 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none resize-none h-24 text-sm"
             />
           </div>
 
@@ -152,7 +152,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
             {onSkip && (
               <button
                 onClick={handleSkip}
-                className="flex-1 px-4 py-2.5 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+                className="flex-1 px-4 py-2.5 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors font-medium"
               >
                 {lang === 'ru' ? 'Пропустить' : 'Skip'}
               </button>
@@ -160,7 +160,7 @@ const BookRatingModal: React.FC<BookRatingModalProps> = ({ isOpen, onClose, onSu
             <button
               onClick={handleSubmit}
               disabled={rating === 0}
-              className={`${onSkip ? 'flex-1' : 'w-full'} px-4 py-2.5 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] disabled:bg-slate-300 disabled:cursor-not-allowed transition-colors font-medium shadow-lg shadow-[#6B9071]/20`}
+              className={`${onSkip ? 'flex-1' : 'w-full'} px-4 py-2.5 bg-accent text-accent-on rounded-lg hover:bg-accent-hover disabled:bg-accent-soft disabled:cursor-not-allowed transition-colors font-medium shadow-card`}
             >
               {lang === 'ru' ? 'Готово' : 'Done'}
             </button>

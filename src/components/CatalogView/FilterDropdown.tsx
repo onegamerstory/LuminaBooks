@@ -50,7 +50,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
       {/* Filter Button */}
       <button
         onClick={onToggle}
-        className="flex items-center gap-2 bg-page border border-slate-200 rounded-xl px-4 py-2.5 hover:border-slate-300 transition-colors"
+        className="flex items-center gap-2 bg-surface border border-default rounded-xl px-4 py-2.5 hover:border-accent transition-colors"
       >
         <Filter size={18} className="text-accent" />
         <span className="text-sm text-fg">
@@ -68,71 +68,71 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
             className="fixed inset-0 z-10" 
             onClick={onToggle}
           />
-          <div className="absolute top-full mt-2 left-0 bg-page border border-slate-200 rounded-xl shadow-lg z-20 min-w-max">
+          <div className="absolute top-full mt-2 left-0 bg-surface border border-default rounded-xl shadow-lg z-20 min-w-max">
             {/* All Statuses */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={isAllSelected}
                 onChange={() => onToggleStatus('All')}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700 font-medium">{t.allStatuses}</span>
+              <span className="text-fg font-medium">{t.allStatuses}</span>
             </label>
 
             {/* Reading */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.READING) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.READING)}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700">{t.reading}</span>
+              <span className="text-fg">{t.reading}</span>
             </label>
 
             {/* Read */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.READ) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.READ)}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700">{t.read}</span>
+              <span className="text-fg">{t.read}</span>
             </label>
 
             {/* Want to Read */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.WANT_TO_READ) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.WANT_TO_READ)}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700">{t.toRead}</span>
+              <span className="text-fg">{t.toRead}</span>
             </label>
 
             {/* Postponed */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.POSTPONED) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.POSTPONED)}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700">{t.postponed}</span>
+              <span className="text-fg">{t.postponed}</span>
             </label>
 
             {/* Abandoned */}
-            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-slate-100 last:border-0">
+            <label className="flex items-center gap-3 px-4 py-3 hover:bg-accent-soft cursor-pointer text-sm border-b border-default last:border-0">
               <input
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.ABANDONED) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.ABANDONED)}
-                className="w-4 h-4 rounded border-slate-300 cursor-pointer"
+                className="w-4 h-4 rounded border-default cursor-pointer"
               />
-              <span className="text-slate-700">{t.abandoned}</span>
+              <span className="text-fg">{t.abandoned}</span>
             </label>
           </div>
         </>

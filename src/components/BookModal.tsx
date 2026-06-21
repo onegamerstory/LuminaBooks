@@ -265,13 +265,13 @@ const BookModal: React.FC<BookModalProps> = ({
 
   return (
     <>
-      <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-        <div className="bg-white rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-          <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-            <h2 className="text-xl font-bold font-serif text-[#1E2920]">
+      <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+        <div className="bg-surface rounded-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto shadow-overlay animate-in zoom-in duration-200">
+          <div className="sticky top-0 bg-surface border-b border-default px-6 py-4 flex items-center justify-between z-10">
+            <h2 className="text-xl font-bold font-display text-fg">
               {initialData ? t.editBook : t.addNewBook}
             </h2>
-            <button onClick={onClose} className="p-2 hover:bg-slate-100 rounded-full text-slate-400">
+            <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted">
               <X size={20} />
             </button>
           </div>
@@ -279,11 +279,11 @@ const BookModal: React.FC<BookModalProps> = ({
           <form id="book-form" onSubmit={handleSubmit} className="p-6 space-y-6">
           <div className="flex flex-col sm:flex-row gap-6">
             <div className="w-full sm:w-1/3 flex flex-col gap-2">
-               <div className="aspect-[2/3] rounded-xl overflow-hidden bg-[#F0F4F1] border-2 border-dashed border-slate-200 relative group">
+               <div className="aspect-[2/3] rounded-xl overflow-hidden bg-page border-2 border-dashed border-default relative group">
                   {formData.coverUrl ? (
                     <img src={formData.coverUrl} className="w-full h-full object-cover" alt="Preview" onError={handleCoverError} />
                   ) : (
-                    <div className="w-full h-full flex items-center justify-center text-slate-300">
+                    <div className="w-full h-full flex items-center justify-center text-muted">
                       {t.preview}
                     </div>
                   )}
@@ -293,27 +293,27 @@ const BookModal: React.FC<BookModalProps> = ({
                  placeholder={t.imageUrl}
                  value={formData.coverUrl}
                  onChange={e => setFormData({...formData, coverUrl: e.target.value})}
-                 className="text-xs px-2 py-1 bg-white border border-[#6B9071]/30 rounded "
+                 className="text-xs px-2 py-1 bg-surface border border-accent/30 rounded"
                />
                {isEditingExistingBook && (formData.rating || 0) > 0 && (
                  <button
                    type="button"
                    onClick={() => setShowRatingEditModal(true)}
-                   className="flex items-center justify-center gap-1 py-2 px-3 bg-[#F9F3E6] border border-amber-200 rounded-lg hover:bg-[#FFF5E1] transition-colors group w-full"
+                   className="flex items-center justify-center gap-1 py-2 px-3 bg-warn/10 border border-warn/30 rounded-lg hover:bg-warn/20 transition-colors group w-full"
                    title={lang === 'ru' ? 'Изменить оценку' : 'Change rating'}
                  >
                    <Star size={18} className="fill-amber-400 text-amber-400" />
-                   <span className="font-semibold text-amber-900">{(formData.rating || 0).toFixed(1)}</span>
-                   <span className="text-xs text-amber-700 group-hover:underline">
+                   <span className="font-semibold text-fg">{(formData.rating || 0).toFixed(1)}</span>
+                   <span className="text-xs text-amber-600 group-hover:underline">
                      {lang === 'ru' ? 'изменить' : 'edit'}
                    </span>
                  </button>
                )}
                {isEditingExistingBook && initialData && (
-                 <div className="flex items-center justify-center gap-2 py-2 px-3 bg-[#DFE9E2] border border-[#B8D4C0] rounded-lg w-full">
-                   <Clock size={18} className="text-[#6B9071]" />
-                   <span className="font-semibold text-[#1E2920]">{calculateBookTotalHours(initialData).toFixed(1)}</span>
-                   <span className="text-xs text-[#4A7056]">
+                 <div className="flex items-center justify-center gap-2 py-2 px-3 bg-accent-soft/50 border border-accent/20 rounded-lg w-full">
+                   <Clock size={18} className="text-accent" />
+                   <span className="font-semibold text-fg">{calculateBookTotalHours(initialData).toFixed(1)}</span>
+                   <span className="text-xs text-accent">
                      {lang === 'ru' ? 'часов' : 'hours'}
                    </span>
                  </div>
@@ -324,13 +324,13 @@ const BookModal: React.FC<BookModalProps> = ({
               <div>
                 <div className="flex items-center justify-between gap-3">
                   <div className="flex-grow">
-                    <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.title}</label>
+                    <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.title}</label>
                     <input 
                       required
                       type="text" 
                       value={formData.title}
                       onChange={e => setFormData({...formData, title: e.target.value})}
-                      className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                      className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
                       placeholder="e.g. The Great Gatsby"
                     />
                   </div>
@@ -340,14 +340,14 @@ const BookModal: React.FC<BookModalProps> = ({
                       onClick={() => setShowFranchiseSelect(true)}
                       className={`p-2 rounded-lg transition-all relative ${
                         (formData.franchiseIds && formData.franchiseIds.length > 0) || formData.isPartOfSeries
-                          ? 'bg-[#6B9071] text-white shadow-md' 
-                          : 'bg-slate-200 text-slate-500 hover:bg-slate-300'
+                          ? 'bg-accent text-accent-on shadow-card' 
+                          : 'bg-accent-soft/50 text-muted hover:bg-accent-soft'
                       }`}
                       title={lang === 'ru' ? 'Добавить в коллекцию' : 'Add to collection'}
                     >
                       <Link size={18} />
                       {formData.franchiseIds && formData.franchiseIds.length > 0 && (
-                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-amber-500 text-white text-xs font-bold rounded-full">
+                        <span className="absolute -top-1 -right-1 flex items-center justify-center w-5 h-5 bg-warn text-white text-xs font-bold rounded-full">
                           {formData.franchiseIds.length}
                         </span>
                       )}
@@ -358,8 +358,8 @@ const BookModal: React.FC<BookModalProps> = ({
                       disabled={isSearching || !formData.title?.trim()}
                       className={`p-2 rounded-lg transition-all ${
                         formData.title?.trim()
-                          ? 'bg-[#6B9071] text-white hover:bg-[#5A7A60]'
-                          : 'bg-slate-200 text-slate-400 cursor-not-allowed'
+                          ? 'bg-accent text-accent-on hover:bg-accent-hover'
+                          : 'bg-accent-soft/50 text-muted cursor-not-allowed'
                       } ${isSearching ? 'opacity-60 cursor-wait' : ''}`}
                       title={t.findBook}
                     >
@@ -384,44 +384,44 @@ const BookModal: React.FC<BookModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.author}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.author}</label>
                   <input 
                     type="text" 
                     value={formData.author}
                     onChange={e => setFormData({...formData, author: e.target.value})}
-                    className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                    className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.year}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.year}</label>
                   <input 
                     type="text" 
                     value={formData.year}
                     onChange={e => setFormData({...formData, year: e.target.value})}
-                    className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                    className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
                   />
                 </div>
               </div>
 
               <div>
-                <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{lang === 'ru' ? 'Всего страниц' : 'Total Pages'}</label>
+                <label className="block text-xs font-semibold text-muted uppercase mb-1">{lang === 'ru' ? 'Всего страниц' : 'Total Pages'}</label>
                 <input 
                   type="number" 
                   min="0"
                   value={formData.totalPages || ''}
                   onChange={e => setFormData({...formData, totalPages: e.target.value ? parseInt(e.target.value) : undefined})}
                   placeholder={lang === 'ru' ? 'Количество страниц в книге' : 'Total number of pages'}
-                  className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                  className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
                 />
               </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.status}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.status}</label>
                   <select
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
-                    className="w-full px-4 bg-white py-2 border border-[#6B9071]/30 text-slate-500 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none appearance-none"
+                    className="w-full px-4 bg-surface py-2 border border-accent/30 text-muted rounded-xl focus:ring-2 focus:ring-accent outline-none appearance-none"
                   >
                     <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
                     <option value={BookStatus.READING}>{t.reading}</option>
@@ -431,11 +431,11 @@ const BookModal: React.FC<BookModalProps> = ({
                   </select>
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.description}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.description}</label>
                   <textarea 
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-4 bg-white py-2 border border-[#6B9071]/30 rounded-xl focus:ring-2 focus:ring-[#6B9071] outline-none resize-none h-[42px]"
+                    className="w-full px-4 bg-surface py-2 border border-accent/30 rounded-xl focus:ring-2 focus:ring-accent outline-none resize-none h-[42px]"
                     rows={1}
                   />
                 </div>
@@ -443,7 +443,7 @@ const BookModal: React.FC<BookModalProps> = ({
 
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.startDate}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.startDate}</label>
                   <DateInput
                     value={formData.startDate ? dayjs(formData.startDate).toDate() : null}
                     onChange={(date) => setFormData({...formData, startDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
@@ -454,7 +454,7 @@ const BookModal: React.FC<BookModalProps> = ({
                   />
                 </div>
                 <div>
-                  <label className="block text-xs font-semibold text-slate-500 uppercase mb-1">{t.endDate}</label>
+                  <label className="block text-xs font-semibold text-muted uppercase mb-1">{t.endDate}</label>
                   <DateInput
                     value={formData.endDate ? dayjs(formData.endDate).toDate() : null}
                     onChange={(date) => setFormData({...formData, endDate: date ? dayjs(date).format('YYYY-MM-DD') : ''})}
@@ -469,18 +469,18 @@ const BookModal: React.FC<BookModalProps> = ({
           </div>
 
         </form>
-          <div className="bg-white px-6 py-4 border-t flex justify-end gap-3">
+          <div className="bg-surface px-6 py-4 border-t border-default flex justify-end gap-3">
             <button 
               type="button" 
               onClick={onClose}
-              className="px-6 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors"
+              className="px-6 py-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors"
             >
               {t.cancel}
             </button>
             <button 
               type="submit"
               form="book-form"
-              className="px-8 py-2 bg-[#6B9071] text-white font-semibold rounded-lg hover:bg-[#5A7A60] shadow-lg shadow-[#6B9071]/20 transition-all active:scale-95"
+              className="px-8 py-2 bg-accent text-accent-on font-semibold rounded-lg hover:bg-accent-hover shadow-card transition-all active:scale-95"
             >
               {initialData ? t.updateBook : t.addToLibrary}
             </button>

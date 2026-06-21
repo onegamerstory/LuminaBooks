@@ -54,7 +54,7 @@ const cardTitleStyle: React.CSSProperties = {
   fontSize: 'var(--text-lg)',
   fontWeight: 600,
   color: 'var(--fg)',
-  fontFamily: 'var(--font-display)',
+  fontFamily: 'var(--font-body)',
 };
 
 const subtleBgStyle: React.CSSProperties = {
@@ -154,29 +154,37 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
         style={{
           background: 'linear-gradient(135deg, var(--accent) 0%, #4A6B50 100%)',
           borderRadius: 'var(--radius-xl)',
-          padding: 'var(--space-10)',
+          padding: '24px var(--space-10)',
           boxShadow: 'var(--elev-overlay)',
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: 'var(--space-4)' }}>
-          <div
-            style={{
-              width: 88, height: 88, borderRadius: '50%',
-              backgroundColor: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              overflow: 'hidden', border: '3px solid var(--surface)',
-              boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
-            }}
-          >
-            {profile?.photoUrl ? (
-              <img src={profile.photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
-            ) : (
-              <User size={44} style={{ color: 'var(--meta)' }} />
-            )}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-8)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
+            <div
+              style={{
+                width: 72, height: 72, borderRadius: '50%', flexShrink: 0,
+                backgroundColor: 'var(--surface)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                overflow: 'hidden', border: '3px solid var(--surface)',
+                boxShadow: '0 4px 16px rgba(0,0,0,0.15)',
+              }}
+            >
+              {profile?.photoUrl ? (
+                <img src={profile.photoUrl} alt="Profile" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+              ) : (
+                <User size={32} style={{ color: 'var(--meta)' }} />
+              )}
+            </div>
+            <div>
+              <h2 className="font-display" style={{ fontSize: 'var(--text-2xl)', color: 'var(--accent-on)', margin: 0, marginBottom: 2 }}>
+                {profile?.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
+              </h2>
+              <p style={{ fontSize: 'var(--text-sm)', color: 'color-mix(in oklab, white 60%, transparent)', margin: 0 }}>
+                {totalBooks} {lang === 'ru' ? 'книг' : 'books'} · {Math.round(totalReadSeconds / 3600)} {lang === 'ru' ? 'часов' : 'hours'}
+              </p>
+            </div>
           </div>
-          <h2 className="font-display" style={{ fontSize: 'var(--text-2xl)', color: 'var(--accent-on)', margin: 0 }}>
-            {profile?.nickname || (lang === 'ru' ? 'Читатель' : 'Reader')}
-          </h2>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(5, 1fr)', gap: 'var(--space-4)', width: '100%', maxWidth: 600, marginTop: 'var(--space-2)' }}>
+
+          <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
             {[
               { icon: BookOpen, label: t.totalBooks, value: totalBooks },
               { icon: TrendingUp, label: t.reading, value: readingCount },
@@ -184,10 +192,9 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
               { icon: Hourglass, label: t.totalHours, value: Math.round(totalReadSeconds / 3600) },
               { icon: ListTodo, label: t.toRead, value: toReadCount },
             ].map((stat, i) => (
-              <div key={i} style={{ textAlign: 'center' }}>
-                <stat.icon size={16} style={{ color: 'color-mix(in oklab, white 70%, transparent)', margin: '0 auto 6px' }} />
-                <p style={{ fontSize: 10, color: 'color-mix(in oklab, white 50%, transparent)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: 0 }}>{stat.label}</p>
-                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--accent-on)', margin: '2px 0 0' }}>{stat.value}</p>
+              <div key={i} style={{ textAlign: 'center', minWidth: 56 }}>
+                <p style={{ fontSize: 'var(--text-xl)', fontWeight: 700, color: 'var(--accent-on)', margin: 0, lineHeight: 1.1 }}>{stat.value}</p>
+                <p style={{ fontSize: 10, color: 'color-mix(in oklab, white 50%, transparent)', textTransform: 'uppercase', letterSpacing: '0.05em', margin: '2px 0 0', whiteSpace: 'nowrap' }}>{stat.label}</p>
               </div>
             ))}
           </div>
@@ -204,7 +211,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
       <div className="grid grid-cols-1 lg:grid-cols-[2fr_3fr]" style={{ gap: 'var(--space-6)' }}>
         <div style={cardStyle}>
           <h3 style={cardTitleStyle}>{t.readProgress}</h3>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-6)', marginTop: 'var(--space-4)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 'var(--space-6)', marginTop: 'var(--space-6)', padding: 'var(--space-2)' }}>
             <div style={{ flexShrink: 0 }}>
               <svg width={150} height={150} viewBox="0 0 160 160">
                 <circle cx="80" cy="80" r="66" fill="none" stroke="var(--accent-soft)" strokeWidth={14} />

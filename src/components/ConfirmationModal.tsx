@@ -36,19 +36,19 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-2xl max-w-sm w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="bg-surface rounded-xl shadow-overlay max-w-sm w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
         {/* Header */}
-        <div className="flex items-start gap-3 p-6 border-b border-slate-100">
+        <div className="flex items-start gap-3 p-6 border-b border-default">
           {isDangerous && (
-            <AlertTriangle className="w-6 h-6 text-red-500 flex-shrink-0 mt-0.5" />
+            <AlertTriangle className="w-6 h-6 text-danger flex-shrink-0 mt-0.5" />
           )}
           <div className="flex-1">
-            <h2 className="text-lg font-bold text-[#1E2920]">{title}</h2>
+            <h2 className="text-lg font-bold text-fg">{title}</h2>
           </div>
           <button
             onClick={onCancel}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-muted hover:text-fg transition-colors"
             aria-label="Close"
           >
             <X size={20} />
@@ -57,15 +57,15 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
         {/* Body */}
         <div className="p-6">
-          <p className="text-slate-600 text-sm leading-relaxed">{message}</p>
+          <p className="text-muted text-sm leading-relaxed">{message}</p>
         </div>
 
         {/* Footer */}
-        <div className="flex gap-3 p-6 border-t border-slate-100 bg-slate-50">
+        <div className="flex gap-3 p-6 border-t border-default bg-page">
           <button
             onClick={onCancel}
             disabled={loading}
-            className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors disabled:opacity-50"
+            className="flex-1 px-4 py-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors disabled:opacity-50"
           >
             {cancelText}
           </button>
@@ -74,8 +74,8 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
             disabled={loading}
             className={`flex-1 px-4 py-2 font-medium text-sm rounded-lg transition-colors text-white inline-flex items-center justify-center gap-2 ${
               isDangerous
-                ? 'bg-red-600 hover:bg-red-700 disabled:bg-red-400'
-                : 'bg-[#6B9071] hover:bg-[#5A7A60] disabled:bg-[#8FB89A]'
+                ? 'bg-danger hover:bg-danger/80 disabled:bg-danger/50'
+                : 'bg-accent hover:bg-accent-hover disabled:bg-accent/50'
             }`}
           >
             {loading && <Loader2 size={16} className="animate-spin" />}

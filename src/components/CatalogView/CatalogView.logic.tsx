@@ -247,8 +247,8 @@ const CatalogView: React.FC<CatalogViewProps> = ({
       
       {/* Top bar with actions */}
       <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-        <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold text-fg">{t.library}</h2>
+          <div className="flex items-center gap-3">
+          <h2 className="text-2xl font-bold font-display text-fg">{t.library}</h2>
           <div className="flex gap-2">
             <button
               onClick={handleRandomBook}
@@ -262,20 +262,14 @@ const CatalogView: React.FC<CatalogViewProps> = ({
             <button
               onClick={handleExport}
               disabled={books.length === 0}
-              className="flex items-center gap-2 px-3 py-2 text-accent-on rounded-lg disabled:bg-accent-soft disabled:cursor-not-allowed transition-colors"
-              style={{ backgroundColor: '#9E8F8F' }}
-              onMouseEnter={e => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#887777' }}
-              onMouseLeave={e => { if (!e.currentTarget.disabled) e.currentTarget.style.backgroundColor = '#9E8F8F' }}
+              className="flex items-center gap-2 px-3 py-2 bg-accent-hover text-accent-on rounded-lg hover:bg-accent disabled:bg-accent-soft disabled:cursor-not-allowed transition-colors"
               title={lang === 'ru' ? 'Экспортировать в JSON' : 'Export to JSON'}
             >
               <Upload size={18} />
             </button>
             
             <label
-              className="flex items-center gap-2 px-3 py-2 text-accent-on rounded-lg transition-colors cursor-pointer"
-              style={{ backgroundColor: 'color-mix(in oklab, #846B90 60%, transparent)' }}
-              onMouseEnter={e => { e.currentTarget.style.backgroundColor = '#846B90' }}
-              onMouseLeave={e => { e.currentTarget.style.backgroundColor = 'color-mix(in oklab, #846B90 60%, transparent)' }}
+              className="flex items-center gap-2 px-3 py-2 bg-accent-soft text-accent rounded-lg hover:bg-accent hover:text-accent-on transition-colors cursor-pointer"
               title="Импорт в формате JSON"
             >
               <Download size={18} />
@@ -294,13 +288,13 @@ const CatalogView: React.FC<CatalogViewProps> = ({
         <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
           {/* Search input */}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" size={18} />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input 
               type="text" 
               placeholder={t.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-white border border-[var(--accent)]/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-[var(--accent)] w-full"
+              className="pl-10 pr-4 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent w-full"
             />
           </div>
           

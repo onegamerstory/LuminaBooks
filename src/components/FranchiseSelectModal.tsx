@@ -46,15 +46,15 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto shadow-2xl animate-in zoom-in duration-200">
-        <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-center justify-between z-10">
-          <h2 className="text-lg font-bold text-[#1E2920]">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="bg-surface rounded-2xl w-full max-w-md max-h-[80vh] overflow-y-auto shadow-overlay animate-in zoom-in duration-200">
+        <div className="sticky top-0 bg-surface border-b border-default px-6 py-4 flex items-center justify-between z-10">
+          <h2 className="text-lg font-bold text-fg">
             {lang === 'ru' ? 'Выбрать коллекции' : 'Select Collections'}
           </h2>
           <button
             onClick={onClose}
-            className="p-2 hover:bg-slate-100 rounded-full text-slate-400"
+            className="p-2 hover:bg-page rounded-full text-muted"
           >
             <X size={20} />
           </button>
@@ -64,24 +64,25 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
           {/* Существующие коллекции */}
           {franchises.length > 0 && (
             <div>
-              <label className="block text-sm font-semibold text-slate-600 mb-3">
+              <label className="block text-sm font-semibold text-fg mb-3">
                 {lang === 'ru' ? 'Добавить в существующие коллекции' : 'Add to existing collections'}
               </label>
               <div className="space-y-2">
                 {franchises.map((franchise) => (
                   <label
                     key={franchise.id}
-                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-slate-50 cursor-pointer transition-colors"
+                    className="flex items-center gap-3 p-3 rounded-lg hover:bg-page cursor-pointer transition-colors"
                   >
                     <input
                       type="checkbox"
                       checked={selectedIds.includes(franchise.id)}
                       onChange={() => handleToggleFranchise(franchise.id)}
-                      className="w-4 h-4 rounded text-[#6B9071] cursor-pointer"
+                      className="w-4 h-4 rounded text-accent cursor-pointer"
+                      style={{ accentColor: 'var(--accent)' }}
                     />
                     <div className="flex-grow">
-                      <p className="text-sm font-medium text-[#1E2920]">{franchise.name}</p>
-                      <p className="text-xs text-slate-500">
+                      <p className="text-sm font-medium text-fg">{franchise.name}</p>
+                      <p className="text-xs text-muted">
                         {franchise.bookIds.length} {lang === 'ru' ? 'книг' : 'books'}
                       </p>
                     </div>
@@ -93,18 +94,18 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
 
           {franchises.length === 0 && !createNew && (
             <div className="text-center py-4">
-              <p className="text-sm text-slate-500 mb-3">
+              <p className="text-sm text-muted mb-3">
                 {lang === 'ru' ? 'Нет доступных коллекций' : 'No collections available'}
               </p>
             </div>
           )}
 
           {/* Создать новую коллекцию */}
-          <div className="border-t pt-4">
+          <div className="border-t border-default pt-4">
             {!createNew ? (
               <button
                 onClick={() => setCreateNew(true)}
-                className="w-full flex items-center gap-2 justify-center p-2 border border-dashed border-slate-300 rounded-lg hover:bg-slate-50 text-slate-600 transition-colors"
+                className="w-full flex items-center gap-2 justify-center p-2 border border-dashed border-default rounded-lg hover:bg-page text-muted transition-colors"
               >
                 <Plus size={16} />
                 <span className="text-sm font-medium">
@@ -113,7 +114,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
               </button>
             ) : (
               <div className="space-y-3">
-                <label className="block text-sm font-semibold text-slate-600">
+                <label className="block text-sm font-semibold text-fg">
                   {lang === 'ru' ? 'Название новой коллекции' : 'New collection name'}
                 </label>
                 <input
@@ -121,7 +122,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
                   value={newFranchiseName}
                   onChange={(e) => setNewFranchiseName(e.target.value)}
                   placeholder={lang === 'ru' ? 'Введите название...' : 'Enter name...'}
-                  className="w-full px-4 py-2 bg-white border border-[#6B9071]/30 rounded-lg focus:ring-2 focus:ring-[#6B9071] outline-none"
+                  className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
                   autoFocus
                 />
                 <button
@@ -129,7 +130,7 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
                     setCreateNew(false);
                     setNewFranchiseName('');
                   }}
-                  className="w-full text-sm text-slate-500 hover:text-slate-700 py-2"
+                  className="w-full text-sm text-muted hover:text-fg py-2"
                 >
                   {lang === 'ru' ? 'Отмена' : 'Cancel'}
                 </button>
@@ -141,13 +142,13 @@ const FranchiseSelectModal: React.FC<FranchiseSelectModalProps> = ({
           <div className="flex gap-3">
             <button
               onClick={onClose}
-              className="flex-1 px-4 py-2 bg-white border border-slate-300 text-slate-700 rounded-lg hover:bg-slate-100 transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors font-medium"
             >
               {lang === 'ru' ? 'Отмена' : 'Cancel'}
             </button>
             <button
               onClick={handleSubmit}
-              className="flex-1 px-4 py-2 bg-[#6B9071] text-white rounded-lg hover:bg-[#5A7A60] transition-colors font-medium"
+              className="flex-1 px-4 py-2 bg-accent text-accent-on rounded-lg hover:bg-accent-hover transition-colors font-medium"
             >
               {lang === 'ru' ? 'Применить' : 'Apply'}
             </button>

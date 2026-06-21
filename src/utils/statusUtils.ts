@@ -17,6 +17,6 @@ export const getStatusColor = (status: BookStatus): string => {
     case BookStatus.POSTPONED:
       return 'text-orange-600 bg-orange-50';
     default:
-      return 'text-slate-600 bg-slate-50';
+      return 'text-muted bg-page';
   }
 };
