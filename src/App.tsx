@@ -613,38 +613,46 @@ const App: React.FC = () => {
   };
 
   const handleAddToQueue = async (book: Book) => {
-    let savedBook: Book | undefined;
-    setBooks(prev => prev.map(b => {
-      if (b.id !== book.id) return b;
-      let updatedBook = { ...b, inQueue: true };
-      if (b.status === BookStatus.ABANDONED || b.status === BookStatus.POSTPONED) {
-        updatedBook = { ...updatedBook, status: BookStatus.WANT_TO_READ };
-      }
-      savedBook = updatedBook;
-      return updatedBook;
-    }));
+    const updatedBook: Book = {
+      ...book,
+      inQueue: true,
+      status: book.status === BookStatus.ABANDONED || book.status === BookStatus.POSTPONED
+        ? BookStatus.WANT_TO_READ
+        : book.status,
+    };
+
+    setBooks(prev => prev.map(b => b.id === book.id ? updatedBook : b));
+
     const api = getDbApi();
-    if (savedBook && api) {
-      await api.updateBook(savedBook);
+    if (api) {
+      try {
+        await api.updateBook(updatedBook);
+      } catch (e) {
+        console.error('Failed to add book to queue:', e);
+        setBooks(prev => prev.map(b =>
+          b.id === book.id ? { ...b, inQueue: false, status: book.status } : b
+        ));
+        addToast(
+          lang === 'ru' ? 'Ошибка при добавлении в очередь' : 'Failed to add to queue',
+          'error'
+        );
+      }
     }
   };
 
   const handleStartReadingBook = async (book: Book) => {
-    let savedBook: Book | undefined;
-    setBooks(prev => prev.map(b => {
-      if (b.id !== book.id) return b;
-      const updatedBook = {
-        ...b,
-        status: BookStatus.READING,
-        startDate: new Date().toISOString().split('T')[0],
-        inQueue: false,
-      };
-      savedBook = updatedBook;
-      return updatedBook;
-    }));
+    const updatedBook: Book = {
+      ...book,
+      status: BookStatus.READING,
+      startDate: new Date().toISOString().split('T')[0],
+      inQueue: false,
+    };
+
+    setBooks(prev => prev.map(b => b.id === book.id ? updatedBook : b));
+
     const api = getDbApi();
-    if (savedBook && api) {
-      await api.updateBook(savedBook);
+    if (api) {
+      await api.updateBook(updatedBook);
     }
   };
 
