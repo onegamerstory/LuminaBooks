@@ -465,6 +465,10 @@ const App: React.FC = () => {
     checkAchievements();
   }, [books, lang]);
 
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, [activeView]);
+
   const handleDismissAchievement = (id: string) => {
     setAchievementQueue(prev => {
       const updated = prev.filter(item => item.id !== id);

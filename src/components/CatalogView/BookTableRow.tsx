@@ -118,19 +118,9 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
             disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
             className={`p-2 rounded-lg transition-colors font-medium ${
               book.status === BookStatus.WANT_TO_READ && !book.inQueue
-                ? 'bg-accent-soft text-fg'
+                ? 'bg-accent-soft text-fg hover:bg-accent-hover'
                 : 'bg-page/50 text-muted cursor-not-allowed'
             }`}
-            onMouseEnter={e => {
-              if (book.status === BookStatus.WANT_TO_READ && !book.inQueue) {
-                e.currentTarget.style.backgroundColor = 'var(--accent-hover)'
-              }
-            }}
-            onMouseLeave={e => {
-              if (book.status === BookStatus.WANT_TO_READ && !book.inQueue) {
-                e.currentTarget.style.backgroundColor = ''
-              }
-            }}
             title={lang === 'ru' ? 'В очередь' : 'To Queue'}
           >
             {book.status === BookStatus.WANT_TO_READ && book.inQueue ? (
