@@ -72,10 +72,10 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
           <button
             onClick={handleConfirm}
             disabled={loading}
-            className={`flex-1 px-4 py-2 font-medium text-sm rounded-lg transition-colors text-white inline-flex items-center justify-center gap-2 ${
+            className={`flex-1 px-4 py-2 font-medium text-sm rounded-lg transition-colors inline-flex items-center justify-center gap-2 ${
               isDangerous
-                ? 'bg-danger hover:bg-danger/80 disabled:bg-danger/50'
-                : 'bg-accent hover:bg-accent-hover disabled:bg-accent/50'
+                ? 'border border-danger text-danger hover:bg-danger/10 disabled:opacity-50'
+                : 'bg-accent hover:bg-accent-hover disabled:bg-accent/50 text-white'
             }`}
           >
             {loading && <Loader2 size={16} className="animate-spin" />}
