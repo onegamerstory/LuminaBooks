@@ -31,7 +31,7 @@
 
 Страница, посвященная статистике и достижениям:
 
-<img width="1248" height="1293" alt="image" src="https://github.com/user-attachments/assets/a2b63646-96e4-41ac-806f-30a0eb2fcb8d" />
+<img width="1276" height="1210" alt="image" src="https://github.com/user-attachments/assets/71ac9d24-555c-482b-989e-7d946817193d" />
 
 ## Каталог
 
@@ -41,16 +41,16 @@
 
 Также, доступна возможность добавить книгу в очередь, сформировав список произведений, который отобразится на странице "Чтение":
 
-<img width="1344" height="925" alt="image" src="https://github.com/user-attachments/assets/3bfad488-9fb6-4240-b0cd-6d06f2e50a34" />
+<img width="1295" height="1039" alt="image" src="https://github.com/user-attachments/assets/ae11cfc6-f2bf-4292-8a5e-db235183cbda" />
 
-<img width="1326" height="1201" alt="image" src="https://github.com/user-attachments/assets/3f3abb66-0f13-4894-ba53-bd56c408ba3c" />
+<img width="1293" height="1273" alt="image" src="https://github.com/user-attachments/assets/6a142cc2-f5b0-4e14-baca-31d997a0e137" />
 
 ## Чтение
 
 На странице трекинга чтения можно увидеть очередь из произведений, а также книги в статусах "Читаю" и "Отложено" в отдельных разделах. 
 Для каждой книги доступна фиксация сессий чтения с информацией о времени и прогрессе. Фиксация сессий доступна как в реальном времени с секундомером, так и пост-фактум.
 
-<img width="1246" height="1300" alt="image" src="https://github.com/user-attachments/assets/42b591f5-2277-41f6-9269-3e15d5fb6935" />
+<img width="1292" height="1088" alt="image" src="https://github.com/user-attachments/assets/5f8a5c4e-5782-43a0-a5fc-fb80391e9888" />
 
 ## Календарь
 
@@ -60,25 +60,25 @@
 
 Для каждого месяца доступна краткая статистика в правом окне.
 
-<img width="1249" height="954" alt="image" src="https://github.com/user-attachments/assets/f5b36271-0163-433a-b5e3-d52890fb5fe0" />
+<img width="1296" height="1036" alt="image" src="https://github.com/user-attachments/assets/e20e7dfe-c9a8-4149-ab39-1886a73ba816" />
 
-<img width="1240" height="962" alt="image" src="https://github.com/user-attachments/assets/f067ef94-d364-479a-9053-1bf736b7723d" />
+<img width="1295" height="1037" alt="image" src="https://github.com/user-attachments/assets/71d70d63-58bf-43b7-8e06-f0e24dcf9849" />
 
-Также, по правому клику на ячейку вы можете задать дату начала чтения книги (для начало фазы чтения)
+Также, по правому клику на ячейку вы можете задать дату начала чтения книги (для начала фазы чтения)
 
-<img width="1254" height="1149" alt="image" src="https://github.com/user-attachments/assets/4b7fdf3d-d5be-4707-9bbe-0a5c239fbc4b" />
+<img width="694" height="1088" alt="image" src="https://github.com/user-attachments/assets/f616da0d-8000-41b2-a777-26074cbef2a9" />
 
 ## Коллекции
 
 На этой странице возможность сформировать коллекции книг по любому признаку: популярная франшиза или принадлежность к золотому веку поэзии:
 
-<img width="1304" height="609" alt="image" src="https://github.com/user-attachments/assets/7e09530e-9b7c-48b3-b334-59f5ba708f3a" />
+<img width="1314" height="660" alt="image" src="https://github.com/user-attachments/assets/11374e33-2d2d-4a32-8a17-2a6565c77e92" />
 
 ## Настройки
 
 Окно настроек, где можно указать имя, аватар, обложку по умолчанию, а также включить авто-синхронизацию (если пользуетесь несколькими версиями приложениями)  
 
-<img width="651" height="847" alt="image" src="https://github.com/user-attachments/assets/d296f22b-6dda-4bdf-b665-8121a10ec097" />
+<img width="771" height="1156" alt="image" src="https://github.com/user-attachments/assets/066f1ec6-5460-4049-a44f-aafc0f6c7b70" />
 
 # ПК-приложение и браузерная версия
 
@@ -88,7 +88,7 @@
 2. "Под капотом" вместе с этим запускается сервер, который позволяет нам подключиться к этому ПК через браузер
 3. Берете, например, macbook и, находясь в той же сети, в браузере переходите по ссылке, указанной в меню приложения
 
-<img width="655" height="219" alt="image" src="https://github.com/user-attachments/assets/6299e2a7-4502-4aaa-9b6d-28f4b1ac002c" />
+<img width="647" height="215" alt="image" src="https://github.com/user-attachments/assets/0a51c7d7-5d3c-4a42-aeec-fc61c34dc2f7" />
 
 # Google Books API
 
