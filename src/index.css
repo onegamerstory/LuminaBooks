@@ -1,3 +1,46 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@media (max-width: 639px) {
+  .profile-hero {
+    padding: 20px 16px !important;
+  }
+
+  .profile-hero-content {
+    align-items: stretch !important;
+    flex-direction: column;
+    gap: 16px !important;
+  }
+
+  .profile-hero-content > div:first-child {
+    gap: 12px !important;
+    min-width: 0;
+  }
+
+  .profile-hero-content h2 {
+    font-size: 24px !important;
+    overflow-wrap: anywhere;
+  }
+
+  .profile-hero-stats {
+    display: grid !important;
+    gap: 4px !important;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    width: 100%;
+  }
+
+  .profile-hero-stats > div {
+    min-width: 0 !important;
+  }
+
+  .profile-hero-stats p:last-child {
+    font-size: 7px !important;
+    letter-spacing: 0 !important;
+    white-space: nowrap !important;
+  }
+
+  .profile-hero-stats p:first-child {
+    font-size: 14px !important;
+  }
+}

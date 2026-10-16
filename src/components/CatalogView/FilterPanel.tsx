@@ -85,13 +85,13 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
       label: lang === 'ru' ? 'Страницы' : 'Pages',
       ascOption: 'pages-asc',
       descOption: 'pages-desc',
-      ascIcon: <ArrowUp01 size={15} />,
-      descIcon: <ArrowDown01 size={15} />,
+      ascIcon: <ArrowDown01 size={15} />,
+      descIcon: <ArrowUp01 size={15} />,
     },
   ];
 
   return (
-    <div className="w-60 shrink-0 space-y-6 bg-surface border border-default rounded-2xl shadow-md p-4 sticky top-20 self-start max-h-[calc(100vh-8rem)] overflow-y-auto">
+    <div className="w-full shrink-0 space-y-6 rounded-2xl border border-default bg-surface p-4 shadow-md md:sticky md:top-20 md:max-h-[calc(100vh-8rem)] md:w-60 md:self-start md:overflow-y-auto">
       {/* Sort section */}
       <div>
         <h3 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">

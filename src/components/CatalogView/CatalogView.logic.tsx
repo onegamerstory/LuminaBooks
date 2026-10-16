@@ -15,7 +15,7 @@ import FilterPanel from './FilterPanel';
 import ViewModeButtons from './ViewModeButtons';
 import EmptyState from './EmptyState';
 import BookTableRow from './BookTableRow';
-import { Search, Dices, Upload, Download, Plus } from 'lucide-react';
+import { Search, Dices, Upload, Download, Plus, ChevronDown, SlidersHorizontal } from 'lucide-react';
 import { exportBooksToJson, importBooksFromJson, UserProfile } from '../../utils/jsonUtils';
 import { translations } from '../../utils/translations';
 
@@ -87,6 +87,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
     return (saved && ['large', 'table'].includes(saved)) ? saved : 'large';
   });
   const [isRandomModalOpen, setIsRandomModalOpen] = useState(false);
+  const [isMobileTableFilterExpanded, setIsMobileTableFilterExpanded] = useState(false);
   const [randomBook, setRandomBook] = useState<Book | null>(null);
 
   const t = translations[lang];
@@ -242,18 +243,18 @@ const CatalogView: React.FC<CatalogViewProps> = ({
   };
 
   return (
-    <div className="space-y-6">
+    <div className="w-full min-w-0 space-y-4 sm:space-y-6">
       <Toast messages={toasts} onRemove={removeToast} />
       
       {/* Top bar with actions */}
-      <div className="flex flex-col sm:flex-row gap-4 items-center justify-between">
-          <div className="flex items-center gap-3">
-          <h2 className="text-2xl font-bold font-display text-fg">{t.library}</h2>
-          <div className="flex gap-2">
+      <div className="flex flex-col items-stretch justify-between gap-3 sm:flex-row sm:items-center sm:gap-4">
+          <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-start sm:gap-3">
+          <h2 className="text-xl font-bold font-display text-fg sm:text-2xl">{t.library}</h2>
+          <div className="flex shrink-0 gap-1 sm:gap-2">
             <button
               onClick={handleRandomBook}
               disabled={books.length === 0}
-              className="flex items-center gap-2 px-3 py-2 bg-accent text-accent-on rounded-lg hover:bg-accent-hover disabled:bg-accent-soft disabled:cursor-not-allowed transition-colors"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg bg-accent px-3 py-2 text-accent-on transition-colors hover:bg-accent-hover disabled:cursor-not-allowed disabled:bg-accent-soft"
               title={lang === 'ru' ? 'Случайная книга' : 'Random Book'}
             >
               <Dices size={18} />
@@ -262,14 +263,14 @@ const CatalogView: React.FC<CatalogViewProps> = ({
             <button
               onClick={handleExport}
               disabled={books.length === 0}
-              className="flex items-center gap-2 px-3 py-2 bg-accent-hover text-accent-on rounded-lg hover:bg-accent disabled:bg-accent-soft disabled:cursor-not-allowed transition-colors"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg bg-accent-hover px-3 py-2 text-accent-on transition-colors hover:bg-accent disabled:cursor-not-allowed disabled:bg-accent-soft"
               title={lang === 'ru' ? 'Экспортировать в JSON' : 'Export to JSON'}
             >
               <Upload size={18} />
             </button>
             
             <label
-              className="flex items-center gap-2 px-3 py-2 bg-accent-soft text-accent rounded-lg hover:bg-accent hover:text-accent-on transition-colors cursor-pointer"
+              className="flex min-h-10 min-w-10 cursor-pointer items-center justify-center gap-2 rounded-lg bg-accent-soft px-3 py-2 text-accent transition-colors hover:bg-accent hover:text-accent-on"
               title="Импорт в формате JSON"
             >
               <Download size={18} />
@@ -285,16 +286,16 @@ const CatalogView: React.FC<CatalogViewProps> = ({
         </div>
         
         {/* Search and filters */}
-        <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:flex-nowrap">
           {/* Search input */}
-          <div className="relative">
+          <div className="relative min-w-0 basis-full sm:basis-auto sm:flex-none">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={18} />
             <input 
               type="text" 
               placeholder={t.searchPlaceholder}
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 pr-4 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent w-full"
+              className="w-full rounded-lg border border-accent/30 bg-surface py-2 pl-10 pr-4 focus:outline-none focus:ring-2 focus:ring-accent sm:w-56"
             />
           </div>
           
@@ -355,53 +356,78 @@ const CatalogView: React.FC<CatalogViewProps> = ({
           {/* Add book button */}
           <button
             onClick={onAddBook}
-            className="flex items-center gap-2 bg-accent hover:bg-accent-hover text-accent-on px-4 py-2 rounded-lg text-sm font-semibold transition-colors"
+            className="flex min-h-10 min-w-10 flex-1 items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 text-sm font-semibold text-accent-on transition-colors hover:bg-accent-hover sm:flex-none"
           >
             <Plus size={18} />
-            <span className="hidden sm:inline">{t.addBook}</span>
+            <span>{t.addBook}</span>
           </button>
         </div>
       </div>
 
       {/* Content area */}
       {viewMode === 'table' ? (
-        <div className="flex gap-6">
-          <FilterPanel
-            books={books}
-            selectedStatuses={selectedStatuses}
-            onToggleStatus={(status: BookStatus | 'All') => {
-              const newStatuses = new Set(selectedStatuses);
-              
-              if (status === 'All') {
-                newStatuses.clear();
-                newStatuses.add('All');
-              } else {
-                newStatuses.delete('All');
-                
-                if (newStatuses.has(status)) {
-                  newStatuses.delete(status);
-                } else {
-                  newStatuses.add(status);
-                }
-                
-                const TOTAL_STATUSES = 5;
-                if (newStatuses.size === TOTAL_STATUSES) {
+        <div className="flex min-w-0 flex-col gap-4 md:flex-row md:gap-6">
+          <button
+            type="button"
+            aria-expanded={isMobileTableFilterExpanded}
+            aria-controls="catalog-table-filter-panel"
+            onClick={() => setIsMobileTableFilterExpanded(expanded => !expanded)}
+            className="flex min-h-10 items-center justify-between rounded-xl border border-default bg-surface px-3 py-2 text-sm font-semibold text-fg md:hidden"
+          >
+            <span className="flex items-center gap-2">
+              <SlidersHorizontal size={16} />
+              {lang === 'ru' ? 'Сортировка и фильтры' : 'Sort and filter'}
+            </span>
+            <ChevronDown
+              size={16}
+              className={`transition-transform ${isMobileTableFilterExpanded ? 'rotate-180' : ''}`}
+            />
+          </button>
+          <div
+            id="catalog-table-filter-panel"
+            className={isMobileTableFilterExpanded ? 'block md:contents' : 'hidden md:contents'}
+          >
+            <FilterPanel
+              books={books}
+              selectedStatuses={selectedStatuses}
+              onToggleStatus={(status: BookStatus | 'All') => {
+                const newStatuses = new Set(selectedStatuses);
+
+                if (status === 'All') {
                   newStatuses.clear();
                   newStatuses.add('All');
+                } else {
+                  newStatuses.delete('All');
+
+                  if (newStatuses.has(status)) {
+                    newStatuses.delete(status);
+                  } else {
+                    newStatuses.add(status);
+                  }
+
+                  const TOTAL_STATUSES = 5;
+                  if (newStatuses.size === TOTAL_STATUSES) {
+                    newStatuses.clear();
+                    newStatuses.add('All');
+                  }
+
+                  if (newStatuses.size === 0) {
+                    newStatuses.add('All');
+                  }
                 }
-                
+
                 if (newStatuses.size === 0) {
                   newStatuses.add('All');
                 }
-              }
-              
-              setSelectedStatuses(newStatuses);
-              saveFilterStatuses(newStatuses);
-            }}
-            currentSortOption={tableSortOption}
-            onSortChange={handleTableSortChange}
-            lang={lang}
-          />
+
+                setSelectedStatuses(newStatuses);
+                saveFilterStatuses(newStatuses);
+              }}
+              currentSortOption={tableSortOption}
+              onSortChange={handleTableSortChange}
+              lang={lang}
+            />
+          </div>
           <div className="flex-1 space-y-3 min-w-0">
             {filteredBooks.length > 0 ? getTableSortedBooks(filteredBooks).map(book => (
               <BookTableRow
@@ -418,7 +444,7 @@ const CatalogView: React.FC<CatalogViewProps> = ({
           </div>
         </div>
       ) : filteredBooks.length > 0 ? (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
+        <div className="grid w-full grid-cols-1 gap-4 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3 xl:grid-cols-4">
           {sortedBooks.map(book => (
             <BookCard 
               key={book.id} 

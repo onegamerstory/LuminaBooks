@@ -94,7 +94,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
 
             <div className="flex-1 space-y-3">
               <div>
-                <h3 className="text-xl font-bold text-fg">{book.title}</h3>
+                <h3 className="text-base font-bold text-fg sm:text-xl">{book.title}</h3>
                 {book.author && (
                   <p className="text-muted mt-1">{book.author}</p>
                 )}
@@ -112,10 +112,10 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
           </div>
         </div>
 
-        <div className="flex gap-3 p-4 border-t border-default bg-page">
+        <div className="flex gap-1.5 p-3 border-t border-default bg-page sm:gap-3 sm:p-4">
           <button
             onClick={onClose}
-            className="flex-1 px-4 py-2 text-fg hover:text-fg font-medium text-sm rounded-lg hover:bg-surface transition-colors"
+            className="min-w-0 flex-1 rounded-lg px-1 py-2 text-center text-[10px] font-medium leading-tight text-fg transition-colors hover:bg-surface hover:text-fg sm:px-4 sm:text-sm"
           >
             {t.cancel}
           </button>
@@ -124,19 +124,19 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
               onStartReading(book);
               onClose();
             }}
-            className="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 bg-accent hover:bg-accent-hover text-accent-on font-medium text-sm rounded-lg transition-colors"
+            className="flex min-w-0 flex-1 items-center justify-center gap-1 rounded-lg bg-accent px-1 py-2 text-center text-[10px] font-medium leading-tight text-accent-on transition-colors hover:bg-accent-hover sm:gap-1.5 sm:px-4 sm:text-sm"
           >
-            <Play size={16} />
-            <span>{lang === 'ru' ? 'Читать' : 'Read'}</span>
+            <Play size={14} className="shrink-0 sm:h-4 sm:w-4" />
+            <span className="min-w-0 whitespace-normal">{lang === 'ru' ? 'Читать' : 'Read'}</span>
           </button>
           <button
             onClick={() => {
               onAddToQueue(book);
               onClose();
             }}
-            className="flex-1 px-4 py-2 bg-accent-soft hover:bg-accent text-accent hover:text-accent-on font-medium text-sm rounded-lg transition-colors"
+            className="min-w-0 flex-1 rounded-lg bg-accent-soft px-1 py-2 text-center text-[10px] font-medium leading-tight text-accent transition-colors hover:bg-accent hover:text-accent-on sm:px-4 sm:text-sm"
           >
-            {t.addToQueue}
+            {t.toQueue}
           </button>
         </div>
       </div>

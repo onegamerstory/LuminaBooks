@@ -30,14 +30,14 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
   const t = translations[lang];
 
   return (
-    <div className="bg-surface rounded-xl shadow-sm border border-default hover:shadow-md hover:border-accent transition-all duration-200 p-4 flex gap-4 items-start">
+    <div className="flex items-start gap-2 rounded-xl border border-default bg-surface p-2 shadow-sm transition-all duration-200 hover:border-accent hover:shadow-md sm:gap-4 sm:p-4">
       {/* Обложка */}
       <div className="flex-shrink-0">
         {book.coverUrl && (
           <img 
             src={book.coverUrl} 
             alt={book.title}
-            className="w-16 h-24 object-cover rounded-lg"
+            className="h-20 w-14 rounded-lg object-cover sm:h-24 sm:w-16"
             onError={handleCoverError}
           />
         )}
@@ -107,7 +107,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
       </div>
 
       {/* Кнопки действия */}
-      <div className="flex-shrink-0 flex gap-2">
+      <div className="flex flex-shrink-0 flex-col gap-1 sm:flex-row sm:gap-2">
         {onAddToQueue && (
           <button
             onClick={() => {
@@ -116,7 +116,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
               }
             }}
             disabled={book.status !== BookStatus.WANT_TO_READ || book.inQueue}
-            className={`p-2 rounded-lg transition-colors font-medium ${
+            className={`flex min-h-10 min-w-10 items-center justify-center rounded-lg p-2 transition-colors font-medium ${
               book.status === BookStatus.WANT_TO_READ && !book.inQueue
                 ? 'bg-accent-soft text-fg hover:bg-accent-hover'
                 : 'bg-page/50 text-muted cursor-not-allowed'
@@ -132,14 +132,14 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
         )}
         <button
           onClick={onEdit}
-          className="p-2 bg-surface border border-default rounded-lg text-fg hover:bg-page transition-colors"
+          className="flex min-h-10 min-w-10 items-center justify-center rounded-lg border border-default bg-surface p-2 text-fg transition-colors hover:bg-page"
           title={lang === 'ru' ? 'Редактировать' : 'Edit'}
         >
           <Edit2 size={16} />
         </button>
         <button
           onClick={onDelete}
-          className="p-2 bg-red-100 text-red-600 rounded-lg hover:bg-red-200 transition-colors font-medium"
+          className="flex min-h-10 min-w-10 items-center justify-center rounded-lg bg-red-100 p-2 font-medium text-red-600 transition-colors hover:bg-red-200"
           title={lang === 'ru' ? 'Удалить' : 'Delete'}
         >
           <Trash2 size={16} />

@@ -156,6 +156,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang, profileRef
     <div style={{ display: 'flex', flexDirection: 'column', gap: 'var(--space-6)' }}>
       {/* Hero */}
       <div
+        className="profile-hero"
         style={{
           background: 'linear-gradient(135deg, var(--accent) 0%, #4A6B50 100%)',
           borderRadius: 'var(--radius-xl)',
@@ -163,7 +164,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang, profileRef
           boxShadow: 'var(--elev-overlay)',
         }}
       >
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-8)' }}>
+        <div className="profile-hero-content" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 'var(--space-8)' }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-5)' }}>
             <div
               style={{
@@ -189,7 +190,7 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang, profileRef
             </div>
           </div>
 
-          <div style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
+          <div className="profile-hero-stats" style={{ display: 'flex', gap: 'var(--space-6)', alignItems: 'center' }}>
             {[
               { icon: BookOpen, label: t.totalBooks, value: totalBooks },
               { icon: TrendingUp, label: t.reading, value: readingCount },

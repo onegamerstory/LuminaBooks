@@ -95,16 +95,16 @@ const FranchiseCard: React.FC<{
             className="flex-1 p-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Редактировать' : 'Edit'}
           >
-            <Edit2 size={16} className="inline mr-1" />
-            {lang === 'ru' ? 'Ред.' : 'Edit'}
+            <Edit2 size={16} className="mx-auto inline sm:mr-1" />
+            <span className="hidden sm:inline">{lang === 'ru' ? 'Ред.' : 'Edit'}</span>
           </button>
           <button
             onClick={onDelete}
             className="flex-1 p-2 bg-danger/10 text-danger rounded-lg hover:bg-danger/20 transition-colors font-medium text-sm"
             title={lang === 'ru' ? 'Удалить' : 'Delete'}
           >
-            <Trash2 size={16} className="inline mr-1" />
-            {lang === 'ru' ? 'Удалить' : 'Delete'}
+            <Trash2 size={16} className="mx-auto inline sm:mr-1" />
+            <span className="hidden sm:inline">{lang === 'ru' ? 'Удалить' : 'Delete'}</span>
           </button>
         </div>
       </div>
@@ -220,10 +220,11 @@ const FranchiseView: React.FC<FranchiseViewProps> = ({
 
         <button
           onClick={handleAdd}
-          className="flex items-center gap-2 px-4 py-2 bg-accent text-accent-on rounded-lg hover:bg-accent-hover transition-colors font-semibold shadow-lg whitespace-nowrap"
+          title={lang === 'ru' ? 'Новая коллекция' : 'New Collection'}
+          className="flex w-full items-center justify-center gap-2 rounded-lg bg-accent px-4 py-2 font-semibold text-accent-on shadow-lg transition-colors hover:bg-accent-hover sm:w-auto"
         >
           <Plus size={20} />
-          <span className="hidden sm:inline">
+          <span>
             {lang === 'ru' ? 'Новая коллекция' : 'New Collection'}
           </span>
         </button>

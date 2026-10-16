@@ -119,16 +119,17 @@ const App: React.FC = () => {
           borderBottom: '1px solid var(--border-soft)',
         }}
       >
-        <div className="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+        <div className="mx-auto flex min-h-16 w-full max-w-none flex-wrap items-center justify-between gap-y-2 px-2 py-2 sm:px-4">
           <div className="flex items-center gap-3">
-            <img src={appIcon} alt="LuminaBooks" className="w-9 h-9" />
-            <h1 className="text-lg font-display tracking-tight" style={{ color: 'var(--fg)' }}>LuminaBooks</h1>
+            <img src={appIcon} alt="LuminaBooks" className="h-8 w-8 sm:h-9 sm:w-9" />
+            <h1 className="whitespace-nowrap text-base font-display tracking-tight sm:text-lg" style={{ color: 'var(--fg)' }}>LuminaBooks</h1>
           </div>
 
-          <nav className="flex items-center gap-1 p-1 rounded-xl" style={{ backgroundColor: 'var(--accent-soft)' }}>
+          <nav className="order-3 flex w-full items-center justify-around gap-0 rounded-xl p-1 sm:order-none sm:w-auto sm:justify-center sm:gap-1" style={{ backgroundColor: 'var(--accent-soft)' }}>
             <button
+              aria-label={lang === 'ru' ? 'Профиль' : 'Profile'}
               onClick={() => setActiveView('statistics')}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-1 py-2 text-sm font-medium transition-all sm:flex-none sm:px-3"
               style={{
                 backgroundColor: activeView === 'statistics' ? 'var(--accent)' : 'transparent',
                 color: activeView === 'statistics' ? 'var(--accent-on)' : 'var(--muted)',
@@ -138,8 +139,9 @@ const App: React.FC = () => {
               <span className="hidden sm:inline">{lang === 'ru' ? 'Профиль' : 'Profile'}</span>
             </button>
             <button
+              aria-label={t.catalog}
               onClick={() => setActiveView('catalog')}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-1 py-2 text-sm font-medium transition-all sm:flex-none sm:px-3"
               style={{
                 backgroundColor: activeView === 'catalog' ? 'var(--accent)' : 'transparent',
                 color: activeView === 'catalog' ? 'var(--accent-on)' : 'var(--muted)',
@@ -149,8 +151,9 @@ const App: React.FC = () => {
               <span className="hidden sm:inline">{t.catalog}</span>
             </button>
             <button
+              aria-label={lang === 'ru' ? 'Коллекции' : 'Collections'}
               onClick={() => setActiveView('collections')}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-1 py-2 text-sm font-medium transition-all sm:flex-none sm:px-3"
               style={{
                 backgroundColor: activeView === 'collections' ? 'var(--accent)' : 'transparent',
                 color: activeView === 'collections' ? 'var(--accent-on)' : 'var(--muted)',
@@ -160,8 +163,9 @@ const App: React.FC = () => {
               <span className="hidden sm:inline">{lang === 'ru' ? 'Коллекции' : 'Collections'}</span>
             </button>
             <button
+              aria-label={t.calendar}
               onClick={() => setActiveView('calendar')}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-1 py-2 text-sm font-medium transition-all sm:flex-none sm:px-3"
               style={{
                 backgroundColor: activeView === 'calendar' ? 'var(--accent)' : 'transparent',
                 color: activeView === 'calendar' ? 'var(--accent-on)' : 'var(--muted)',
@@ -171,8 +175,9 @@ const App: React.FC = () => {
               <span className="hidden sm:inline">{t.calendar}</span>
             </button>
             <button
+              aria-label={lang === 'ru' ? 'Чтение' : 'Reading'}
               onClick={() => setActiveView('reading')}
-              className="flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium transition-all"
+              className="flex min-h-10 flex-1 items-center justify-center gap-2 rounded-lg px-1 py-2 text-sm font-medium transition-all sm:flex-none sm:px-3"
               style={{
                 backgroundColor: activeView === 'reading' ? 'var(--accent)' : 'transparent',
                 color: activeView === 'reading' ? 'var(--accent-on)' : 'var(--muted)',
@@ -186,18 +191,18 @@ const App: React.FC = () => {
           <div className="flex items-center gap-1">
             <button
               onClick={toggleLang}
-              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-medium transition-colors"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-medium transition-colors"
               style={{ color: 'var(--muted)' }}
               title="Switch Language"
             >
               <Languages size={17} />
-              <span className="text-xs font-bold uppercase tracking-wider">{lang}</span>
+              <span className="hidden text-xs font-bold uppercase tracking-wider sm:inline">{lang}</span>
             </button>
 
             <button
               onClick={handleManualSync}
               disabled={syncing}
-              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-semibold transition-colors disabled:opacity-50"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold transition-colors disabled:opacity-50"
               style={{ color: 'var(--muted)' }}
               title={lang === 'ru' ? 'Синхронизировать данные' : 'Sync data'}
             >
@@ -206,7 +211,7 @@ const App: React.FC = () => {
 
             <button
               onClick={() => setIsProfileOpen(true)}
-              className="flex items-center gap-2 px-2.5 py-2 rounded-lg text-sm font-semibold transition-colors"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold transition-colors"
               style={{ color: 'var(--muted)' }}
               title={lang === 'ru' ? 'Настройки' : 'Settings'}
             >
@@ -216,7 +221,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="flex-grow max-w-7xl mx-auto w-full p-4 sm:p-6 lg:p-8">
+      <main className="mx-auto w-full max-w-none flex-grow p-2 sm:p-6 lg:p-8">
         {activeView === 'catalog' ? (
           <CatalogView 
             books={books} 

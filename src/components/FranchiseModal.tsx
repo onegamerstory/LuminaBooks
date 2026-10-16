@@ -162,31 +162,31 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
-      <div className="bg-surface rounded-2xl w-full max-w-5xl max-h-[90vh] shadow-overlay animate-in zoom-in duration-200 flex flex-col">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="flex max-h-[calc(100dvh-1rem)] w-full max-w-5xl flex-col overflow-hidden rounded-2xl bg-surface shadow-overlay animate-in zoom-in duration-200 sm:max-h-[90vh]">
         {/* Header */}
-        <div className="sticky top-0 bg-surface border-b border-default px-6 py-4 flex items-center justify-between z-10 rounded-t-2xl">
-          <h2 className="text-xl font-bold font-display text-fg">
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 rounded-t-2xl border-b border-default bg-surface px-4 py-3 sm:px-6 sm:py-4">
+          <h2 className="text-base font-bold font-display text-fg sm:text-xl">
             {initialData
               ? lang === 'ru' ? 'Редактировать коллекцию' : 'Edit Collection'
               : lang === 'ru' ? 'Новая коллекция' : 'New Collection'}
           </h2>
-          <button onClick={onClose} className="p-2 hover:bg-page rounded-full text-muted">
+          <button onClick={onClose} className="shrink-0 rounded-full p-2 text-muted hover:bg-page">
             <X size={20} />
           </button>
         </div>
 
         {error && (
-          <div className="mx-6 mt-4 p-3 bg-danger/10 border border-danger/20 rounded-lg text-danger text-sm font-medium flex items-center gap-2">
+          <div className="mx-4 mt-3 flex items-center gap-2 rounded-lg border border-danger/20 bg-danger/10 p-3 text-sm font-medium text-danger sm:mx-6 sm:mt-4">
             <span>⚠️</span><span>{error}</span>
           </div>
         )}
 
-        <form onSubmit={handleSubmit} className="flex flex-1 overflow-hidden">
+        <form onSubmit={handleSubmit} className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain md:flex-row md:overflow-hidden">
           {/* Left Panel - Collection Info */}
-          <div className="w-1/2 border-r border-default p-6 overflow-y-auto flex flex-col gap-5 bg-surface">
+          <div className="flex w-full shrink-0 flex-col gap-4 border-b border-default bg-surface p-4 sm:p-6 md:w-1/2 md:gap-5 md:overflow-y-auto md:border-b-0 md:border-r">
             <div>
-              <h3 className="text-lg font-bold font-display text-fg mb-4">
+              <h3 className="mb-2 text-base font-bold font-display text-fg sm:mb-4 sm:text-lg">
                 {lang === 'ru' ? 'Информация о коллекции' : 'Collection Info'}
               </h3>
             </div>
@@ -201,7 +201,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                 value={name}
                 onChange={(e) => setName(e.target.value)}
                 placeholder={lang === 'ru' ? 'e.g. Гарри Поттер' : 'e.g. Harry Potter'}
-                className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none"
+                className="w-full rounded-lg border border-accent/30 bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent sm:px-4 sm:text-base"
                 required
               />
             </div>
@@ -215,7 +215,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                 value={description}
                 onChange={(e) => setDescription(e.target.value)}
                 placeholder={lang === 'ru' ? 'Опишите эту коллекцию...' : 'Describe this collection...'}
-                className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none resize-none h-20"
+                className="h-16 w-full resize-none rounded-lg border border-accent/30 bg-surface px-3 py-2 text-sm outline-none focus:ring-2 focus:ring-accent sm:h-20 sm:px-4 sm:text-base"
               />
             </div>
 
@@ -224,8 +224,8 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
               <label className="block text-xs font-semibold text-muted uppercase mb-1">
                 {lang === 'ru' ? 'Обложка' : 'Cover'}
               </label>
-              <div className="flex gap-4 items-start">
-                <div className="w-24 h-24 rounded-xl overflow-hidden border-2 border-accent bg-accent-soft flex-shrink-0">
+              <div className="flex items-start gap-3 sm:gap-4">
+                <div className="h-16 w-16 flex-shrink-0 overflow-hidden rounded-xl border-2 border-accent bg-accent-soft sm:h-24 sm:w-24">
                   <img
                     src={coverUrl || undefined}
                     alt=""
@@ -239,7 +239,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                     value={coverUrl}
                     onChange={(e) => setCoverUrl(e.target.value)}
                     placeholder={lang === 'ru' ? 'Ссылка на обложку...' : 'Cover image URL...'}
-                    className="w-full px-4 py-2 bg-surface border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none text-sm"
+                    className="w-full rounded-lg border border-accent/30 bg-surface px-3 py-2 text-xs outline-none focus:ring-2 focus:ring-accent sm:px-4 sm:text-sm"
                   />
                   <p className="text-xs text-muted mt-1">
                     {lang === 'ru' ? 'Формат 1:1 для превью' : '1:1 aspect ratio recommended'}
@@ -249,12 +249,12 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
             </div>
 
             {/* Books in collection */}
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex min-h-0 flex-col md:flex-1">
               <label className="block text-xs font-semibold text-muted uppercase mb-2">
                 {lang === 'ru' ? 'Книги в коллекции' : 'Books in collection'} ({selectedBooks.length})
               </label>
               {selectedBooks.length > 0 ? (
-                <div className="flex-1 overflow-y-auto space-y-1.5 bg-surface rounded-lg p-2 border border-default">
+                <div className="max-h-40 space-y-1.5 overflow-y-auto rounded-lg border border-default bg-surface p-2 md:max-h-none md:flex-1">
                   {selectedBooks.map((book, index) => (
                     <div
                       key={book.id}
@@ -298,7 +298,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                   ))}
                 </div>
               ) : (
-                <div className="flex-1 flex items-center justify-center bg-surface rounded-lg border border-dashed border-default p-4">
+                <div className="flex min-h-16 items-center justify-center rounded-lg border border-dashed border-default bg-surface p-4 md:flex-1">
                   <p className="text-sm text-muted">
                     {lang === 'ru' ? 'Нет книг в коллекции' : 'No books in collection'}
                   </p>
@@ -308,9 +308,9 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
           </div>
 
           {/* Right Panel - Add Books */}
-          <div className="w-1/2 p-6 overflow-y-auto flex flex-col gap-4 bg-surface">
+          <div className="flex min-h-0 w-full flex-col gap-3 bg-surface p-4 sm:p-6 md:w-1/2 md:gap-4 md:overflow-y-auto">
             <div>
-              <h3 className="text-lg font-bold font-display text-fg mb-4">
+              <h3 className="mb-2 text-base font-bold font-display text-fg sm:mb-4 sm:text-lg">
                 {lang === 'ru' ? 'Добавить книги в коллекцию' : 'Add Books to Collection'}
               </h3>
             </div>
@@ -323,12 +323,12 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                 placeholder={lang === 'ru' ? 'Поиск по названию или автору...' : 'Search by title or author...'}
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-10 pr-4 py-2 bg-surface border border-accent/30 rounded focus:ring-2 focus:ring-accent outline-none"
+                className="w-full rounded border border-accent/30 bg-surface py-2 pl-10 pr-4 text-sm outline-none focus:ring-2 focus:ring-accent"
               />
             </div>
 
             {/* Status filters */}
-            <div className="flex flex-wrap gap-1.5">
+            <div className="flex flex-nowrap gap-1 sm:flex-wrap sm:gap-1.5">
               {STATUS_LIST.map((status) => {
                 const isAll = status === 'All';
                 const isActive = statusFilter === status;
@@ -337,7 +337,7 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                     key={status}
                     type="button"
                     onClick={() => setStatusFilter(status)}
-                    className={`px-3 py-1 rounded text-xs font-semibold transition-all ${
+                    className={`whitespace-nowrap rounded px-1 py-1 text-[8px] font-semibold transition-all sm:px-3 sm:text-xs ${
                       isActive
                         ? isAll
                           ? 'bg-accent text-accent-on'
@@ -356,16 +356,16 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
             </div>
 
             {/* Books table */}
-            <div className="flex-1 flex flex-col min-h-0">
+            <div className="flex min-h-0 flex-col md:flex-1">
               {availableBooks.length > 0 ? (
-                <div className="flex-1 overflow-y-auto border border-default rounded-xl bg-surface">
-                  <table className="w-full">
+                <div className="h-[55dvh] max-h-[55dvh] min-h-32 shrink-0 overflow-auto rounded-xl border border-default bg-surface md:h-auto md:max-h-none md:min-h-0 md:flex-1">
+                  <table className="w-full table-fixed">
                     <thead>
                       <tr className="text-xs text-muted uppercase border-b bg-surface">
-                        <th className="text-left py-2 px-3 w-12"></th>
-                        <th className="text-left py-2 px-2">{lang === 'ru' ? 'Название' : 'Title'}</th>
-                        <th className="text-left py-2 px-2 w-28">{lang === 'ru' ? 'Статус' : 'Status'}</th>
-                        <th className="text-center py-2 px-2 w-10"></th>
+                        <th className="w-8 py-2 px-1 text-left sm:w-12 sm:px-3"></th>
+                        <th className="py-2 px-1 text-left sm:px-2">{lang === 'ru' ? 'Название' : 'Title'}</th>
+                        <th className="w-16 py-2 px-1 text-left text-[9px] sm:w-28 sm:px-2 sm:text-xs">{lang === 'ru' ? 'Статус' : 'Status'}</th>
+                        <th className="w-8 py-2 px-1 text-center sm:w-10 sm:px-2"></th>
                       </tr>
                     </thead>
                     <tbody>
@@ -373,35 +373,35 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
                         const isAdded = selectedBookIds.includes(book.id);
                         return (
                           <tr key={book.id} className="border-b border-default last:border-b-0 hover:bg-page">
-                            <td className="py-2 px-3">
+                            <td className="py-1 px-1 sm:py-2 sm:px-3">
                               <img
                                 src={book.coverUrl}
                                 alt={book.title}
-                                className="w-8 h-12 object-cover rounded"
+                                className="h-9 w-6 rounded object-cover sm:h-12 sm:w-8"
                                 onError={handleCoverError}
                               />
                             </td>
-                            <td className="py-2 px-2">
-                              <p className="text-sm font-medium text-fg truncate max-w-[200px]">
+                            <td className="py-1 px-1 sm:py-2 sm:px-2">
+                              <p className="truncate text-xs font-medium text-fg sm:max-w-[200px] sm:text-sm">
                                 {book.title}
                               </p>
                             </td>
-                            <td className="py-2 px-2">
-                              <span className={`inline-block px-2 py-0.5 rounded text-xs font-semibold ${statusColors[book.status]}`}>
+                            <td className="py-1 px-1 sm:py-2 sm:px-2">
+                              <span className={`inline-block max-w-full truncate rounded px-1 py-0.5 text-[9px] font-semibold sm:px-2 sm:text-xs ${statusColors[book.status]}`}>
                                 {getStatusLabel(t, book.status)}
                               </span>
                             </td>
-                            <td className="py-2 px-2 text-center">
+                            <td className="py-1 px-1 text-center sm:py-2 sm:px-2">
                               <button
                                 type="button"
                                 onClick={() => toggleBook(book.id)}
-                                className={`p-1.5 rounded-lg transition-all ${
+                                className={`rounded-lg p-1 transition-all sm:p-1.5 ${
                                   isAdded
                                     ? 'bg-accent text-accent-on hover:bg-accent-hover'
                                     : 'bg-accent-soft text-accent hover:bg-accent-soft/70'
                                 }`}
                               >
-                                {isAdded ? <Check size={18} /> : <Plus size={18} />}
+                                {isAdded ? <Check size={14} className="sm:h-[18px] sm:w-[18px]" /> : <Plus size={14} className="sm:h-[18px] sm:w-[18px]" />}
                               </button>
                             </td>
                           </tr>
@@ -424,18 +424,18 @@ const FranchiseModal: React.FC<FranchiseModalProps> = ({
         </form>
 
         {/* Footer */}
-        <div className="sticky bottom-0 bg-surface border-t border-default px-6 py-4 flex justify-end gap-3 rounded-b-2xl">
+        <div className="sticky bottom-0 flex justify-end gap-2 rounded-b-2xl border-t border-default bg-surface px-4 py-3 sm:gap-3 sm:px-6 sm:py-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-6 py-2 bg-surface border border-default text-fg rounded-lg hover:bg-page transition-colors"
+            className="rounded-lg border border-default bg-surface px-4 py-2 text-sm text-fg transition-colors hover:bg-page sm:px-6 sm:text-base"
           >
             {lang === 'ru' ? 'Отмена' : 'Cancel'}
           </button>
           <button
             type="submit"
             onClick={handleSubmit}
-            className="px-8 py-2 bg-accent text-accent-on font-semibold rounded-lg hover:bg-accent-hover shadow-card transition-all active:scale-95"
+            className="rounded-lg bg-accent px-6 py-2 text-sm font-semibold text-accent-on shadow-card transition-all hover:bg-accent-hover active:scale-95 sm:px-8 sm:text-base"
           >
             {initialData
               ? lang === 'ru' ? 'Обновить' : 'Update'

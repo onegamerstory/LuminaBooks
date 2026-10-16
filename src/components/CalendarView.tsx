@@ -226,7 +226,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
 
   return (
-    <div className="flex bg-surface rounded-2xl shadow-md border border-default overflow-hidden">
+    <div className="flex w-full flex-col overflow-hidden rounded-2xl border border-default bg-surface shadow-md lg:flex-row">
       {/* Left: Calendar */}
       <div className="flex-1 flex flex-col bg-surface overflow-hidden">
         {/* Header */}
@@ -235,6 +235,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
           <div className="flex items-center gap-2 p-1 rounded-xl" style={{backgroundColor: 'var(--border)'}}>
               <button
+                aria-label={lang === 'ru' ? 'Фазы' : 'Phases'}
+                title={lang === 'ru' ? 'Фазы' : 'Phases'}
                 onClick={() => setViewMode('phases')}
                 className={`px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
                   viewMode === 'phases'
@@ -242,9 +244,12 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                   : 'text-muted hover:bg-accent-soft'
                 }`}
               >
-                {lang === 'ru' ? 'Фазы' : 'Phases'}
+                <BookOpen size={16} className="sm:hidden" />
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Фазы' : 'Phases'}</span>
               </button>
               <button
+                aria-label={lang === 'ru' ? 'Сессии' : 'Sessions'}
+                title={lang === 'ru' ? 'Сессии' : 'Sessions'}
                 onClick={() => setViewMode('sessions')}
                 className={`px-3 py-1.5 rounded-lg transition-colors text-sm font-medium ${
                   viewMode === 'sessions'
@@ -252,7 +257,8 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                     : 'text-muted hover:bg-accent-soft'
                 }`}
               >
-                {lang === 'ru' ? 'Сессии' : 'Sessions'}
+                <Clock size={16} className="sm:hidden" />
+                <span className="hidden sm:inline">{lang === 'ru' ? 'Сессии' : 'Sessions'}</span>
               </button>
             </div>
 
@@ -262,20 +268,22 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             {/* Left Arrow Button */}
             <button 
               onClick={() => changeMonth(-1)} 
-              className="p-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors"
+              aria-label={lang === 'ru' ? 'Предыдущий месяц' : 'Previous month'}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-default bg-page p-1.5 transition-colors hover:bg-accent-soft"
             >
               <ChevronLeft size={18} className="text-muted" />
             </button>
 
             {/* Month and Year */}
-            <button className="p-1 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors font-bold text-fg min-w-[130px] text-center capitalize text-sm">
+            <button aria-label={`${monthName} ${year}`} className="flex h-10 min-w-0 items-center justify-center rounded-lg border border-default bg-page px-2 text-center text-xs font-bold capitalize text-fg transition-colors hover:bg-accent-soft sm:min-w-[130px] sm:text-sm">
               {monthName} {year}
             </button>
 
             {/* Right Arrow Button */}
             <button 
               onClick={() => changeMonth(1)} 
-              className="p-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors"
+              aria-label={lang === 'ru' ? 'Следующий месяц' : 'Next month'}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-default bg-page p-1.5 transition-colors hover:bg-accent-soft"
             >
               <ChevronRight size={18} className="text-muted" />
             </button>
@@ -283,11 +291,13 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             
 
             <button
+              title={t.today}
+              aria-label={t.today}
               onClick={() => setCurrentDate(new Date())}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-page border border-default hover:bg-accent-soft rounded-lg transition-colors text-sm font-medium text-muted"
+              className="flex min-h-10 min-w-10 items-center justify-center gap-1.5 rounded-lg border border-default bg-page px-2 py-1.5 text-sm font-medium text-muted transition-colors hover:bg-accent-soft sm:px-3"
             >
               <CalendarDays size={16} />
-              {t.today}
+              <span className="hidden sm:inline">{t.today}</span>
             </button>
           </div>
         </div>
@@ -302,7 +312,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         </div>
 
         {/* Calendar Grid - cells in light olive */}
-        <div className="grid grid-cols-7 auto-rows-[130px] sm:auto-rows-[160px] flex-1">
+        <div className="grid flex-1 grid-cols-7 auto-rows-[72px] sm:auto-rows-[130px] xl:auto-rows-[160px]">
           {daysInMonth.map((day: Date | null, idx: number) => {
             if (!day) return (
               <div key={`empty-${idx}`} className="bg-surface border-r border-b border-default" />
@@ -314,14 +324,14 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
             return (
               <div 
                 key={day.toISOString()} 
-                className={`relative border-r border-b border-default p-1 group hover:border-accent hover:border-[2px] hover:z-10 transition-colors cursor-pointer bg-surface ${
+                className={`relative border-r border-b border-default p-0.5 sm:p-1 group hover:border-accent hover:border-[2px] hover:z-10 transition-colors cursor-pointer bg-surface ${
                   isToday ? 'ring-1 ring-[var(--accent)] ring-inset' : ''
                 }`}
                 onContextMenu={(e: React.MouseEvent) => handleDayContextMenu(e, day)}
                 title={lang === 'ru' ? 'Правый клик для начала чтения книги' : 'Right click to start reading a book'}
               >
                 <div className="flex items-center justify-between gap-1">
-                  <span className={`z-10 w-6 h-6 flex items-center justify-center text-xs font-bold rounded-full 'text-muted'`}>
+                  <span className={`z-10 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-muted sm:h-6 sm:w-6 sm:text-xs`}>
                     {day.getDate()}
                   </span>
 
@@ -339,7 +349,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                       {booksToday.slice(0, 4).map((book: Book, idx: number) => (
                         <div 
                           key={book.id} 
-                          className="absolute group/cover aspect-[2/3] w-[45px] shadow-md rounded"
+                          className="absolute group/cover aspect-[2/3] w-[25px] rounded shadow-md sm:w-[45px]"
                           style={{
                             zIndex: idx,
                             transform: `translateY(${idx * 8}px) translateX(${(idx - (Math.min(booksToday.length, 4) - 1) / 2) * 8}px)`,
@@ -382,16 +392,16 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       </div>
 
       {/* Divider */}
-      <div className="w-px" style={{backgroundColor: 'var(--border)'}}></div>
+      <div className="hidden w-px lg:block" style={{backgroundColor: 'var(--border)'}}></div>
 
       {/* Right: Statistics */}
-      <div className="w-[280px] shrink-0 bg-surface overflow-auto flex flex-col">
+      <div className="flex w-full shrink-0 flex-col overflow-auto bg-surface lg:w-[280px]">
         <div className="p-4 border-b border-default">
           <h3 className="text-base font-bold text-fg">
             {t.statisticsFor} {monthName}
           </h3>
         </div>
-        <div className="p-4 space-y-3 flex-1">
+        <div className="grid flex-1 grid-cols-2 gap-2 p-3 sm:gap-3 sm:p-4 lg:grid-cols-1">
           <div className="flex items-center gap-3 bg-surface border border-default rounded-xl p-3">
             <div className="w-9 h-9 rounded-lg bg-accent-soft flex items-center justify-center shrink-0">
               <Clock size={18} className="text-accent" />

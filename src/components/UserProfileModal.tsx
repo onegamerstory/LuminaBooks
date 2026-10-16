@@ -108,10 +108,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
 
   return (
     <>
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
-      <div className="flex h-[min(90vh,900px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface shadow-overlay animate-in zoom-in duration-200">
-        <div className="flex flex-shrink-0 items-center justify-between border-b border-default bg-surface px-6 py-5 sm:px-8">
-          <h2 className="text-xl font-bold font-display text-fg">
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-2 sm:p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
+      <div className="flex h-[min(94dvh,900px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface shadow-overlay animate-in zoom-in duration-200 sm:h-[min(90vh,900px)]">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-default bg-surface px-4 py-3 sm:px-8 sm:py-5">
+          <h2 className="text-lg font-bold font-display text-fg sm:text-xl">
             {lang === 'ru' ? 'Настройки' : 'Settings'}
           </h2>
           <button 
@@ -123,16 +123,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           </button>
         </div>
 
-        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 sm:px-8 sm:py-5">
+        <div className="min-h-0 flex-1 overflow-y-auto px-4 py-2 sm:px-8 sm:py-5">
           <div className="space-y-0">
           {/* Section 1: Avatar */}
-          <div className="py-6">
+          <div className="py-4 sm:py-6">
             <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
               <div className="w-full flex-shrink-0 sm:w-48">
-                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
+                <p className="text-xs font-semibold text-fg sm:text-sm">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
               </div>
-              <div className="flex flex-1 flex-wrap items-center justify-center gap-4 sm:justify-start">
+              <div className="flex flex-1 flex-wrap items-center justify-center gap-2 sm:gap-4 sm:justify-start">
                 <div className="w-20 h-20 rounded-full bg-accent-soft flex items-center justify-center overflow-hidden border-2 border-accent flex-shrink-0">
                   {profile.photoUrl ? (
                     <img 
@@ -147,28 +147,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                     <User size={32} className="text-muted" />
                   )}
                 </div>
-                <div className="flex flex-wrap items-center gap-2">
+                <div className="flex w-full flex-nowrap items-center justify-center gap-1 sm:w-auto sm:gap-2">
                   <button
                     onClick={handlePhotoClick}
-                    className="flex items-center gap-1.5 rounded-lg border-2 border-accent px-3 py-1.5 text-sm text-accent transition-colors hover:bg-accent hover:text-accent-on"
+                    className="flex items-center gap-1 whitespace-nowrap rounded-lg border-2 border-accent px-1.5 py-1 text-[10px] text-accent transition-colors hover:bg-accent hover:text-accent-on sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm"
                   >
-                    <Upload size={16} />
+                    <Upload size={14} className="sm:h-4 sm:w-4" />
                     {lang === 'ru' ? 'Загрузить фото' : 'Upload photo'}
                   </button>
                   {profile.photoUrl && (
                     <button
                       type="button"
                       onClick={() => setCropImage(profile.photoUrl)}
-                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:bg-accent-soft hover:text-accent"
+                      className="flex items-center gap-1 whitespace-nowrap rounded-lg px-1.5 py-1 text-[10px] text-muted transition-colors hover:bg-accent-soft hover:text-accent sm:gap-1.5 sm:px-3 sm:py-1.5 sm:text-sm"
                       title={lang === 'ru' ? 'Изменить кадрирование аватара' : 'Edit avatar crop'}
                     >
-                      <Crop size={16} />
+                      <Crop size={14} className="sm:h-4 sm:w-4" />
                       {lang === 'ru' ? 'Редактировать' : 'Edit'}
                     </button>
                   )}
                   <button
                     onClick={handleDeletePhoto}
-                    className="rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:bg-danger/10 hover:text-danger"
+                    className="whitespace-nowrap rounded-lg px-1.5 py-1 text-[10px] text-muted transition-colors hover:bg-danger/10 hover:text-danger sm:px-3 sm:py-1.5 sm:text-sm"
                   >
                     {lang === 'ru' ? 'Удалить' : 'Delete'}
                   </button>
@@ -187,22 +187,22 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 2: Nickname */}
-          <div className="py-6">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-48">
+          <div className="py-4 sm:py-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
+              <div className="w-full flex-shrink-0 sm:w-48">
                 <div className="flex items-center gap-2">
                   <User size={16} className="text-muted" />
-                  <p className="text-sm font-semibold text-fg">{t.nickname}</p>
+                  <p className="text-xs font-semibold text-fg sm:text-sm">{t.nickname}</p>
                 </div>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Ваше имя в приложении' : 'Your name in the app'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Ваше имя в приложении' : 'Your name in the app'}</p>
               </div>
-              <div className="flex-1">
+              <div className="w-full flex-1">
                 <input 
                   type="text" 
                   placeholder={t.enterNickname}
                   value={profile.nickname}
                   onChange={(e) => setProfile(prev => ({ ...prev, nickname: e.target.value }))}
-                  className="w-full px-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                  className="min-h-11 w-full rounded-lg border border-accent/30 bg-surface px-3 py-2 text-sm placeholder:text-xs focus:outline-none focus:ring-2 focus:ring-accent sm:text-base sm:placeholder:text-sm"
                 />
               </div>
             </div>
@@ -211,16 +211,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 3: Default Cover */}
-          <div className="py-6">
-            <div className="flex gap-6">
-              <div className="flex-shrink-0 w-48">
+          <div className="py-4 sm:py-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:gap-6">
+              <div className="w-full flex-shrink-0 sm:w-48">
                 <div className="flex items-center gap-2">
                   <Book size={16} className="text-muted" />
-                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Обложка по умолчанию' : 'Default Cover'}</p>
+                  <p className="text-xs font-semibold text-fg sm:text-sm">{lang === 'ru' ? 'Обложка по умолчанию' : 'Default Cover'}</p>
                 </div>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Обложка будет использоваться для книг без обложки' : 'Cover will be used for books without a cover'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Обложка будет использоваться для книг без обложки' : 'Cover will be used for books without a cover'}</p>
               </div>
-              <div className="flex-1">
+              <div className="w-full flex-1">
                 <div className="relative">
                   <Link className="absolute left-3 top-1/2 -translate-y-1/2 text-muted" size={16} />
                   <input 
@@ -228,7 +228,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                     placeholder={lang === 'ru' ? 'Введите URL обложки...' : 'Enter cover URL...'}
                     value={profile.defaultCoverUrl}
                     onChange={(e) => setProfile(prev => ({ ...prev, defaultCoverUrl: e.target.value }))}
-                    className="w-full pl-10 pr-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent"
+                    className="min-h-11 w-full rounded-lg border border-accent/30 bg-surface py-2 pl-10 pr-3 text-sm placeholder:text-xs focus:outline-none focus:ring-2 focus:ring-accent sm:text-base sm:placeholder:text-sm"
                   />
                 </div>
                 {profile.defaultCoverUrl && (
@@ -250,14 +250,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 4: Auto Sync */}
-          <div className="py-6">
+          <div className="py-4 sm:py-6">
             <div className="flex items-center justify-between">
-              <div className="flex-shrink-0 w-48">
+              <div className="min-w-0 flex-1 sm:w-48 sm:flex-none">
                 <div className="flex items-center gap-2">
                   <RefreshCw size={16} className="text-muted" />
-                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}</p>
+                  <p className="text-xs font-semibold text-fg sm:text-sm">{lang === 'ru' ? 'Авто-синхронизация' : 'Auto Sync'}</p>
                 </div>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Автоматически обновлять данные с другого устройства' : 'Automatically sync data from other devices'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Автоматически обновлять данные с другого устройства' : 'Automatically sync data from other devices'}</p>
               </div>
               <div className="flex-shrink-0">
                 <button
@@ -278,14 +278,14 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="h-px bg-gradient-to-r from-transparent via-border to-transparent" />
 
           {/* Section 4.5: Launch at Login */}
-          <div className="py-6">
+          <div className="py-4 sm:py-6">
             <div className="flex items-center justify-between">
-              <div className="flex-shrink-0 w-48">
+              <div className="min-w-0 flex-1 sm:w-48 sm:flex-none">
                 <div className="flex items-center gap-2">
                   <Power size={16} className="text-muted" />
-                  <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Запуск при входе' : 'Launch at Login'}</p>
+                  <p className="text-xs font-semibold text-fg sm:text-sm">{lang === 'ru' ? 'Запуск при входе' : 'Launch at Login'}</p>
                 </div>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Автоматически запускать приложение при входе в систему' : 'Automatically start the app when you log in'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Автоматически запускать приложение при входе в систему' : 'Automatically start the app when you log in'}</p>
               </div>
               <div className="flex-shrink-0">
                 <button
@@ -306,19 +306,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           <div className="h-px bg-gradient-to-r from-transparent via-slate-200 to-transparent" />
 
           {/* Section 5: Google Books API Key */}
-          <div className="py-6">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-48">
-                <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Google Books API ключ' : 'Google Books API Key'}</p>
-                <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Ключ для расширенного поиска книг по API Google' : 'API key for extended book search via Google'}</p>
+          <div className="py-4 sm:py-6">
+            <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-6">
+              <div className="w-full flex-shrink-0 sm:w-48">
+                <p className="text-xs font-semibold text-fg sm:text-sm">{lang === 'ru' ? 'Google Books API ключ' : 'Google Books API Key'}</p>
+                <p className="mt-1 text-[11px] text-muted sm:text-xs">{lang === 'ru' ? 'Ключ для расширенного поиска книг по API Google' : 'API key for extended book search via Google'}</p>
               </div>
-              <div className="flex-1">
+              <div className="w-full flex-1">
                 <input
                   type="password"
                   placeholder={lang === 'ru' ? 'Введите API ключ...' : 'Enter API key...'}
                   value={profile.googleApiKey}
                   onChange={(e) => setProfile(prev => ({ ...prev, googleApiKey: e.target.value }))}
-                  className="w-full px-3 py-2 bg-surface border border-accent/30 rounded-lg focus:outline-none focus:ring-2 focus:ring-accent font-mono text-sm"
+                  className="min-h-11 w-full rounded-lg border border-accent/30 bg-surface px-3 py-2 font-mono text-sm placeholder:text-xs focus:outline-none focus:ring-2 focus:ring-accent sm:text-base sm:placeholder:text-sm"
                 />
               </div>
             </div>

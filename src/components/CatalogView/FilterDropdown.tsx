@@ -49,11 +49,13 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
     <div className="relative filter-dropdown-container">
       {/* Filter Button */}
       <button
+        aria-label={isAllSelected ? t.allStatuses : `${specificStatusesCount} ${lang === 'ru' ? 'выбрано' : 'selected'}`}
+        title={isAllSelected ? t.allStatuses : `${specificStatusesCount} ${lang === 'ru' ? 'выбрано' : 'selected'}`}
         onClick={onToggle}
-        className="flex items-center gap-2 bg-surface border border-default rounded-xl px-4 py-2.5 hover:border-accent transition-colors"
+        className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-xl border border-default bg-surface px-2 py-2.5 transition-colors hover:border-accent sm:px-4"
       >
         <Filter size={18} className="text-accent" />
-        <span className="text-sm text-fg">
+        <span className="hidden text-sm text-fg sm:inline">
           {isAllSelected 
             ? t.allStatuses 
             : `${specificStatusesCount} ${lang === 'ru' ? 'выбрано' : 'selected'}`
