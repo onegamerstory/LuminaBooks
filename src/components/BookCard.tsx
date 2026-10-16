@@ -85,7 +85,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
         </div>
         {/* Hover эффект */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div>
-        <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-full text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
+        <div className={`absolute top-3 left-3 px-2 py-0.5 rounded-md text-xs font-bold uppercase tracking-wider ${statusColors[book.status]}`}>
           {getStatusLabel(book.status)}
         </div>
         {/* Процент прочтения — прогресс бар */}
@@ -109,7 +109,7 @@ const BookCard: React.FC<BookCardProps> = React.memo(({ book, onEdit, onDelete, 
               </div>
             )}
           </div>
-          <div className="flex items-center gap-1 text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded text-sm font-bold">
+          <div className="flex items-center gap-1 text-amber-400 bg-amber-50 px-1.5 py-0.5 rounded-md text-sm font-bold">
             <Star size={14} fill="currentColor" />
             {book.rating}
           </div>

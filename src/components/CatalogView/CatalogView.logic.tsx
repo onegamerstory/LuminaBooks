@@ -416,10 +416,6 @@ const CatalogView: React.FC<CatalogViewProps> = ({
                   }
                 }
 
-                if (newStatuses.size === 0) {
-                  newStatuses.add('All');
-                }
-
                 setSelectedStatuses(newStatuses);
                 saveFilterStatuses(newStatuses);
               }}

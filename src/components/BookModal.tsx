@@ -421,7 +421,7 @@ const BookModal: React.FC<BookModalProps> = ({
                   <select
                     value={formData.status}
                     onChange={e => setFormData({...formData, status: e.target.value as BookStatus})}
-                    className="w-full px-4 bg-surface py-2 border border-accent/30 text-muted rounded-xl focus:ring-2 focus:ring-accent outline-none appearance-none"
+                    className="w-full px-4 bg-surface py-2 border border-accent/30 text-muted rounded-lg focus:ring-2 focus:ring-accent outline-none appearance-none"
                   >
                     <option value={BookStatus.WANT_TO_READ}>{t.toRead}</option>
                     <option value={BookStatus.READING}>{t.reading}</option>
@@ -435,7 +435,7 @@ const BookModal: React.FC<BookModalProps> = ({
                   <textarea 
                     value={formData.description}
                     onChange={e => setFormData({...formData, description: e.target.value})}
-                    className="w-full px-4 bg-surface py-2 border border-accent/30 rounded-xl focus:ring-2 focus:ring-accent outline-none resize-none h-[42px]"
+                    className="w-full px-4 bg-surface py-2 border border-accent/30 rounded-lg focus:ring-2 focus:ring-accent outline-none resize-none h-[42px]"
                     rows={1}
                   />
                 </div>

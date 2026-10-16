@@ -509,7 +509,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
                     <button
                       key={book.id}
                       onClick={() => handleBookSelect(book)}
-                      className="w-full flex items-center gap-3 p-3 rounded-xl hover:bg-page border border-default hover:border-accent transition-colors text-left"
+                      className="w-full flex items-center gap-3 p-3 rounded-lg hover:bg-page border border-default hover:border-accent transition-colors text-left"
                     >
                       <img 
                         src={book.coverUrl} 

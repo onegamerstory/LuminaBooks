@@ -114,8 +114,6 @@ const App: React.FC = () => {
         className={`sticky top-0 z-30 ${isMac ? 'pt-8' : ''}`}
         style={{
           backgroundColor: 'color-mix(in oklab, var(--surface), transparent 8%)',
-          backdropFilter: 'blur(16px)',
-          WebkitBackdropFilter: 'blur(16px)',
           borderBottom: '1px solid var(--border-soft)',
         }}
       >
@@ -125,7 +123,7 @@ const App: React.FC = () => {
             <h1 className="whitespace-nowrap text-base font-display tracking-tight sm:text-lg" style={{ color: 'var(--fg)' }}>LuminaBooks</h1>
           </div>
 
-          <nav className="order-3 flex w-full items-center justify-around gap-0 rounded-xl p-1 sm:order-none sm:w-auto sm:justify-center sm:gap-1" style={{ backgroundColor: 'var(--accent-soft)' }}>
+          <nav className="fixed inset-x-3 bottom-[calc(env(safe-area-inset-bottom)+0.75rem)] z-40 order-none flex w-auto items-center justify-around gap-0 rounded-2xl border border-default p-1 shadow-lg sm:static sm:z-auto sm:order-none sm:w-auto sm:justify-center sm:gap-1 sm:rounded-xl sm:border-0 sm:p-1 sm:shadow-none" style={{ backgroundColor: 'var(--surface)' }}>
             <button
               aria-label={lang === 'ru' ? 'Профиль' : 'Profile'}
               onClick={() => setActiveView('statistics')}
@@ -221,7 +219,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-none flex-grow p-2 sm:p-6 lg:p-8">
+      <main className="mx-auto w-full max-w-none flex-grow p-2 pb-24 sm:p-6 lg:p-8">
         {activeView === 'catalog' ? (
           <CatalogView 
             books={books} 
@@ -385,7 +383,7 @@ const App: React.FC = () => {
         isDangerous={confirmationModal.isDangerous}
       />
       
-      <footer className="py-6 text-center text-sm" style={{ color: 'var(--meta)', borderTop: '1px solid var(--border-soft)' }}>
+      <footer className="hidden py-6 text-center text-sm sm:block" style={{ color: 'var(--meta)', borderTop: '1px solid var(--border-soft)' }}>
         &copy; {new Date().getFullYear()} LuminaBooks. {lang === 'ru' ? 'Следите за своим прогрессом чтения.' : 'Track your reading journey.'}
       </footer>
     </div>

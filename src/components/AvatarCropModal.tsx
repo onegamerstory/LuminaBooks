@@ -178,13 +178,13 @@ const AvatarCropModal: React.FC<AvatarCropModalProps> = ({ imageSrc, lang, onCan
         <p className="mt-2 flex items-center justify-center gap-2 text-xs text-muted">
           <Move size={14} />{isRussian ? 'Перетащите изображение для кадрирования' : 'Drag the image to position it'}
         </p>
-        {error && <p role="alert" className="mt-4 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
+        {error && <p role="alert" className="mt-4 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
 
         <footer className="mt-6 flex justify-end gap-3">
-          <button type="button" onClick={onCancel} className="rounded-xl px-4 py-2.5 text-sm font-semibold text-muted hover:bg-page">
+          <button type="button" onClick={onCancel} className="rounded-lg px-4 py-2.5 text-sm font-semibold text-muted hover:bg-page">
             {isRussian ? 'Отмена' : 'Cancel'}
           </button>
-          <button type="button" onClick={handleApply} disabled={!imageReady} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on hover:opacity-90 disabled:opacity-50">
+          <button type="button" onClick={handleApply} disabled={!imageReady} className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on hover:opacity-90 disabled:opacity-50">
             <Check size={17} />{isRussian ? 'Применить' : 'Apply'}
           </button>
         </footer>

@@ -882,7 +882,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-surface rounded-xl shadow-overlay p-6 max-w-md w-full mx-4">
+          <div className="bg-surface rounded-2xl shadow-overlay p-6 max-w-md w-full mx-4">
             <h3 className="text-xl font-semibold text-accent mb-4">
               {lang === 'ru' ? 'Завершить сессию' : 'End Session'}
             </h3>
@@ -971,7 +971,7 @@ const ReadingView: React.FC<ReadingViewProps> = ({ books, onUpdateBook, lang }) 
             }
           }}
         >
-          <div className="bg-surface rounded-xl shadow-overlay p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
+          <div className="bg-surface rounded-2xl shadow-overlay p-6 max-w-2xl w-full mx-4 max-h-[90vh] overflow-y-auto">
             <h3 className="text-xl font-semibold text-fg mb-4">
               {lang === 'ru' ? 'Добавить сессию вручную' : 'Add Manual Session'}
             </h3>

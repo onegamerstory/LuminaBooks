@@ -37,7 +37,7 @@ const ConfirmationModal: React.FC<ConfirmationModalProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
-      <div className="bg-surface rounded-xl shadow-overlay max-w-sm w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="bg-surface rounded-2xl shadow-overlay max-w-sm w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
         {/* Header */}
         <div className="flex items-start gap-3 p-6 border-b border-default">
           {isDangerous && (

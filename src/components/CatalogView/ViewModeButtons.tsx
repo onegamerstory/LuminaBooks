@@ -27,7 +27,7 @@ const ViewModeButtons: React.FC<ViewModeButtonsProps> = ({
     <div className="flex gap-1 bg-surface p-1 rounded-lg border border-default">
       <button
         onClick={() => onModeChange('large')}
-        className={`min-h-10 min-w-10 rounded-lg p-2 transition-colors ${
+        className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg p-2 transition-colors ${
           currentMode === 'large'
             ? 'bg-accent text-accent-on'
             : 'bg-surface text-muted hover:bg-accent-soft'
@@ -38,7 +38,7 @@ const ViewModeButtons: React.FC<ViewModeButtonsProps> = ({
       </button>
       <button
         onClick={() => onModeChange('table')}
-        className={`min-h-10 min-w-10 rounded-lg p-2 transition-colors ${
+        className={`inline-flex min-h-10 min-w-10 items-center justify-center rounded-lg p-2 transition-colors ${
           currentMode === 'table'
             ? 'bg-accent text-accent-on'
             : 'bg-surface text-muted hover:bg-accent-soft'

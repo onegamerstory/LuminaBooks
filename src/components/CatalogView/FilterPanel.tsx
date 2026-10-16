@@ -91,7 +91,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
   ];
 
   return (
-    <div className="w-full shrink-0 space-y-6 rounded-2xl border border-default bg-surface p-4 shadow-md md:sticky md:top-20 md:max-h-[calc(100vh-8rem)] md:w-60 md:self-start md:overflow-y-auto">
+    <div className="w-full shrink-0 space-y-6 rounded-xl border border-default bg-surface p-4 shadow-md md:sticky md:top-20 md:max-h-[calc(100vh-8rem)] md:w-60 md:self-start md:overflow-y-auto">
       {/* Sort section */}
       <div>
         <h3 className="text-sm font-semibold text-fg uppercase tracking-wide mb-3">
@@ -110,26 +110,22 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 <div className="flex gap-1">
                   <button
                     onClick={() => onSortChange(field.ascOption)}
-                    className={`p-1.5 rounded transition-colors ${
+                    className={`p-1.5 rounded-md transition-colors ${
                       isAsc
                         ? 'bg-accent text-accent-on'
-                        : 'text-muted'
+                        : 'text-muted hover:bg-accent-soft'
                     }`}
-                    onMouseEnter={e => { if (!isAsc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
-                    onMouseLeave={e => { if (!isAsc) e.currentTarget.style.backgroundColor = '' }}
                     title={lang === 'ru' ? 'По возрастанию' : 'Ascending'}
                   >
                     {field.ascIcon}
                   </button>
                   <button
                     onClick={() => onSortChange(field.descOption)}
-                    className={`p-1.5 rounded transition-colors ${
+                    className={`p-1.5 rounded-md transition-colors ${
                       isDesc
                         ? 'bg-accent text-accent-on'
-                        : 'text-muted'
+                        : 'text-muted hover:bg-accent-soft'
                     }`}
-                    onMouseEnter={e => { if (!isDesc) e.currentTarget.style.backgroundColor = 'var(--accent-soft)' }}
-                    onMouseLeave={e => { if (!isDesc) e.currentTarget.style.backgroundColor = '' }}
                     title={lang === 'ru' ? 'По убыванию' : 'Descending'}
                   >
                     {field.descIcon}
@@ -153,7 +149,7 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                 type="checkbox"
                 checked={isAllSelected}
                 onChange={() => onToggleStatus('All')}
-                    className="w-4 h-4 rounded border-default cursor-pointer accent-[var(--accent)]"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer accent-[var(--accent)]"
               />
               <span className="text-sm text-fg font-medium">{t.allStatuses}</span>
             </div>
@@ -173,9 +169,9 @@ const FilterPanel: React.FC<FilterPanelProps> = ({
                     type="checkbox"
                     checked={isChecked}
                     onChange={() => onToggleStatus(status)}
-                className="w-4 h-4 rounded border-default cursor-pointer accent-[var(--accent)]"
+                    className="w-4 h-4 rounded-sm border-default cursor-pointer accent-[var(--accent)]"
                   />
-                  <span className={`text-xs font-medium px-2.5 py-1 rounded-full ${getStatusColor(status)}`}>
+                  <span className={`text-xs font-medium px-2.5 py-1 rounded-md ${getStatusColor(status)}`}>
                     {t[statusLabels[status]]}
                   </span>
                 </div>

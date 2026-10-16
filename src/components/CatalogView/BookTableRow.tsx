@@ -55,7 +55,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
         
         <div className="flex flex-wrap gap-3 items-center text-xs">
           {/* Статус */}
-          <span className={`px-2.5 py-1 rounded-lg font-medium whitespace-nowrap ${getStatusColor(book.status)}`}>
+          <span className={`px-2.5 py-1 rounded-md font-medium whitespace-nowrap ${getStatusColor(book.status)}`}>
             {(() => {
               switch (book.status) {
                 case BookStatus.READING:
@@ -84,7 +84,7 @@ const BookTableRow: React.FC<BookTableRowProps> = ({
 
           {/* Оценка */}
           {book.rating > 0 && (
-            <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 rounded-lg">
+            <div className="flex items-center gap-1 px-2.5 py-1 bg-amber-50 rounded-md">
               <span className="text-amber-600 font-semibold">★</span>
               <span className="text-amber-700 font-semibold">{book.rating.toFixed(1)}</span>
             </div>

@@ -110,7 +110,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
       >
         <header className="flex items-center justify-between border-b border-default px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
-            <img src={appIcon} alt="LuminaBooks" className="h-10 w-10 rounded-xl object-cover" />
+            <img src={appIcon} alt="LuminaBooks" className="h-10 w-10 rounded-lg object-cover" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted">LuminaBooks</p>
               <p className="text-sm text-muted">{isRussian ? `Шаг ${page + 1} из ${pageTitles.length}` : `Step ${page + 1} of ${pageTitles.length}`}</p>
@@ -150,7 +150,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       setError(isRussian ? 'Не удалось загрузить профиль. Попробуйте ещё раз.' : 'Could not load your profile. Please try again.');
                     }).finally(() => setLoading(false));
                   }}
-                  className="mb-5 rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent hover:bg-accent-soft"
+                  className="mb-5 rounded-lg border border-accent px-4 py-2 text-sm font-semibold text-accent hover:bg-accent-soft"
                 >
                   {isRussian ? 'Повторить загрузку' : 'Retry loading'}
                 </button>
@@ -193,11 +193,11 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         : <User size={34} className="text-muted" />}
                     </div>
                     <div className="flex flex-wrap gap-2">
-                      <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-2 rounded-xl border border-accent px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent-soft">
+                      <button type="button" onClick={() => fileInputRef.current?.click()} className="inline-flex items-center gap-2 rounded-lg border border-accent px-4 py-2 text-sm font-semibold text-accent transition-colors hover:bg-accent-soft">
                         <Upload size={16} />{isRussian ? 'Загрузить фото' : 'Upload photo'}
                       </button>
                       {profile.photoUrl && (
-                        <button type="button" onClick={() => setProfile(previous => ({ ...previous, photoUrl: '' }))} className="rounded-xl px-4 py-2 text-sm text-muted hover:bg-page">
+                        <button type="button" onClick={() => setProfile(previous => ({ ...previous, photoUrl: '' }))} className="rounded-lg px-4 py-2 text-sm text-muted hover:bg-page">
                           {isRussian ? 'Удалить фото' : 'Remove photo'}
                         </button>
                       )}
@@ -211,7 +211,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                       value={profile.nickname}
                       onChange={event => setProfile(previous => ({ ...previous, nickname: event.target.value }))}
                       placeholder={isRussian ? 'Ваше имя' : 'Your name'}
-                      className="w-full rounded-xl border border-accent/30 bg-surface px-4 py-3 text-fg outline-none transition focus:ring-2 focus:ring-accent"
+                      className="w-full rounded-lg border border-accent/30 bg-surface px-4 py-3 text-fg outline-none transition focus:ring-2 focus:ring-accent"
                     />
                   </label>
                 </div>
@@ -231,7 +231,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                         value={profile.defaultCoverUrl}
                         onChange={event => setProfile(previous => ({ ...previous, defaultCoverUrl: event.target.value }))}
                         placeholder="https://example.com/cover.jpg"
-                        className="w-full rounded-xl border border-accent/30 bg-surface py-3 pl-10 pr-4 text-fg outline-none transition focus:ring-2 focus:ring-accent"
+                        className="w-full rounded-lg border border-accent/30 bg-surface py-3 pl-10 pr-4 text-fg outline-none transition focus:ring-2 focus:ring-accent"
                       />
                     </div>
                   </label>
@@ -277,7 +277,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 </div>
               )}
 
-              {error && <p role="alert" className="mt-5 rounded-xl bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
+              {error && <p role="alert" className="mt-5 rounded-lg bg-danger/10 px-4 py-3 text-sm text-danger">{error}</p>}
             </>
           )}
         </div>
@@ -300,7 +300,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
               type="button"
               onClick={() => setPage(current => Math.max(0, current - 1))}
               disabled={page === 0 || loading || saving || !profileLoaded}
-              className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-page disabled:invisible"
+              className="inline-flex items-center gap-2 rounded-lg px-4 py-2.5 text-sm font-semibold text-muted transition hover:bg-page disabled:invisible"
             >
               <ArrowLeft size={17} />{isRussian ? 'Назад' : 'Back'}
             </button>
@@ -308,7 +308,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
               type="button"
               onClick={() => void finish()}
               disabled={loading || saving || !profileLoaded}
-              className={`inline-flex items-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+              className={`inline-flex items-center gap-2 rounded-lg py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
                 page === pageTitles.length - 1
                   ? 'bg-accent px-5 text-accent-on hover:opacity-90'
                   : 'px-4 text-muted hover:bg-page'
@@ -326,7 +326,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 type="button"
                 onClick={() => setPage(current => Math.min(pageTitles.length - 1, current + 1))}
                 disabled={loading || saving || !profileLoaded}
-                className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on transition hover:opacity-90 disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-lg bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on transition hover:opacity-90 disabled:opacity-60"
               >
                 {isRussian ? 'Далее' : 'Next'}<ArrowRight size={17} />
               </button>

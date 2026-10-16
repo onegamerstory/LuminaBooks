@@ -63,7 +63,7 @@ const RandomBookModal: React.FC<RandomBookModalProps> = ({
 
   return createPortal(
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
-      <div className="bg-surface rounded-xl shadow-overlay max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
+      <div className="bg-surface rounded-2xl shadow-overlay max-w-xl w-full mx-4 overflow-hidden animate-in fade-in zoom-in-95">
         <div className="flex items-start justify-between p-4 border-b border-default">
           <h2 className="text-lg font-bold text-fg">{t.randomBook}</h2>
           <button

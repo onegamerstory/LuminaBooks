@@ -52,7 +52,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
         aria-label={isAllSelected ? t.allStatuses : `${specificStatusesCount} ${lang === 'ru' ? 'выбрано' : 'selected'}`}
         title={isAllSelected ? t.allStatuses : `${specificStatusesCount} ${lang === 'ru' ? 'выбрано' : 'selected'}`}
         onClick={onToggle}
-        className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-xl border border-default bg-surface px-2 py-2.5 transition-colors hover:border-accent sm:px-4"
+        className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg border border-default bg-surface px-2 py-2.5 transition-colors hover:border-accent sm:px-4"
       >
         <Filter size={18} className="text-accent" />
         <span className="hidden text-sm text-fg sm:inline">
@@ -77,7 +77,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={isAllSelected}
                 onChange={() => onToggleStatus('All')}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg font-medium">{t.allStatuses}</span>
             </label>
@@ -88,7 +88,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.READING) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.READING)}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg">{t.reading}</span>
             </label>
@@ -99,7 +99,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.READ) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.READ)}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg">{t.read}</span>
             </label>
@@ -110,7 +110,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.WANT_TO_READ) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.WANT_TO_READ)}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg">{t.toRead}</span>
             </label>
@@ -121,7 +121,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.POSTPONED) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.POSTPONED)}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg">{t.postponed}</span>
             </label>
@@ -132,7 +132,7 @@ const FilterDropdown: React.FC<FilterDropdownProps> = ({
                 type="checkbox"
                 checked={selectedStatuses.has(BookStatus.ABANDONED) && !isAllSelected}
                 onChange={() => onToggleStatus(BookStatus.ABANDONED)}
-                className="w-4 h-4 rounded border-default cursor-pointer"
+                className="w-4 h-4 rounded-sm border-default cursor-pointer"
               />
               <span className="text-fg">{t.abandoned}</span>
             </label>
