@@ -5,7 +5,7 @@ import { networkInterfaces } from 'os';
 import {
   getAllBooks, addBook, updateBook, deleteBook,
   getAllFranchises, addFranchise, updateFranchise, deleteFranchise,
-  getUserProfile, setUserProfile,
+  getUserProfile, setUserProfile, mergeUserAchievements,
   searchBooksDictionary, saveToBooksDictionary
 } from './database.js';
 
@@ -137,6 +137,18 @@ export async function startServer(port: number = 3456, isDev: boolean = false) {
     try {
       setUserProfile(req.body);
       res.json(req.body);
+    } catch (err) {
+      res.status(500).json({ error: String(err) });
+    }
+  });
+
+  app.post('/api/profile/achievements', (req: any, res: any) => {
+    const achievements = req.body?.achievements;
+    if (!Array.isArray(achievements) || !achievements.every((id: unknown) => typeof id === 'string')) {
+      return res.status(400).json({ error: 'achievements must be an array of strings' });
+    }
+    try {
+      res.json(mergeUserAchievements(achievements));
     } catch (err) {
       res.status(500).json({ error: String(err) });
     }

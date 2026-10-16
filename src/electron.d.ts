@@ -28,6 +28,7 @@ export interface ElectronDBAPI {
 
   getUserProfile: () => Promise<UserProfileData>;
   setUserProfile: (profile: UserProfileData) => Promise<void>;
+  mergeUserAchievements: (achievements: string[]) => Promise<UserProfileData>;
 
   migrate: () => Promise<{ books: number; franchises: number }>;
 

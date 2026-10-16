@@ -416,6 +416,7 @@ const [activeView, setActiveView] = useState<ViewType>('catalog');
 | DELETE | `/api/franchises/:id` | Удалить коллекцию |
 | GET | `/api/profile` | Профиль |
 | PUT | `/api/profile` | Обновить профиль |
+| POST | `/api/profile/achievements` | Объединить достижения без перезаписи остальных полей профиля |
 | GET | `/api/books-dictionary/search?title=&author= | Поиск в словаре |
 | POST | `/api/books-dictionary` | Сохранить в словарь |
 | GET | `/api/status` | Health check |
@@ -425,6 +426,7 @@ const [activeView, setActiveView] = useState<ViewType>('catalog');
 
 - Интервал: **30 секунд**
 - Срабатывает также при фокусе окна и при `visibilitychange` → `visible`
+- Синхронизация запускается только для активной вкладки и повторные запуски объединяются в один запрос
 - Отключается через настройку `autoSync` в профиле
 
 ### 11.3 URL сервера

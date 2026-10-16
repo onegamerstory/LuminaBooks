@@ -24,6 +24,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
     getUserProfile: () => ipcRenderer.invoke('db:getUserProfile'),
     setUserProfile: (profile) => ipcRenderer.invoke('db:setUserProfile', profile),
+    mergeUserAchievements: (achievements) => ipcRenderer.invoke('db:mergeUserAchievements', achievements),
 
     migrate: () => ipcRenderer.invoke('db:migrate'),
 

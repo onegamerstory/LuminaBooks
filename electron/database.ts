@@ -215,9 +215,21 @@ export function getUserProfile(): UserProfile {
 }
 
 export function setUserProfile(profile: UserProfile): void {
+  const achievements = [...new Set([
+    ...getUserProfile().achievements,
+    ...(profile.achievements || []),
+  ])];
   db.prepare(`
     UPDATE user_profile SET nickname = ?, photoUrl = ?, defaultCoverUrl = ?, achievements = ?, googleApiKey = ? WHERE id = 1
-  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl, JSON.stringify(profile.achievements || []), profile.googleApiKey || '');
+  `).run(profile.nickname, profile.photoUrl, profile.defaultCoverUrl, JSON.stringify(achievements), profile.googleApiKey || '');
+}
+
+export function mergeUserAchievements(achievements: string[]): UserProfile {
+  const profile = getUserProfile();
+  const mergedAchievements = [...new Set([...profile.achievements, ...achievements])];
+  db.prepare('UPDATE user_profile SET achievements = ? WHERE id = 1')
+    .run(JSON.stringify(mergedAchievements));
+  return { ...profile, achievements: mergedAchievements };
 }
 
 // --- Migration ---

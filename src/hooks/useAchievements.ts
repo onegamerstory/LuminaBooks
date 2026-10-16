@@ -43,9 +43,7 @@ export function useAchievements({ books, lang, getDbApi }: UseAchievementsDeps) 
         const api = getDbApi();
         if (api) {
           try {
-            const profile = await api.getUserProfile();
-            profile.achievements = [...notifiedAchievementsRef.current];
-            await api.setUserProfile(profile);
+            await api.mergeUserAchievements([...notifiedAchievementsRef.current]);
           } catch (e) {
             console.error("Failed to save achievements to DB profile", e);
           }

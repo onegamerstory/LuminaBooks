@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { Book, Franchise } from '../types';
 import type { ElectronDBAPI } from '../electron.d';
 import { migrateAllBooksStatusHistory } from '../utils/statusHistoryUtils';
@@ -26,56 +26,71 @@ export function useSync({
   setLang, addToast, lang, autoSync, notifiedAchievementsRef,
 }: UseSyncDeps) {
   const [syncing, setSyncing] = useState(false);
+  const syncInFlightRef = useRef<Promise<void> | null>(null);
 
   const syncDataFromApi = useCallback(async (api: ElectronDBAPI) => {
-    // Профиль загружаем первым, чтобы ref с ачивками был заполнен
-    try {
-      const profile = await api.getUserProfile();
-      if (profile) {
-        const dbAchievements = new Set(profile.achievements || []);
+    if (syncInFlightRef.current) {
+      await syncInFlightRef.current;
+      return;
+    }
 
-        for (const id of dbAchievements) {
-          notifiedAchievementsRef.current.add(id);
-        }
+    const syncPromise = (async () => {
+      // Профиль загружаем первым, чтобы ref с ачивками был заполнен
+      try {
+        const localProfileBeforeFetch = localStorage.getItem('lumina_user_profile');
+        let profile = await api.getUserProfile();
+        if (profile) {
+          const dbAchievements = new Set(profile.achievements || []);
 
-        const unsaved = [...notifiedAchievementsRef.current].filter(id => !dbAchievements.has(id));
-        if (unsaved.length > 0) {
-          profile.achievements = [...notifiedAchievementsRef.current];
-          await api.setUserProfile(profile);
-        }
+          for (const id of dbAchievements) {
+            notifiedAchievementsRef.current.add(id);
+          }
 
-        localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
-        if (profile.defaultCoverUrl) {
-          setDefaultCoverUrl(profile.defaultCoverUrl);
+          const unsaved = [...notifiedAchievementsRef.current].filter(id => !dbAchievements.has(id));
+          if (unsaved.length > 0) {
+            profile = await api.mergeUserAchievements([...notifiedAchievementsRef.current]);
+          }
+
+          if (localStorage.getItem('lumina_user_profile') === localProfileBeforeFetch) {
+            localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
+          }
+          setDefaultCoverUrl(profile.defaultCoverUrl || '');
+          setGoogleApiKey(profile.googleApiKey || '');
         }
-        if (profile.googleApiKey) {
-          setGoogleApiKey(profile.googleApiKey);
-        }
+      } catch (e) {
+        console.error("Failed to load profile", e);
       }
-    } catch (e) {
-      console.error("Failed to load profile", e);
-    }
 
-    const loadedBooks = await api.getAllBooks();
-    if (loadedBooks && loadedBooks.length > 0) {
-      const normalizedBooks = loadedBooks.map((book: Book) => ({
-        ...book,
-        startDate: book.startDate?.trim() || '',
-        endDate: book.endDate?.trim() || '',
-      }));
-      let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
-      let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
-      updatedBooks = syncStatusFromHistory(updatedBooks);
-      setBooks(updatedBooks);
-    } else {
-      setBooks([]);
-    }
+      const loadedBooks = await api.getAllBooks();
+      if (loadedBooks && loadedBooks.length > 0) {
+        const normalizedBooks = loadedBooks.map((book: Book) => ({
+          ...book,
+          startDate: book.startDate?.trim() || '',
+          endDate: book.endDate?.trim() || '',
+        }));
+        let migratedBooks = migrateAllBooksStatusHistory(normalizedBooks);
+        let updatedBooks = updateBookStatusBasedOnDates(migratedBooks);
+        updatedBooks = syncStatusFromHistory(updatedBooks);
+        setBooks(updatedBooks);
+      } else {
+        setBooks([]);
+      }
 
-    const loadedFranchises = await api.getAllFranchises();
-    if (loadedFranchises && loadedFranchises.length > 0) {
-      setFranchises(loadedFranchises);
-    } else {
-      setFranchises([]);
+      const loadedFranchises = await api.getAllFranchises();
+      if (loadedFranchises && loadedFranchises.length > 0) {
+        setFranchises(loadedFranchises);
+      } else {
+        setFranchises([]);
+      }
+    })();
+
+    syncInFlightRef.current = syncPromise;
+    try {
+      await syncPromise;
+    } finally {
+      if (syncInFlightRef.current === syncPromise) {
+        syncInFlightRef.current = null;
+      }
     }
   }, [setBooks, setFranchises, setDefaultCoverUrl, setGoogleApiKey, notifiedAchievementsRef]);
 
@@ -93,8 +108,9 @@ export function useSync({
     } catch (e) {
       console.error('[Sync]', e);
       addToast(lang === 'ru' ? 'Ошибка синхронизации' : 'Sync failed', 'error');
+    } finally {
+      setSyncing(false);
     }
-    setSyncing(false);
   };
 
   // Загрузка данных при старте
@@ -207,26 +223,39 @@ export function useSync({
 
   // Периодическая синхронизация
   useEffect(() => {
-    const api = getDbApi();
-    if (!api || !autoSync) return;
+    if (!autoSync) return;
 
     const poll = async () => {
+      if (document.visibilityState !== 'visible') return;
+      const api = getDbApi();
+      if (!api) return;
+
       try {
         await syncDataFromApi(api);
-      } catch {}
+      } catch (e) {
+        console.error('[Sync] Background sync failed', e);
+      }
     };
 
-    const interval = setInterval(poll, 30000);
+    const interval = window.setInterval(() => {
+      void poll();
+    }, 30000);
 
-    const onFocus = () => poll();
+    const onFocus = () => {
+      void poll();
+    };
+    const onVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        void poll();
+      }
+    };
     window.addEventListener('focus', onFocus);
-    document.addEventListener('visibilitychange', () => {
-      if (document.visibilityState === 'visible') poll();
-    });
+    document.addEventListener('visibilitychange', onVisibilityChange);
 
     return () => {
       clearInterval(interval);
       window.removeEventListener('focus', onFocus);
+      document.removeEventListener('visibilitychange', onVisibilityChange);
     };
   }, [syncDataFromApi, autoSync, getDbApi]);
 

@@ -80,6 +80,16 @@ export const httpApi: ElectronDBAPI = {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
   },
 
+  mergeUserAchievements: async (achievements: string[]) => {
+    const res = await fetch(`${BASE}/api/profile/achievements`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ achievements }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    return res.json();
+  },
+
   migrate: async () => {
     return { books: 0, franchises: 0 };
   },

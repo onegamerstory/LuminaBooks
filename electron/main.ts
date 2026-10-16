@@ -2,7 +2,7 @@ import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
-import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, migrateFromLocalStorage, searchBooksDictionary, saveToBooksDictionary } from './database.js';
+import { initDatabase, getAllBooks, addBook, updateBook, deleteBook, getAllFranchises, addFranchise, updateFranchise, deleteFranchise, getUserProfile, setUserProfile, mergeUserAchievements, migrateFromLocalStorage, searchBooksDictionary, saveToBooksDictionary } from './database.js';
 
 
 const __filename = fileURLToPath(import.meta.url);
@@ -145,6 +145,10 @@ function registerIpcHandlers() {
 
   ipcMain.handle('db:setUserProfile', (_event, profile) => {
     setUserProfile(profile);
+  });
+
+  ipcMain.handle('db:mergeUserAchievements', (_event, achievements: string[]) => {
+    return mergeUserAchievements(achievements);
   });
 
   ipcMain.handle('db:migrate', async (event) => {

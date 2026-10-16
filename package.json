@@ -1,7 +1,7 @@
 {
   "name": "luminabooks---personal-book-tracker",
   "private": true,
-  "version": "1.10.6",
+  "version": "1.10.7",
   "type": "module",
   "main": "dist-electron/main.js",
   "scripts": {
@@ -11,7 +11,7 @@
     "electron:dev": "concurrently \"vite\" \"wait-on http://localhost:3000 && cross-env ELECTRON=true electron .\"",
     "electron:build": "npm run build:electron && npm run build:app && electron-builder",
     "electron:pack": "npm run build:electron && npm run build:app && electron-builder --dir",
-    "build:electron": "tsc -p electron/tsconfig.json && cp electron/preload.cjs dist-electron/preload.cjs",
+    "build:electron": "tsc -p electron/tsconfig.json && node -e \"require('node:fs').copyFileSync('electron/preload.cjs', 'dist-electron/preload.cjs')\"",
     "build:app": "tsc && vite build --mode production"
   },
   "dependencies": {
