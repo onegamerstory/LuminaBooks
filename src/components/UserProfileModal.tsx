@@ -30,6 +30,7 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropImage, setCropImage] = useState<string | null>(null);
+  const [releaseOpenError, setReleaseOpenError] = useState(false);
   const [profile, setProfile] = useState<UserProfile>({
     nickname: '',
     photoUrl: '',
@@ -110,15 +111,21 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
 
   const handleDownloadRelease = async () => {
     if (!latestRelease) return;
+    setReleaseOpenError(false);
     if (window.electronAPI?.openExternalUrl) {
       try {
         await window.electronAPI.openExternalUrl(latestRelease.url);
       } catch (error) {
         console.error('[App Update] Failed to open release page:', error);
+        setReleaseOpenError(true);
       }
       return;
     }
-    window.open(latestRelease.url, '_blank', 'noopener,noreferrer');
+    const releaseWindow = window.open(latestRelease.url, '_blank', 'noopener,noreferrer');
+    if (!releaseWindow) {
+      console.error('[App Update] The browser blocked opening the release page');
+      setReleaseOpenError(true);
+    }
   };
 
   return (
@@ -367,6 +374,13 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                 {lang === 'ru'
                   ? `Доступна новая версия ${latestRelease.tagName}`
                   : `Version ${latestRelease.tagName} is available`}
+              </p>
+            )}
+            {releaseOpenError && (
+              <p role="alert" className="text-xs font-medium text-danger">
+                {lang === 'ru'
+                  ? 'Не удалось открыть страницу релиза. Проверьте настройки браузера и попробуйте ещё раз.'
+                  : 'Could not open the release page. Check your browser settings and try again.'}
               </p>
             )}
             <div className="flex items-center justify-between">

@@ -6,7 +6,7 @@ export interface AppRelease {
   url: string;
 }
 
-const RELEASE_API_URL = 'https://api.github.com/repos/onegamerstory/loominabooks/releases/latest';
+const RELEASE_API_URL = 'https://api.github.com/repos/onegamerstory/LuminaBooks/releases/latest';
 
 const parseVersion = (value: string): number[] | null => {
   const match = value.replace(/^v/i, '').match(/^(\d+)\.(\d+)\.(\d+)(?:[-+].*)?$/);

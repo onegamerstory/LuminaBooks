@@ -186,6 +186,7 @@ function registerIpcHandlers() {
       throw new Error('External URL must be a string');
     }
     const url = new URL(value);
+    const releasePath = url.pathname.toLowerCase();
     if (
       url.origin !== 'https://github.com' ||
       url.username !== '' ||
@@ -193,8 +194,8 @@ function registerIpcHandlers() {
       url.search !== '' ||
       url.hash !== '' ||
       (
-        url.pathname !== '/onegamerstory/loominabooks/releases/latest' &&
-        !url.pathname.startsWith('/onegamerstory/loominabooks/releases/tag/')
+        releasePath !== '/onegamerstory/luminabooks/releases/latest' &&
+        !releasePath.startsWith('/onegamerstory/luminabooks/releases/tag/')
       )
     ) {
       throw new Error('External URL is not an approved LuminaBooks release page');
