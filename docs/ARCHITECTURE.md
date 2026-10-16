@@ -62,6 +62,7 @@ LuminaBooks/
 │   │   ├── ErrorBoundary.tsx          # React Error Boundary
 │   │   ├── UserProfileModal.tsx       # Настройки профиля
 │   │   ├── OnboardingModal.tsx        # Мастер первого запуска
+│   │   ├── AvatarCropModal.tsx        # Кадрирование аватара
 │   │   ├── GitHubCalendar.tsx         # GitHub-стиль календарь активности
 │   │   ├── FranchiseSelectModal.tsx   # Выбор коллекции для книги
 │   │   ├── FranchiseModal.tsx         # Создание/редактирование коллекции
@@ -357,6 +358,7 @@ const [activeView, setActiveView] = useState<ViewType>('catalog');
 Тип `ViewType`: `'catalog' | 'collections' | 'calendar' | 'statistics' | 'reading'`
 
 При переключении вкладки окно прокручивается вверх (`window.scrollTo(0, 0)`).
+После сохранения профиля в настройках `profileRefreshKey` инициирует повторную загрузку данных `StatisticsView`; незавершённые предыдущие загрузки не могут перезаписать свежий профиль.
 
 ---
 
@@ -447,6 +449,7 @@ const [activeView, setActiveView] = useState<ViewType>('catalog');
 
 - Мастер настройки показывается в Electron только при первом запуске без сохранённых настроек или данных
 - Содержит обзор приложения, настройку профиля и обложки по умолчанию, а также автосинхронизацию и запуск при входе
+- Аватар можно перемещать и масштабировать в общем `AvatarCropModal` как при загрузке, так и при повторном кадрировании из настроек профиля
 - Завершение сохраняет профиль в SQLite, параметры устройства — в системные настройки Electron и `localStorage`
 - Флаг `lumina_onboarding_completed` предотвращает повторный показ мастера
 

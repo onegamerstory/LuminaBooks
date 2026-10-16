@@ -33,6 +33,7 @@ import achievement10Png from '../assets/achivements/10.png';
 interface StatisticsViewProps {
   books: Book[];
   lang: 'en' | 'ru';
+  profileRefreshKey: number;
 }
 
 interface UserProfile {
@@ -63,17 +64,18 @@ const subtleBgStyle: React.CSSProperties = {
   padding: 'var(--space-3)',
 };
 
-const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
+const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang, profileRefreshKey }) => {
   const t = translations[lang];
   const [profile, setProfile] = useState<UserProfile | null>(null);
 
   useEffect(() => {
+    let cancelled = false;
     const loadProfile = async () => {
       try {
         if (window.electronAPI?.db) {
           const savedProfile = await window.electronAPI.db.getUserProfile();
           if (savedProfile && (savedProfile.nickname || savedProfile.photoUrl)) {
-            setProfile(savedProfile);
+            if (!cancelled) setProfile(savedProfile);
             return;
           }
         }
@@ -83,14 +85,17 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
       const saved = localStorage.getItem('lumina_user_profile');
       if (saved) {
         try {
-          setProfile(JSON.parse(saved));
+          if (!cancelled) setProfile(JSON.parse(saved));
         } catch (e) {
           console.error("Failed to load profile", e);
         }
       }
     };
-    loadProfile();
-  }, []);
+    void loadProfile();
+    return () => {
+      cancelled = true;
+    };
+  }, [profileRefreshKey]);
 
   const totalBooks = books.length;
   const readingCount = books.filter(b => b.status === BookStatus.READING).length;
@@ -471,4 +476,3 @@ const StatisticsView: React.FC<StatisticsViewProps> = ({ books, lang }) => {
 };
 
 export default StatisticsView;
-

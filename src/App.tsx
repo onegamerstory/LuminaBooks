@@ -34,6 +34,7 @@ export { translations };
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewType>('catalog');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [profileRefreshKey, setProfileRefreshKey] = useState(0);
   const [isOnboardingOpen, setIsOnboardingOpen] = useState(() =>
     Boolean(window.electronAPI?.db) &&
     localStorage.getItem('lumina_onboarding_completed') !== 'true' &&
@@ -257,6 +258,7 @@ const App: React.FC = () => {
           <StatisticsView 
             books={books} 
             lang={lang}
+            profileRefreshKey={profileRefreshKey}
           />
         )}
       </main>
@@ -292,6 +294,7 @@ const App: React.FC = () => {
             if (api) {
               await api.setUserProfile({ ...profile, achievements: profile.achievements || [] });
             }
+            setProfileRefreshKey(key => key + 1);
             setDefaultCoverUrl(profile.defaultCoverUrl || '');
             setGoogleApiKey(profile.googleApiKey || '');
           }}

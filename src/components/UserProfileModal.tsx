@@ -1,7 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power, Check } from 'lucide-react';
+import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power, Check, Crop } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { version } from '../../package.json';
+import AvatarCropModal from './AvatarCropModal';
 
 interface UserProfile {
   nickname: string;
@@ -26,6 +27,7 @@ interface SettingsModalProps {
 const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, launchAtStartup, onLaunchAtStartupChange, serverUrl, lang }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropImage, setCropImage] = useState<string | null>(null);
   const [profile, setProfile] = useState<UserProfile>({
     nickname: '',
     photoUrl: '',
@@ -63,7 +65,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
       const reader = new FileReader();
       reader.onload = (event) => {
         const base64String = event.target?.result as string;
-        setProfile(prev => ({ ...prev, photoUrl: base64String }));
+        setCropImage(base64String);
+      };
+      reader.onerror = () => {
+        console.error('Failed to read avatar image', reader.error);
       };
       reader.readAsDataURL(file);
     }
@@ -102,9 +107,10 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
   };
 
   return (
+    <>
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{backgroundColor: 'color-mix(in oklab, var(--fg), transparent 50%)', backdropFilter: 'blur(4px)'}}>
-      <div className="bg-surface rounded-2xl w-full max-w-2xl shadow-overlay animate-in zoom-in duration-200 max-h-[90vh] overflow-y-auto">
-        <div className="border-b border-default px-8 py-5 flex items-center justify-between sticky top-0 bg-surface">
+      <div className="flex h-[min(90vh,900px)] w-full max-w-2xl flex-col overflow-hidden rounded-2xl bg-surface shadow-overlay animate-in zoom-in duration-200">
+        <div className="flex flex-shrink-0 items-center justify-between border-b border-default bg-surface px-6 py-5 sm:px-8">
           <h2 className="text-xl font-bold font-display text-fg">
             {lang === 'ru' ? 'Настройки' : 'Settings'}
           </h2>
@@ -117,15 +123,16 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
           </button>
         </div>
 
-        <div className="p-8 space-y-0">
+        <div className="min-h-0 flex-1 overflow-y-auto px-6 py-4 sm:px-8 sm:py-5">
+          <div className="space-y-0">
           {/* Section 1: Avatar */}
           <div className="py-6">
-            <div className="flex items-center gap-6">
-              <div className="flex-shrink-0 w-48">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:gap-6">
+              <div className="w-full flex-shrink-0 sm:w-48">
                 <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Аватар' : 'Avatar'}</p>
                 <p className="text-xs text-muted mt-1">{lang === 'ru' ? 'Загрузите изображение для профиля' : 'Upload a profile image'}</p>
               </div>
-              <div className="flex items-center gap-4 flex-1 justify-center">
+              <div className="flex flex-1 flex-wrap items-center justify-center gap-4 sm:justify-start">
                 <div className="w-20 h-20 rounded-full bg-accent-soft flex items-center justify-center overflow-hidden border-2 border-accent flex-shrink-0">
                   {profile.photoUrl ? (
                     <img 
@@ -140,17 +147,28 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
                     <User size={32} className="text-muted" />
                   )}
                 </div>
-                <div className="flex flex-col gap-2">
+                <div className="flex flex-wrap items-center gap-2">
                   <button
                     onClick={handlePhotoClick}
-                    className="px-4 py-1.5 border-2 border-accent text-accent text-sm rounded-lg hover:bg-accent hover:text-accent-on transition-colors flex items-center gap-1.5"
+                    className="flex items-center gap-1.5 rounded-lg border-2 border-accent px-3 py-1.5 text-sm text-accent transition-colors hover:bg-accent hover:text-accent-on"
                   >
                     <Upload size={16} />
                     {lang === 'ru' ? 'Загрузить фото' : 'Upload photo'}
                   </button>
+                  {profile.photoUrl && (
+                    <button
+                      type="button"
+                      onClick={() => setCropImage(profile.photoUrl)}
+                      className="flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:bg-accent-soft hover:text-accent"
+                      title={lang === 'ru' ? 'Изменить кадрирование аватара' : 'Edit avatar crop'}
+                    >
+                      <Crop size={16} />
+                      {lang === 'ru' ? 'Редактировать' : 'Edit'}
+                    </button>
+                  )}
                   <button
                     onClick={handleDeletePhoto}
-                    className="px-4 py-1.5 bg-accent-soft/50 text-muted text-sm rounded-lg hover:bg-danger/10 hover:text-danger transition-colors"
+                    className="rounded-lg px-3 py-1.5 text-sm text-muted transition-colors hover:bg-danger/10 hover:text-danger"
                   >
                     {lang === 'ru' ? 'Удалить' : 'Delete'}
                   </button>
@@ -344,17 +362,30 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
             </div>
           </div>
         </div>
+        </div>
 
-        <div className="px-8 pb-8 pt-2 bg-surface">
+        <div className="flex-shrink-0 border-t border-default bg-surface px-6 py-4 sm:px-8">
           <button
             onClick={handleSave}
-            className="w-full px-4 py-2.5 bg-accent text-accent-on rounded-lg hover:bg-accent-hover font-semibold transition-colors"
+            className="w-full rounded-lg bg-accent px-4 py-2.5 font-semibold text-accent-on transition-colors hover:bg-accent-hover"
           >
             {t.save}
           </button>
         </div>
       </div>
     </div>
+    {cropImage && (
+      <AvatarCropModal
+        imageSrc={cropImage}
+        lang={lang}
+        onCancel={() => setCropImage(null)}
+        onApply={photoUrl => {
+          setProfile(previous => ({ ...previous, photoUrl }));
+          setCropImage(null);
+        }}
+      />
+    )}
+    </>
   );
 };
 

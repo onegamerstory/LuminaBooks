@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Check, Image, Power, RefreshCw, Sparkles, Upload, User } from 'lucide-react';
 import type { UserProfileData } from '../electron.d';
+import AvatarCropModal from './AvatarCropModal';
 
 interface OnboardingModalProps {
   lang: 'en' | 'ru';
@@ -17,6 +18,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
 }) => {
   const isRussian = lang === 'ru';
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [cropImage, setCropImage] = useState<string | null>(null);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(true);
   const [profileLoaded, setProfileLoaded] = useState(false);
@@ -65,7 +67,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
       reader.onload = () => {
         const result = reader.result;
         if (typeof result === 'string') {
-          setProfile(previous => ({ ...previous, photoUrl: result }));
+          setCropImage(result);
         }
       };
       reader.onerror = () => {
@@ -97,6 +99,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
     `relative inline-flex h-7 w-12 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors focus:outline-none focus:ring-2 focus:ring-accent focus:ring-offset-2 ${enabled ? 'bg-accent' : 'bg-accent-soft'}`;
 
   return (
+    <>
     <div className="fixed inset-0 z-[60] flex items-center justify-center p-4" style={{ backgroundColor: 'color-mix(in oklab, var(--fg), transparent 45%)', backdropFilter: 'blur(8px)' }}>
       <section
         role="dialog"
@@ -302,7 +305,16 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
             >
               <ArrowLeft size={17} />{isRussian ? 'Назад' : 'Back'}
             </button>
-            <button type="button" onClick={() => void finish()} disabled={loading || saving || !profileLoaded} className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on transition hover:opacity-90 disabled:opacity-60">
+            <button
+              type="button"
+              onClick={() => void finish()}
+              disabled={loading || saving || !profileLoaded}
+              className={`inline-flex items-center gap-2 rounded-xl py-2.5 text-sm font-semibold transition disabled:opacity-60 ${
+                page === pageTitles.length - 1
+                  ? 'bg-accent px-5 text-accent-on hover:opacity-90'
+                  : 'px-4 text-muted hover:bg-page'
+              }`}
+            >
               {saving ? <RefreshCw className="animate-spin" size={17} /> : page === pageTitles.length - 1 ? <Check size={17} /> : null}
               {saving
                 ? (isRussian ? 'Сохраняем…' : 'Saving…')
@@ -315,7 +327,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
                 type="button"
                 onClick={() => setPage(current => Math.min(pageTitles.length - 1, current + 1))}
                 disabled={loading || saving || !profileLoaded}
-                className="inline-flex items-center gap-2 rounded-xl px-4 py-2.5 text-sm font-semibold text-accent transition hover:bg-accent-soft disabled:opacity-60"
+                className="inline-flex items-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-accent-on transition hover:opacity-90 disabled:opacity-60"
               >
                 {isRussian ? 'Далее' : 'Next'}<ArrowRight size={17} />
               </button>
@@ -324,6 +336,18 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
         </footer>
       </section>
     </div>
+    {cropImage && (
+      <AvatarCropModal
+        imageSrc={cropImage}
+        lang={lang}
+        onCancel={() => setCropImage(null)}
+        onApply={photoUrl => {
+          setProfile(previous => ({ ...previous, photoUrl }));
+          setCropImage(null);
+        }}
+      />
+    )}
+    </>
   );
 };
 
