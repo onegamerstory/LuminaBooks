@@ -1,6 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import { ArrowLeft, ArrowRight, BookOpen, Check, Image, Power, RefreshCw, Sparkles, Upload, User } from 'lucide-react';
 import type { UserProfileData } from '../electron.d';
+import appIcon from '../../resources/icon.png';
 import AvatarCropModal from './AvatarCropModal';
 
 interface OnboardingModalProps {
@@ -109,9 +110,7 @@ const OnboardingModal: React.FC<OnboardingModalProps> = ({
       >
         <header className="flex items-center justify-between border-b border-default px-6 py-5 sm:px-8">
           <div className="flex items-center gap-3">
-            <div className="flex h-10 w-10 items-center justify-center rounded-2xl bg-accent-soft text-accent">
-              <BookOpen size={21} />
-            </div>
+            <img src={appIcon} alt="LuminaBooks" className="h-10 w-10 rounded-xl object-cover" />
             <div>
               <p className="text-xs font-semibold uppercase tracking-widest text-muted">LuminaBooks</p>
               <p className="text-sm text-muted">{isRussian ? `Шаг ${page + 1} из ${pageTitles.length}` : `Step ${page + 1} of ${pageTitles.length}`}</p>
