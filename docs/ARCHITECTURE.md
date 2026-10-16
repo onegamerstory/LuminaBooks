@@ -61,6 +61,7 @@ LuminaBooks/
 │   │   ├── AchievementNotification.tsx # Уведомления о достижениях (очередь)
 │   │   ├── ErrorBoundary.tsx          # React Error Boundary
 │   │   ├── UserProfileModal.tsx       # Настройки профиля
+│   │   ├── OnboardingModal.tsx        # Мастер первого запуска
 │   │   ├── GitHubCalendar.tsx         # GitHub-стиль календарь активности
 │   │   ├── FranchiseSelectModal.tsx   # Выбор коллекции для книги
 │   │   ├── FranchiseModal.tsx         # Создание/редактирование коллекции
@@ -441,6 +442,13 @@ const [activeView, setActiveView] = useState<ViewType>('catalog');
 - Однократная операция при первом запуске в Electron
 - Переносит `lumina_books_v1` и `lumina_franchises_v1` в SQLite
 - Устанавливает флаг `lumina_migrated`
+
+### 11.5 Первый запуск
+
+- Мастер настройки показывается в Electron только при первом запуске без сохранённых настроек или данных
+- Содержит обзор приложения, настройку профиля и обложки по умолчанию, а также автосинхронизацию и запуск при входе
+- Завершение сохраняет профиль в SQLite, параметры устройства — в системные настройки Electron и `localStorage`
+- Флаг `lumina_onboarding_completed` предотвращает повторный показ мастера
 
 ---
 

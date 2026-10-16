@@ -9,6 +9,7 @@ import ReadingView from './components/ReadingView';
 import BookModal from './components/BookModal';
 import BookRatingModal from './components/BookRatingModal';
 import SettingsModal from './components/UserProfileModal';
+import OnboardingModal from './components/OnboardingModal';
 import Toast from './components/Toast';
 import AchievementNotification from './components/AchievementNotification';
 import ConfirmationModal from './components/ConfirmationModal';
@@ -26,12 +27,23 @@ import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
 import { translations } from './utils/translations';
 import appIcon from '../resources/icon.png';
+import type { UserProfileData } from './electron.d';
 
 export { translations };
 
 const App: React.FC = () => {
   const [activeView, setActiveView] = useState<ViewType>('catalog');
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [isOnboardingOpen, setIsOnboardingOpen] = useState(() =>
+    Boolean(window.electronAPI?.db) &&
+    localStorage.getItem('lumina_onboarding_completed') !== 'true' &&
+    localStorage.getItem('lumina_lang') === null &&
+    localStorage.getItem('lumina_user_profile') === null &&
+    localStorage.getItem('lumina_books_v1') === null &&
+    localStorage.getItem('lumina_franchises_v1') === null &&
+    localStorage.getItem('lumina_migrated') === null &&
+    localStorage.getItem('lumina_auto_sync') === null
+  );
 
   const { toasts, addToast, removeToast } = useToast();
   const { lang, setLang, toggleLang, t, defaultCoverUrl, setDefaultCoverUrl, googleApiKey, setGoogleApiKey, serverUrl, setServerUrl, autoSync, setAutoSync, launchAtStartup, setLaunchAtStartup } = useSettings();
@@ -57,6 +69,39 @@ const App: React.FC = () => {
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [activeView]);
+
+  useEffect(() => {
+    if (!isOnboardingOpen) return;
+
+    const checkExistingSetup = async () => {
+      const api = window.electronAPI?.db;
+      if (!api) return;
+
+      try {
+        const [profile, existingBooks, existingFranchises] = await Promise.all([
+          api.getUserProfile(),
+          api.getAllBooks(),
+          api.getAllFranchises(),
+        ]);
+        const profileIsConfigured = Boolean(
+          profile.nickname || profile.photoUrl || profile.defaultCoverUrl || profile.googleApiKey
+        );
+        if (profileIsConfigured || existingBooks.length > 0 || existingFranchises.length > 0) {
+          localStorage.setItem('lumina_onboarding_completed', 'true');
+          setIsOnboardingOpen(false);
+        }
+      } catch (error) {
+        console.error('[Onboarding] Failed to check existing setup', error);
+        addToast(
+          lang === 'ru' ? 'Не удалось проверить настройки приложения' : 'Could not check the existing app setup',
+          'error'
+        );
+        setIsOnboardingOpen(false);
+      }
+    };
+
+    void checkExistingSetup();
+  }, [isOnboardingOpen, addToast, lang]);
 
   // Определяем платформу для применения macOS стилей
   const isMac = typeof window !== 'undefined' && window.electronAPI?.isMac === true;
@@ -247,6 +292,7 @@ const App: React.FC = () => {
             if (api) {
               await api.setUserProfile({ ...profile, achievements: profile.achievements || [] });
             }
+            setDefaultCoverUrl(profile.defaultCoverUrl || '');
             setGoogleApiKey(profile.googleApiKey || '');
           }}
           autoSync={autoSync}
@@ -261,6 +307,33 @@ const App: React.FC = () => {
           }}
           serverUrl={serverUrl}
           lang={lang}
+        />
+      )}
+
+      {isOnboardingOpen && (
+        <OnboardingModal
+          lang={lang}
+          autoSync={autoSync}
+          launchAtStartup={launchAtStartup}
+          onFinish={async (profile: UserProfileData, enableAutoSync, enableLaunchAtStartup) => {
+            const api = getDbApi();
+            if (!api) throw new Error('No active database connection');
+
+            await api.setUserProfile({ ...profile, achievements: profile.achievements || [] });
+            if (window.electronAPI?.setLoginItemSettings) {
+              await window.electronAPI.setLoginItemSettings({ openAtLogin: enableLaunchAtStartup });
+            }
+
+            localStorage.setItem('lumina_user_profile', JSON.stringify(profile));
+            localStorage.setItem('lumina_default_cover_url', profile.defaultCoverUrl || '');
+            localStorage.setItem('lumina_auto_sync', String(enableAutoSync));
+            localStorage.setItem('lumina_onboarding_completed', 'true');
+            setDefaultCoverUrl(profile.defaultCoverUrl || '');
+            setGoogleApiKey(profile.googleApiKey || '');
+            setAutoSync(enableAutoSync);
+            setLaunchAtStartup(enableLaunchAtStartup);
+            setIsOnboardingOpen(false);
+          }}
         />
       )}
 
