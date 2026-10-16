@@ -45,6 +45,7 @@ export interface ElectronAPI {
   getServerUrl?: () => Promise<string>;
   getLoginItemSettings?: () => Promise<{ openAtLogin: boolean; openAsHidden: boolean }>;
   setLoginItemSettings?: (settings: { openAtLogin: boolean; openAsHidden?: boolean }) => Promise<void>;
+  openExternalUrl?: (url: string) => Promise<void>;
 }
 
 declare global {

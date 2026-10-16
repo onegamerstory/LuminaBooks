@@ -1,4 +1,4 @@
-import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain } from 'electron';
+import { app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, shell } from 'electron';
 import { join, dirname } from 'path';
 import { fileURLToPath } from 'url';
 import { existsSync } from 'fs';
@@ -179,6 +179,27 @@ function registerIpcHandlers() {
 
   ipcMain.handle('app:setLoginItemSettings', (_event, settings: { openAtLogin: boolean; openAsHidden?: boolean }) => {
     app.setLoginItemSettings(settings);
+  });
+
+  ipcMain.handle('app:openExternalUrl', async (_event, value: unknown) => {
+    if (typeof value !== 'string') {
+      throw new Error('External URL must be a string');
+    }
+    const url = new URL(value);
+    if (
+      url.origin !== 'https://github.com' ||
+      url.username !== '' ||
+      url.password !== '' ||
+      url.search !== '' ||
+      url.hash !== '' ||
+      (
+        url.pathname !== '/onegamerstory/loominabooks/releases/latest' &&
+        !url.pathname.startsWith('/onegamerstory/loominabooks/releases/tag/')
+      )
+    ) {
+      throw new Error('External URL is not an approved LuminaBooks release page');
+    }
+    await shell.openExternal(url.toString());
   });
 }
 

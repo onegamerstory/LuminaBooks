@@ -22,6 +22,7 @@ import { useFranchises } from './hooks/useFranchises';
 import { useBooks } from './hooks/useBooks';
 import { useAchievements } from './hooks/useAchievements';
 import { useSync } from './hooks/useSync';
+import { useAppUpdate } from './hooks/useAppUpdate';
 import { MantineProvider } from '@mantine/core';
 import '@mantine/core/styles.css';
 import '@mantine/dates/styles.css';
@@ -66,6 +67,7 @@ const App: React.FC = () => {
     setDefaultCoverUrl, setGoogleApiKey, setServerUrl,
     setLang, addToast, lang, autoSync, notifiedAchievementsRef,
   });
+  const latestRelease = useAppUpdate();
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -211,9 +213,15 @@ const App: React.FC = () => {
               onClick={() => setIsProfileOpen(true)}
               className="flex min-h-10 min-w-10 items-center justify-center gap-2 rounded-lg px-2.5 py-2 text-sm font-semibold transition-colors"
               style={{ color: 'var(--muted)' }}
-              title={lang === 'ru' ? 'Настройки' : 'Settings'}
+              title={latestRelease
+                ? (lang === 'ru' ? `Доступна новая версия ${latestRelease.tagName}` : `New version ${latestRelease.tagName} available`)
+                : (lang === 'ru' ? 'Настройки' : 'Settings')}
+              aria-label={lang === 'ru' ? 'Настройки' : 'Settings'}
             >
-              <Settings size={17} />
+              <span className="relative inline-flex">
+                <Settings size={17} />
+                {latestRelease && <span className="absolute -right-1 -top-1 h-2.5 w-2.5 rounded-full border-2 border-surface bg-accent" />}
+              </span>
             </button>
           </div>
         </div>
@@ -313,6 +321,7 @@ const App: React.FC = () => {
           }}
           serverUrl={serverUrl}
           lang={lang}
+          latestRelease={latestRelease}
         />
       )}
 

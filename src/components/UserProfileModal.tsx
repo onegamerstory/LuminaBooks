@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power, Check, Crop } from 'lucide-react';
+import { X, User, Book, RefreshCw, Link, Globe, Copy, Upload, Power, Check, Crop, Download } from 'lucide-react';
 import { translations } from '../utils/translations';
 import { version } from '../../package.json';
 import AvatarCropModal from './AvatarCropModal';
+import type { AppRelease } from '../hooks/useAppUpdate';
 
 interface UserProfile {
   nickname: string;
@@ -22,9 +23,10 @@ interface SettingsModalProps {
   onLaunchAtStartupChange: (value: boolean) => void;
   serverUrl: string;
   lang: 'en' | 'ru';
+  latestRelease: AppRelease | null;
 }
 
-const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, launchAtStartup, onLaunchAtStartupChange, serverUrl, lang }) => {
+const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, autoSync, onAutoSyncChange, launchAtStartup, onLaunchAtStartupChange, serverUrl, lang, latestRelease }) => {
   const t = translations[lang];
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [cropImage, setCropImage] = useState<string | null>(null);
@@ -104,6 +106,19 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
       setCopied(true);
       setTimeout(() => setCopied(false), 2000);
     });
+  };
+
+  const handleDownloadRelease = async () => {
+    if (!latestRelease) return;
+    if (window.electronAPI?.openExternalUrl) {
+      try {
+        await window.electronAPI.openExternalUrl(latestRelease.url);
+      } catch (error) {
+        console.error('[App Update] Failed to open release page:', error);
+      }
+      return;
+    }
+    window.open(latestRelease.url, '_blank', 'noopener,noreferrer');
   };
 
   return (
@@ -328,14 +343,32 @@ const SettingsModal: React.FC<SettingsModalProps> = ({ isOpen, onClose, onSave, 
 
           {/* Section 6: Version & Browser */}
           <div className="py-6 space-y-4">
-            <div className="flex items-center justify-between">
+            <div className="flex flex-col items-start gap-2 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex-shrink-0">
                 <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Версия приложения' : 'App Version'}</p>
               </div>
-              <div className="flex-shrink-0">
+              <div className="flex flex-wrap items-center gap-2">
                 <p className="text-sm text-muted">{version}</p>
+                {latestRelease && (
+                  <button
+                    type="button"
+                    onClick={handleDownloadRelease}
+                    className="inline-flex items-center gap-1.5 rounded-lg bg-accent px-2.5 py-1.5 text-xs font-semibold text-accent-on transition-colors hover:bg-accent-hover sm:px-3 sm:text-sm"
+                  >
+                    <Download size={14} />
+                    {lang === 'ru' ? 'Скачать' : 'Download'}
+                  </button>
+                )}
               </div>
             </div>
+            {latestRelease && (
+              <p className="flex items-center gap-2 text-xs font-medium text-accent">
+                <span className="h-2 w-2 rounded-full bg-accent" />
+                {lang === 'ru'
+                  ? `Доступна новая версия ${latestRelease.tagName}`
+                  : `Version ${latestRelease.tagName} is available`}
+              </p>
+            )}
             <div className="flex items-center justify-between">
               <div className="flex-shrink-0">
                 <p className="text-sm font-semibold text-fg">{lang === 'ru' ? 'Доступно в браузере' : 'Available in browser'}</p>

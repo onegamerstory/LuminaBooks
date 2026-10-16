@@ -10,6 +10,7 @@ contextBridge.exposeInMainWorld('electronAPI', {
 
   getLoginItemSettings: () => ipcRenderer.invoke('app:getLoginItemSettings'),
   setLoginItemSettings: (settings) => ipcRenderer.invoke('app:setLoginItemSettings', settings),
+  openExternalUrl: (url) => ipcRenderer.invoke('app:openExternalUrl', url),
 
   db: {
     getAllBooks: () => ipcRenderer.invoke('db:getAllBooks'),
