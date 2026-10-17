@@ -119,7 +119,7 @@ const App: React.FC = () => {
           borderBottom: '1px solid var(--border-soft)',
         }}
       >
-        <div className="mx-auto flex min-h-16 w-full max-w-none flex-wrap items-center justify-between gap-y-2 px-2 py-2 sm:px-4">
+        <div className="mx-auto flex min-h-16 w-full max-w-7xl flex-wrap items-center justify-between gap-y-2 px-2 py-2 sm:px-4">
           <div className="flex items-center gap-3">
             <img src={appIcon} alt="LuminaBooks" className="h-8 w-8 sm:h-9 sm:w-9" />
             <h1 className="whitespace-nowrap text-base font-display tracking-tight sm:text-lg" style={{ color: 'var(--fg)' }}>LuminaBooks</h1>
@@ -227,7 +227,7 @@ const App: React.FC = () => {
         </div>
       </header>
 
-      <main className="mx-auto w-full max-w-none flex-grow p-2 pb-24 sm:p-6 lg:p-8">
+      <main className="mx-auto w-full max-w-7xl flex-grow p-2 pb-24 sm:p-6 lg:p-8">
         {activeView === 'catalog' ? (
           <CatalogView 
             books={books} 
