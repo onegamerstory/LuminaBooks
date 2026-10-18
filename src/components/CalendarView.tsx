@@ -16,6 +16,10 @@ interface CalendarViewProps {
 
 const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading }: CalendarViewProps) => {
   const [currentDate, setCurrentDate] = useState(new Date());
+  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 639px)').matches);
+  const [calendarRange, setCalendarRange] = useState<'month' | 'week'>(() =>
+    window.matchMedia('(max-width: 639px)').matches ? 'week' : 'month'
+  );
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [isBookSelectionModalOpen, setIsBookSelectionModalOpen] = useState(false);
   const [bookSearchTerm, setBookSearchTerm] = useState('');
@@ -28,6 +32,17 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
   useEffect(() => {
     localStorage.setItem('calendarViewMode', viewMode);
   }, [viewMode]);
+
+  useEffect(() => {
+    const mediaQuery = window.matchMedia('(max-width: 639px)');
+    const handleMediaChange = (event: MediaQueryListEvent) => {
+      setIsMobile(event.matches);
+      setCalendarRange(event.matches ? 'week' : 'month');
+    };
+
+    mediaQuery.addEventListener('change', handleMediaChange);
+    return () => mediaQuery.removeEventListener('change', handleMediaChange);
+  }, []);
 
   const daysInMonth = useMemo(() => {
     const year = currentDate.getFullYear();
@@ -47,14 +62,34 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
     return days;
   }, [currentDate]);
 
+  const daysInWeek = useMemo(() => {
+    const weekStart = new Date(currentDate);
+    const weekday = weekStart.getDay() === 0 ? 6 : weekStart.getDay() - 1;
+    weekStart.setDate(weekStart.getDate() - weekday);
+    return Array.from({ length: 7 }, (_, index) => {
+      const day = new Date(weekStart);
+      day.setDate(weekStart.getDate() + index);
+      return day;
+    });
+  }, [currentDate]);
+
+  const visibleDays = calendarRange === 'week' ? daysInWeek : daysInMonth;
   const monthName = currentDate.toLocaleString(lang === 'ru' ? 'ru-RU' : 'en-US', { month: 'long' });
   const year = currentDate.getFullYear();
 
-  const changeMonth = (delta: number) => {
+  const changePeriod = (delta: number) => {
     const newDate = new Date(currentDate);
-    newDate.setMonth(newDate.getMonth() + delta);
+    if (calendarRange === 'week') {
+      newDate.setDate(newDate.getDate() + delta * 7);
+    } else {
+      newDate.setMonth(newDate.getMonth() + delta);
+    }
     setCurrentDate(newDate);
   };
+
+  const periodLabel = calendarRange === 'week'
+    ? `${daysInWeek[0].toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short' })} – ${daysInWeek[6].toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US', { day: 'numeric', month: 'short', year: 'numeric' })}`
+    : `${monthName} ${year}`;
 
   const toLocalISOString = (date: Date) => {
     const y = date.getFullYear();
@@ -65,29 +100,18 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
   const dailyHoursMap = useMemo(() => {
     const map = new Map<string, number>();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
-      let totalSeconds = 0;
-
-      books.forEach((book: Book) => {
-        if (!book.sessions || book.sessions.length === 0) return;
-        book.sessions.forEach((session: ReadingSession) => {
-          const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
-          if (sessionDate === dayStr) {
-            totalSeconds += session.duration || 0;
-          }
-        });
+    books.forEach((book: Book) => {
+      book.sessions?.forEach((session: ReadingSession) => {
+        const sessionDate = dayjs(session.startTime).format('YYYY-MM-DD');
+        map.set(sessionDate, (map.get(sessionDate) || 0) + (session.duration || 0));
       });
+    });
 
-      map.set(dayStr, Math.round((totalSeconds / 3600) * 10) / 10);
-    }
-
+    map.forEach((totalSeconds, day) => {
+      map.set(day, Math.round((totalSeconds / 3600) * 10) / 10);
+    });
     return map;
-  }, [books, currentDate.getFullYear(), currentDate.getMonth()]);
+  }, [books]);
 
   const getDailyHours = useCallback((day: Date): number => {
     return dailyHoursMap.get(toLocalISOString(day)) || 0;
@@ -114,12 +138,9 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
 
   const booksByDayMap = useMemo(() => {
     const map = new Map<string, Book[]>();
-    const year = currentDate.getFullYear();
-    const month = currentDate.getMonth();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
-
-    for (let d = 1; d <= daysInMonth; d++) {
-      const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+    visibleDays.forEach((day) => {
+      if (!day) return;
+      const dayStr = toLocalISOString(day);
 
       const dayBooks = books.filter((book: Book) => {
         if (viewMode === 'sessions') {
@@ -136,10 +157,10 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
       });
 
       map.set(dayStr, dayBooks);
-    }
+    });
 
     return map;
-  }, [books, viewMode, currentDate.getFullYear(), currentDate.getMonth()]);
+  }, [books, viewMode, visibleDays]);
 
   const getBooksForDay = useCallback((day: Date): Book[] => {
     return booksByDayMap.get(toLocalISOString(day)) || [];
@@ -262,27 +283,55 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
               </button>
             </div>
 
-          {/* Month Navigation + Phases / Sessions Toggle + Today */}
+          {isMobile && (
+            <div className="flex items-center gap-1 rounded-xl bg-page p-1" role="group" aria-label={lang === 'ru' ? 'Период календаря' : 'Calendar period'}>
+              <button
+                type="button"
+                aria-pressed={calendarRange === 'week'}
+                onClick={() => setCalendarRange('week')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  calendarRange === 'week' ? 'bg-accent text-accent-on' : 'text-muted hover:bg-accent-soft'
+                }`}
+              >
+                {lang === 'ru' ? 'Неделя' : 'Week'}
+              </button>
+              <button
+                type="button"
+                aria-pressed={calendarRange === 'month'}
+                onClick={() => setCalendarRange('month')}
+                className={`rounded-lg px-3 py-1.5 text-xs font-semibold transition-colors ${
+                  calendarRange === 'month' ? 'bg-accent text-accent-on' : 'text-muted hover:bg-accent-soft'
+                }`}
+              >
+                {lang === 'ru' ? 'Месяц' : 'Month'}
+              </button>
+            </div>
+          )}
+
+          {/* Calendar period navigation */}
           <div className="flex items-center gap-2 shrink-0">
 
             {/* Left Arrow Button */}
             <button 
-              onClick={() => changeMonth(-1)} 
-              aria-label={lang === 'ru' ? 'Предыдущий месяц' : 'Previous month'}
+              onClick={() => changePeriod(-1)}
+              aria-label={calendarRange === 'week'
+                ? (lang === 'ru' ? 'Предыдущая неделя' : 'Previous week')
+                : (lang === 'ru' ? 'Предыдущий месяц' : 'Previous month')}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-default bg-page p-1.5 transition-colors hover:bg-accent-soft"
             >
               <ChevronLeft size={18} className="text-muted" />
             </button>
 
-            {/* Month and Year */}
-            <button aria-label={`${monthName} ${year}`} className="flex h-10 min-w-0 items-center justify-center rounded-lg border border-default bg-page px-2 text-center text-xs font-bold capitalize text-fg transition-colors hover:bg-accent-soft sm:min-w-[130px] sm:text-sm">
-              {monthName} {year}
-            </button>
+            <div aria-label={periodLabel} className="flex h-10 min-w-0 items-center justify-center rounded-lg border border-default bg-page px-2 text-center text-xs font-bold capitalize text-fg sm:min-w-[130px] sm:text-sm">
+              {periodLabel}
+            </div>
 
             {/* Right Arrow Button */}
             <button 
-              onClick={() => changeMonth(1)} 
-              aria-label={lang === 'ru' ? 'Следующий месяц' : 'Next month'}
+              onClick={() => changePeriod(1)}
+              aria-label={calendarRange === 'week'
+                ? (lang === 'ru' ? 'Следующая неделя' : 'Next week')
+                : (lang === 'ru' ? 'Следующий месяц' : 'Next month')}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-lg border border-default bg-page p-1.5 transition-colors hover:bg-accent-soft"
             >
               <ChevronRight size={18} className="text-muted" />
@@ -303,7 +352,7 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
         </div>
 
         {/* Weekday Headers */}
-        <div className="grid grid-cols-7 bg-surface border-b border-default">
+        <div className={`${calendarRange === 'week' && isMobile ? 'hidden' : 'grid'} grid-cols-7 bg-surface border-b border-default`}>
           {weekDays.map((day: string) => (
             <div key={day} className="py-2 text-center text-xs font-bold text-muted uppercase tracking-widest">
               {day}
@@ -311,34 +360,129 @@ const CalendarView: React.FC<CalendarViewProps> = ({ books, lang, onStartReading
           ))}
         </div>
 
+        {calendarRange === 'week' && isMobile && (
+          <div className="divide-y divide-default">
+            {daysInWeek.map((day) => {
+              const booksToday = getBooksForDay(day);
+              const isToday = new Date().toDateString() === day.toDateString();
+              const isFocusedDay = toLocalISOString(day) === toLocalISOString(currentDate);
+              const dailyHours = getDailyHours(day);
+
+              return (
+                <div
+                  key={day.toISOString()}
+                  role="button"
+                  tabIndex={0}
+                  aria-label={`${day.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US')}${dailyHours > 0 ? `, ${dailyHours}h` : ''}`}
+                  onClick={() => setCurrentDate(day)}
+                  onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                    if (event.key === 'Enter' || event.key === ' ') {
+                      event.preventDefault();
+                      setCurrentDate(day);
+                    }
+                  }}
+                  onContextMenu={(event: React.MouseEvent) => handleDayContextMenu(event, day)}
+                  className={`flex min-h-[88px] items-center gap-2 px-2 py-2 transition-colors hover:bg-page ${
+                    isFocusedDay || isToday ? 'bg-accent-soft/50' : ''
+                  }`}
+                >
+                  <div className="flex w-12 shrink-0 flex-col items-center justify-center">
+                    <span className="text-[10px] font-semibold uppercase text-muted">
+                      {weekDays[(day.getDay() + 6) % 7]}
+                    </span>
+                    <span className={`mt-0.5 flex h-7 w-7 items-center justify-center rounded-full text-sm font-bold ${
+                      isToday ? 'bg-accent text-accent-on' : 'text-fg'
+                    }`}>
+                      {day.getDate()}
+                    </span>
+                  </div>
+
+                  <div className="flex min-w-0 flex-1 items-center gap-2 overflow-x-auto py-1">
+                    {booksToday.length > 0 ? booksToday.slice(0, 8).map((book) => (
+                      <img
+                        key={book.id}
+                        src={book.coverUrl}
+                        alt={book.title}
+                        title={book.title}
+                        className="h-[64px] w-[43px] shrink-0 rounded object-cover shadow-sm"
+                        onError={handleCoverError}
+                      />
+                    )) : (
+                      <span className="text-xs text-muted">
+                        {lang === 'ru' ? 'Нет записей' : 'No entries'}
+                      </span>
+                    )}
+                  </div>
+
+                  <div className="flex w-12 shrink-0 flex-col items-center justify-center gap-1">
+                    <Clock size={14} className={dailyHours > 0 ? 'text-accent' : 'text-muted'} />
+                    <span className={`text-xs font-semibold ${dailyHours > 0 ? 'text-fg' : 'text-muted'}`}>
+                      {dailyHours > 0 ? `${dailyHours}h` : '—'}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
         {/* Calendar Grid - cells in light olive */}
-        <div className="grid flex-1 grid-cols-7 auto-rows-[72px] sm:auto-rows-[130px] xl:auto-rows-[160px]">
-          {daysInMonth.map((day: Date | null, idx: number) => {
+        <div className={`${calendarRange === 'week' && isMobile ? 'hidden' : 'grid'} flex-1 grid-cols-7 ${
+          calendarRange === 'week'
+            ? 'auto-rows-[140px] sm:auto-rows-[130px] xl:auto-rows-[160px]'
+            : 'auto-rows-[72px] sm:auto-rows-[130px] xl:auto-rows-[160px]'
+        }`}>
+          {visibleDays.map((day: Date | null, idx: number) => {
             if (!day) return (
               <div key={`empty-${idx}`} className="bg-surface border-r border-b border-default" />
             );
 
             const booksToday = getBooksForDay(day);
             const isToday = new Date().toDateString() === day.toDateString();
+            const isFocusedDay = calendarRange === 'week' && toLocalISOString(day) === toLocalISOString(currentDate);
+            const dailyHours = getDailyHours(day);
 
             return (
               <div 
                 key={day.toISOString()} 
                 className={`relative border-r border-b border-default p-0.5 sm:p-1 group hover:border-accent hover:border-[2px] hover:z-10 transition-colors cursor-pointer bg-surface ${
-                  isToday ? 'ring-1 ring-[var(--accent)] ring-inset' : ''
+                  isFocusedDay || isToday ? 'ring-1 ring-[var(--accent)] ring-inset' : ''
                 }`}
+                onClick={() => {
+                  if (!isMobile) return;
+                  setCurrentDate(day);
+                  if (calendarRange === 'month') setCalendarRange('week');
+                }}
+                onKeyDown={(event: React.KeyboardEvent<HTMLDivElement>) => {
+                  if (isMobile && (event.key === 'Enter' || event.key === ' ')) {
+                    event.preventDefault();
+                    setCurrentDate(day);
+                    if (calendarRange === 'month') setCalendarRange('week');
+                  }
+                }}
+                role={isMobile ? 'button' : undefined}
+                tabIndex={isMobile ? 0 : undefined}
                 onContextMenu={(e: React.MouseEvent) => handleDayContextMenu(e, day)}
                 title={lang === 'ru' ? 'Правый клик для начала чтения книги' : 'Right click to start reading a book'}
+                aria-label={`${day.toLocaleDateString(lang === 'ru' ? 'ru-RU' : 'en-US')}${dailyHours > 0 ? `, ${dailyHours}h` : ''}`}
               >
                 <div className="flex items-center justify-between gap-1">
                   <span className={`z-10 flex h-5 w-5 items-center justify-center rounded-full text-[10px] font-bold text-muted sm:h-6 sm:w-6 sm:text-xs`}>
                     {day.getDate()}
                   </span>
 
-                  {getDailyHours(day) > 0 && (
-                    <div className="bg-accent text-accent-on rounded px-1.5 py-0.5 flex items-center justify-center text-[10px] font-bold whitespace-nowrap">
-                      {getDailyHours(day)}h
-                    </div>
+                  {dailyHours > 0 && (
+                    calendarRange === 'month' && isMobile ? (
+                      <span
+                        className="mr-1 h-2 w-2 shrink-0 rounded-full bg-accent"
+                        title={`${dailyHours}h`}
+                        aria-label={`${dailyHours}h`}
+                      />
+                    ) : (
+                      <div className="flex items-center justify-center whitespace-nowrap rounded bg-accent px-1.5 py-0.5 text-[10px] font-bold text-accent-on">
+                        {dailyHours}h
+                      </div>
+                    )
                   )}
                 </div>
 
