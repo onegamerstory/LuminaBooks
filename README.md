@@ -2,12 +2,16 @@
 
 <img width="128" height="128" alt="icon" src="https://github.com/user-attachments/assets/0a18658d-1c10-4e8f-8d04-fdbc83c21023" />
 
-
 ПК-приложение для отслеживания вашей библиотеки книг, созданное с помощью ИИ на стеке React + Vite + Electron.
 
 Приложение разрабатывалось под себя, опираяясь на то, как нам было бы удобно. 
 
 Ниже кратко будут описаны функциональные возможности.
+
+![GitHub Repo stars](https://img.shields.io/github/stars/onegamerstory/LuminaBooks)
+![GitHub Downloads (all assets, all releases)](https://img.shields.io/github/downloads/onegamerstory/LuminaBooks/total)
+![GitHub Release](https://img.shields.io/github/v/release/onegamerstory/LuminaBooks)
+
 
 # Установка
 
