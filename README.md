@@ -15,6 +15,9 @@
 
 Стандартный процесс установки:
 
+<img width="498" height="385" alt="image" src="https://github.com/user-attachments/assets/d03e5422-f13c-458b-96ff-b15fa956b2dc" />
+
+<img width="495" height="386" alt="image" src="https://github.com/user-attachments/assets/4bca962e-7420-45f8-93ad-8322cd290848" />
 
 ## MacOS
 
